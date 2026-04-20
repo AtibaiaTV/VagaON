@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronDown, ChevronUp } from "lucide-react";
 import { ESPECIALIDADES, CATEGORIAS, labelEspecialidade } from "@/constants/especialidades";
 
 interface Props {
@@ -13,24 +12,21 @@ interface Props {
 
 export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Props) {
   const [busca, setBusca] = useState("");
-  const [categoriaAberta, setCategoriaAberta] = useState<string | null>(null);
+  const [categoriasAbertas, setCategoriasAbertas] = useState<Set<string>>(new Set());
 
-  const filtradas = useMemo(() => {
-    const termo = busca.toLowerCase().trim();
-    if (!termo) return ESPECIALIDADES;
-    return ESPECIALIDADES.filter((e) => e.label.toLowerCase().includes(termo));
-  }, [busca]);
+  const termoBusca = busca.toLowerCase().trim();
 
-  const agrupadas = useMemo(() => {
-    if (busca.trim()) {
-      return [{ categoriaLabel: "Resultados", catValue: "", itens: filtradas }];
-    }
+  const resultadosBusca = useMemo(() => {
+    if (!termoBusca) return [];
+    return ESPECIALIDADES.filter((e) => e.label.toLowerCase().includes(termoBusca));
+  }, [termoBusca]);
+
+  const grupos = useMemo(() => {
     return CATEGORIAS.map((cat) => ({
-      categoriaLabel: cat.label,
-      catValue: cat.value,
+      cat,
       itens: ESPECIALIDADES.filter((e) => e.categoria === cat.value),
     })).filter((g) => g.itens.length > 0);
-  }, [busca, filtradas]);
+  }, []);
 
   function toggle(value: string) {
     onChange(
@@ -42,6 +38,15 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
 
   function remover(value: string) {
     onChange(selecionadas.filter((v) => v !== value));
+  }
+
+  function toggleCategoria(catValue: string) {
+    setCategoriasAbertas((prev) => {
+      const next = new Set(prev);
+      if (next.has(catValue)) next.delete(catValue);
+      else next.add(catValue);
+      return next;
+    });
   }
 
   return (
@@ -60,6 +65,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                 type="button"
                 onClick={() => remover(v)}
                 className="hover:opacity-70 ml-0.5"
+                aria-label={`Remover ${labelEspecialidade(v)}`}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -75,100 +81,106 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
           placeholder="Buscar função..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          className="pl-9"
+          className="pl-9 pr-9"
         />
-      </div>
-
-      {/* Lista agrupada */}
-      <div className="border rounded-lg max-h-72 overflow-y-auto">
-        {agrupadas.map((grupo) => {
-          const expandida = !!busca.trim() || categoriaAberta === grupo.categoriaLabel;
-          const qtdSelecionadas = grupo.itens.filter((i) => selecionadas.includes(i.value)).length;
-
-          return (
-            <div key={grupo.categoriaLabel}>
-
-              {/* Header da categoria */}
-              {busca.trim() ? (
-                <div className="flex items-center justify-between px-3 py-2 bg-muted/60 text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border/40">
-                  <span>{grupo.categoriaLabel}</span>
-                  {qtdSelecionadas > 0 && (
-                    <Badge variant="secondary" className="text-xs font-normal normal-case tracking-normal">
-                      {qtdSelecionadas} selecionada{qtdSelecionadas !== 1 ? "s" : ""}
-                    </Badge>
-                  )}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-between px-3 py-2 bg-muted/60 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted transition-colors border-b border-border/40"
-                  onClick={() =>
-                    setCategoriaAberta(
-                      categoriaAberta === grupo.categoriaLabel ? null : grupo.categoriaLabel
-                    )
-                  }
-                >
-                  <span>{grupo.categoriaLabel}</span>
-                  <span className="flex items-center gap-2 font-normal normal-case tracking-normal">
-                    {qtdSelecionadas > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        {qtdSelecionadas} selecionada{qtdSelecionadas !== 1 ? "s" : ""}
-                      </Badge>
-                    )}
-                    <span className="text-muted-foreground/50">{expandida ? "▲" : "▼"}</span>
-                  </span>
-                </button>
-              )}
-
-              {/* Itens */}
-              {expandida && (
-                <div>
-                  {grupo.itens.map((esp) => {
-                    const ativa = selecionadas.includes(esp.value);
-                    return (
-                      <button
-                        key={esp.value}
-                        type="button"
-                        onClick={() => toggle(esp.value)}
-                        className={`w-full px-4 py-2.5 text-sm flex items-center gap-2.5 text-left transition-colors ${
-                          ativa
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "hover:bg-muted/50 text-foreground"
-                        }`}
-                      >
-                        <span
-                          className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 flex-shrink-0 transition-colors ${
-                            ativa ? "bg-primary border-primary" : "border-muted-foreground/30"
-                          }`}
-                        >
-                          {ativa && (
-                            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12">
-                              <path
-                                d="M2 6l3 3 5-5"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
-                        </span>
-                        {esp.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {filtradas.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-6">
-            Nenhuma função encontrada para &quot;{busca}&quot;
-          </p>
+        {busca && (
+          <button
+            type="button"
+            onClick={() => setBusca("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
         )}
       </div>
+
+      {/* Resultados da busca — chips inline, sem container de scroll */}
+      {termoBusca && (
+        <div className="border rounded-lg p-3">
+          {resultadosBusca.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-2">
+              Nenhuma função encontrada para &quot;{busca}&quot;
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {resultadosBusca.map((esp) => {
+                const ativa = selecionadas.includes(esp.value);
+                return (
+                  <button
+                    key={esp.value}
+                    type="button"
+                    onClick={() => toggle(esp.value)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                      ativa
+                        ? "bg-primary text-white border-primary shadow-sm"
+                        : "bg-white text-foreground border-border hover:border-primary hover:text-primary"
+                    }`}
+                  >
+                    {esp.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Categorias acordeão — sem busca */}
+      {!termoBusca && (
+        <div className="border rounded-lg divide-y divide-border/60">
+          {grupos.map(({ cat, itens }) => {
+            const aberta = categoriasAbertas.has(cat.value);
+            const qtdSel = itens.filter((i) => selecionadas.includes(i.value)).length;
+            return (
+              <div key={cat.value}>
+                {/* Header da categoria */}
+                <button
+                  type="button"
+                  onClick={() => toggleCategoria(cat.value)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-left hover:bg-muted/40 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    {cat.label}
+                    {qtdSel > 0 && (
+                      <span className="text-xs font-medium bg-primary text-white px-1.5 py-0.5 rounded-full">
+                        {qtdSel}
+                      </span>
+                    )}
+                  </span>
+                  {aberta ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                  )}
+                </button>
+
+                {/* Chips da categoria — aparecem abaixo do header */}
+                {aberta && (
+                  <div className="px-4 pb-4 pt-1 flex flex-wrap gap-2 bg-muted/20">
+                    {itens.map((esp) => {
+                      const ativa = selecionadas.includes(esp.value);
+                      return (
+                        <button
+                          key={esp.value}
+                          type="button"
+                          onClick={() => toggle(esp.value)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                            ativa
+                              ? "bg-primary text-white border-primary shadow-sm"
+                              : "bg-white text-foreground border-border hover:border-primary hover:text-primary"
+                          }`}
+                        >
+                          {esp.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
         {selecionadas.length} função{selecionadas.length !== 1 ? "ões" : ""} selecionada{selecionadas.length !== 1 ? "s" : ""}
