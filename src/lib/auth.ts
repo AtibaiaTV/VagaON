@@ -1,7 +1,5 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import { MongoClient } from "mongodb";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
@@ -24,10 +22,9 @@ declare module "next-auth" {
   }
 }
 
-const client = new MongoClient(process.env.MONGODB_URI!);
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: MongoDBAdapter(client),
+  // Sem adapter — usamos JWT puro com Credentials provider.
+  // O MongoDBAdapter + JWT gerava cookies duplicados causando 494 REQUEST_HEADER_TOO_LARGE.
   session: { strategy: "jwt" },
   providers: [
     Credentials({
@@ -60,7 +57,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          image: user.image,
           role: user.role,
           profileId: user.profileId?.toString() ?? null,
           status: user.status,
