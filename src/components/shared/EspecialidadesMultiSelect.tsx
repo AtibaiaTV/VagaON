@@ -120,28 +120,34 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                 </button>
               )}
 
-              {/* Itens — usa <label> + <input checkbox> para máxima confiabilidade de clique */}
+              {/* Itens */}
               {expandida && (
                 <div>
                   {grupo.itens.map((esp) => {
                     const ativa = selecionadas.includes(esp.value);
                     return (
-                      <label
+                      <div
                         key={esp.value}
-                        className={`w-full px-4 py-2.5 text-sm flex items-center gap-2.5 cursor-pointer transition-colors select-none ${
+                        role="checkbox"
+                        aria-checked={ativa}
+                        tabIndex={0}
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggle(esp.value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === " " || e.key === "Enter") {
+                            e.preventDefault();
+                            toggle(esp.value);
+                          }
+                        }}
+                        className={`w-full px-4 py-2.5 text-sm flex items-center gap-2.5 cursor-pointer select-none touch-manipulation transition-colors ${
                           ativa
                             ? "bg-primary/10 text-primary font-medium"
                             : "hover:bg-muted/50 text-foreground"
                         }`}
                       >
-                        {/* Checkbox nativo oculto — garante compatibilidade total de clique */}
-                        <input
-                          type="checkbox"
-                          checked={ativa}
-                          onChange={() => toggle(esp.value)}
-                          className="sr-only"
-                        />
-                        {/* Visual customizado do checkbox */}
                         <span
                           className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
                             ativa ? "bg-primary border-primary" : "border-muted-foreground/30"
@@ -160,7 +166,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                           )}
                         </span>
                         {esp.label}
-                      </label>
+                      </div>
                     );
                   })}
                 </div>

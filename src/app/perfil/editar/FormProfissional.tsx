@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 import { ESTADOS } from "@/constants/estados";
-import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2 } from "lucide-react";
+import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X } from "lucide-react";
 
 interface Experiencia {
   _id?: string;
@@ -40,6 +40,9 @@ export default function FormProfissional({ profileId, dados }: Props) {
 
   const disponibilidadeDados = dados?.disponibilidade as Record<string, unknown> | undefined;
 
+  const [fotoPerfil, setFotoPerfil] = useState<string>((dados?.fotoPerfil as string) ?? "");
+  const [uploadandoFoto, setUploadandoFoto] = useState(false);
+
   const [pessoal, setPessoal] = useState({
     nomeCompleto: (dados?.nomeCompleto as string) ?? "",
     telefone: (dados?.telefone as string) ?? "",
@@ -66,6 +69,24 @@ export default function FormProfissional({ profileId, dados }: Props) {
     imediata: (disponibilidadeDados?.imediata as boolean) ?? true,
     dataDisponivel: (disponibilidadeDados?.dataDisponivel as string) ?? "",
   });
+
+  async function handleFotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadandoFoto(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const data = await res.json();
+    if (res.ok && data.url) {
+      setFotoPerfil(data.url);
+    } else {
+      setErro(data.error || "Erro ao enviar foto.");
+    }
+    setUploadandoFoto(false);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  }
 
   function toggleDisponibilidade(tipo: string) {
     setDisponibilidade((prev) => ({
@@ -99,6 +120,7 @@ export default function FormProfissional({ profileId, dados }: Props) {
 
     const payload = {
       ...pessoal,
+      fotoPerfil,
       especialidades,
       habilidades: habilidades.split(",").map((h) => h.trim()).filter(Boolean),
       experiencias,
@@ -186,6 +208,64 @@ export default function FormProfissional({ profileId, dados }: Props) {
               <CardDescription>Informações básicas do seu perfil.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+
+              {/* Foto de perfil */}
+              <div className="flex items-center gap-4 pb-2 border-b border-border/50">
+                <div className="shrink-0">
+                  {fotoPerfil ? (
+                    <img
+                      src={fotoPerfil}
+                      alt="Foto de perfil"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-border"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-dashed border-primary/30 flex items-center justify-center">
+                      {pessoal.nomeCompleto ? (
+                        <span className="text-xl font-bold text-primary">
+                          {pessoal.nomeCompleto.split(" ").slice(0, 2).map((n) => n[0]?.toUpperCase()).join("")}
+                        </span>
+                      ) : (
+                        <Camera className="h-7 w-7 text-primary/40" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-sm font-medium">Foto de perfil</p>
+                  <p className="text-xs text-muted-foreground">JPG ou PNG · Máx. 5 MB · Quadrada ideal</p>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-medium text-primary border border-primary/30 rounded-md px-3 py-1.5 cursor-pointer hover:bg-primary/5 transition-colors">
+                    {uploadandoFoto ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-3.5 w-3.5" />
+                        {fotoPerfil ? "Trocar foto" : "Enviar foto"}
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={handleFotoUpload}
+                      disabled={uploadandoFoto}
+                    />
+                  </label>
+                  {fotoPerfil && (
+                    <button
+                      type="button"
+                      onClick={() => setFotoPerfil("")}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                      Remover foto
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <Label htmlFor="nomeCompleto">Nome completo *</Label>
                 <Input
