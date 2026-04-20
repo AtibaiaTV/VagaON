@@ -1,13 +1,12 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
 
-// Rotas que exigem autenticação e role específica
-const rotasProfissional = ["/painel", "/perfil", "/candidaturas"];
-const rotasEmpresa = ["/painel", "/perfil", "/profissionais"];
-const rotasAdmin = ["/admin"];
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
-  const { nextUrl, auth: session } = req;
+  const { nextUrl } = req;
+  const session = req.auth;
   const pathname = nextUrl.pathname;
 
   // Rota do admin — exige role admin
