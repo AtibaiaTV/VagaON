@@ -66,9 +66,9 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
   const [tipo, setTipo] = useState<string>("todos");
   const [estado, setEstado] = useState<string>("todos");
 
-  // Extrair estados únicos das vagas
-  const estados = useMemo(() => {
-    const set = new Set(vagas.map((v) => v.estado).filter(Boolean));
+  // Extrair cidades únicas das vagas
+  const cidades = useMemo(() => {
+    const set = new Set(vagas.map((v) => v.cidade).filter(Boolean));
     return Array.from(set).sort();
   }, [vagas]);
 
@@ -81,7 +81,7 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
         v.empresaId?.nomeFantasia?.toLowerCase().includes(busca.toLowerCase());
       const matchArea  = area === "todas" || getArea(v.especialidade) === area;
       const matchTipo  = tipo === "todos" || v.tipo === tipo;
-      const matchEstado = estado === "todos" || v.estado === estado;
+      const matchEstado = estado === "todos" || v.cidade === estado;
       return matchBusca && matchArea && matchTipo && matchEstado;
     });
   }, [vagas, busca, area, tipo, estado]);
@@ -159,18 +159,18 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
               </div>
             </div>
 
-            {/* Estado */}
-            {estados.length > 0 && (
+            {/* Cidade */}
+            {cidades.length > 0 && (
               <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Estado</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cidade</p>
                 <select
                   value={estado}
                   onChange={(e) => setEstado(e.target.value)}
                   className="h-10 px-3 rounded-full border border-border bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
                 >
-                  <option value="todos">Todos os estados</option>
-                  {estados.map((uf) => (
-                    <option key={uf} value={uf}>{uf}</option>
+                  <option value="todos">Todas as cidades</option>
+                  {cidades.map((cidade) => (
+                    <option key={cidade} value={cidade}>{cidade}</option>
                   ))}
                 </select>
               </div>
