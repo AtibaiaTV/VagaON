@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   if (!cloudName || !apiKey || !apiSecret) {
     return NextResponse.json(
-      { error: "Upload de foto não configurado. Contate o administrador." },
+      { error: "Upload não configurado. Contate o administrador." },
       { status: 503 }
     );
   }
@@ -32,29 +32,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Arquivo muito grande. Máximo 5 MB." }, { status: 400 });
   }
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
   try {
-    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "vagaon/profissionais",
-            transformation: [
-              { width: 400, height: 400, crop: "fill", gravity: "face" },
-            ],
-          },
-          (error, result) => {
-            if (error || !result) reject(error);
-            else resolve(result as { secure_url: string });
-          }
-        )
-        .end(buffer);
+    const bytes = await file.arrayBuffer();
+    const b64 = Buffer.from(bytes).toString("base64");
+    const dataUri = `data:${file.type};base64,${b64}`;
+
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: "vagaon/profissionais",
+      width: 400,
+      height: 400,
+      crop: "fill",
     });
 
     return NextResponse.json({ url: result.secure_url });
-  } catch {
-    return NextResponse.json({ error: "Erro ao enviar foto. Tente novamente." }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[upload] Cloudinary error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
