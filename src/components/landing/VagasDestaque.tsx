@@ -140,22 +140,20 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             {/* Área */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Área</p>
-              <div className="flex flex-wrap gap-2">
-                <Chip label="Todas" active={area === "todas"} onClick={() => setArea("todas")} />
-                <Chip label="Gastronomia" active={area === "gastronomia"} onClick={() => setArea("gastronomia")} />
-                <Chip label="Hotelaria" active={area === "hotelaria"} onClick={() => setArea("hotelaria")} />
-                <Chip label="Eventos" active={area === "eventos"} onClick={() => setArea("eventos")} />
+              <div className="flex gap-2">
+                <Chip label="Gastronomia" active={area === "gastronomia"} onClick={() => setArea(area === "gastronomia" ? "todas" : "gastronomia")} />
+                <Chip label="Hotelaria"   active={area === "hotelaria"}   onClick={() => setArea(area === "hotelaria"   ? "todas" : "hotelaria")} />
+                <Chip label="Eventos"     active={area === "eventos"}     onClick={() => setArea(area === "eventos"     ? "todas" : "eventos")} />
               </div>
             </div>
 
             {/* Período */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Período</p>
-              <div className="flex flex-wrap gap-2">
-                <Chip label="Todos" active={tipo === "todos"} onClick={() => setTipo("todos")} />
-                <Chip label="CLT" active={tipo === "clt"} onClick={() => setTipo("clt")} />
-                <Chip label="Temporário" active={tipo === "temporario"} onClick={() => setTipo("temporario")} />
-                <Chip label="Sazonal" active={tipo === "sazonal"} onClick={() => setTipo("sazonal")} />
+              <div className="flex gap-2">
+                <Chip label="CLT"        active={tipo === "clt"}        onClick={() => setTipo(tipo === "clt"        ? "todos" : "clt")} />
+                <Chip label="Temporário" active={tipo === "temporario"} onClick={() => setTipo(tipo === "temporario" ? "todos" : "temporario")} />
+                <Chip label="Sazonal"    active={tipo === "sazonal"}    onClick={() => setTipo(tipo === "sazonal"    ? "todos" : "sazonal")} />
               </div>
             </div>
 
