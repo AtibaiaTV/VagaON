@@ -134,11 +134,11 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             )}
           </div>
 
-          {/* Filtros em linha */}
-          <div className="flex flex-wrap gap-4">
+          {/* Filtros em 3 colunas iguais */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4 pt-1">
 
             {/* Área */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Área</p>
               <div className="flex flex-wrap gap-2">
                 <Chip label="Todas" active={area === "todas"} onClick={() => setArea("todas")} />
@@ -149,7 +149,7 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             </div>
 
             {/* Período */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Período</p>
               <div className="flex flex-wrap gap-2">
                 <Chip label="Todos" active={tipo === "todos"} onClick={() => setTipo("todos")} />
@@ -160,21 +160,20 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             </div>
 
             {/* Cidade */}
-            {cidades.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cidade</p>
-                <select
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
-                  className="h-10 px-3 rounded-full border border-border bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
-                >
-                  <option value="todos">Todas as cidades</option>
-                  {cidades.map((cidade) => (
-                    <option key={cidade} value={cidade}>{cidade}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cidade</p>
+              <select
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+                className="h-10 w-full px-4 rounded-xl border border-border bg-[#f4f7f5] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
+              >
+                <option value="todos">Todas as cidades</option>
+                {cidades.map((cidade) => (
+                  <option key={cidade} value={cidade}>{cidade}</option>
+                ))}
+              </select>
+            </div>
+
           </div>
 
           {/* Linha de resultado + limpar */}
