@@ -14,7 +14,7 @@ export default function Footer() {
               <Logo size="md" variant="white" />
             </div>
             <p className="text-sm text-white/55 max-w-xs leading-relaxed">
-              Conectando profissionais e empresas do setor gastronômico e hoteleiro em todo o Brasil.
+              Conectando profissionais e empresas do setor gastronômico, hoteleiro e de eventos em todo o Brasil.
             </p>
           </div>
           <div>

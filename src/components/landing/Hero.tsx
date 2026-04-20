@@ -58,7 +58,7 @@ export default function Hero() {
             </ul>
 
             {/* 3 CTAs principais */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3">
 
               {/* Profissional */}
               <Link href="/cadastro/profissional" className="group">
