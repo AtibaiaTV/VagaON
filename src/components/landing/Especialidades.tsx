@@ -8,7 +8,7 @@ const setores = [
   },
   {
     icone: BedDouble,
-    nome: "Hospedagens",
+    nome: "Hotelaria",
     descricao: "Hotéis, pousadas, resorts e apart-hotéis",
   },
   {
@@ -27,7 +27,7 @@ export default function Especialidades() {
             Onde você vai trabalhar
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Conectamos profissionais aos melhores estabelecimentos do setor de gastronomia e hospitalidade.
+            Conectamos profissionais aos melhores estabelecimentos do setor de gastronomia, hospitalidade e de eventos.
           </p>
         </div>
 

@@ -1,16 +1,11 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowRight, Briefcase, Clock } from "lucide-react";
+import { MapPin, ArrowRight, Briefcase } from "lucide-react";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
-};
-const TIPO_COR: Record<string, string> = {
-  clt: "bg-blue-100 text-blue-700",
-  temporario: "bg-amber-100 text-amber-700",
-  sazonal: "bg-violet-100 text-violet-700",
 };
 
 interface VagaCard {
@@ -35,7 +30,7 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
     <section className="py-20 bg-[#f0faf5]">
       <div className="max-w-6xl mx-auto px-6">
 
-        {/* Card intro — estilo CriarPerfilBox */}
+        {/* Intro — estilo CriarPerfilBox */}
         <div className="grid lg:grid-cols-2 gap-8 items-center mb-16">
 
           {/* Esquerda — texto */}
@@ -64,21 +59,27 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             </div>
           </div>
 
-          {/* Direita — mock de vaga (mesmo design dos cards reais) */}
+          {/* Direita — mock card com header verde */}
           <div className="flex items-center justify-center">
-            <div className="w-full max-w-sm bg-white rounded-2xl border border-border/50 shadow-xl overflow-hidden">
-              <div className="h-1.5 bg-gradient-to-r from-primary to-[#7de06a]" />
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Briefcase className="h-5 w-5 text-primary" strokeWidth={1.75} />
+            <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-xl border border-border/20">
+
+              {/* Header verde */}
+              <div style={{ backgroundColor: "#1a5c38" }} className="px-5 pt-5 pb-4 relative">
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+                    <Briefcase className="h-5 w-5 text-white/80" strokeWidth={1.75} />
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 bg-blue-100 text-blue-700">CLT</span>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-400/20 text-white border border-white/20 shrink-0">CLT</span>
                 </div>
-                <h3 className="font-bold text-base leading-snug mb-1">Garçom / Garçonete</h3>
-                <p className="text-sm text-muted-foreground mb-3">Restaurante Bella Vista</p>
+                <h3 className="font-bold text-base text-white leading-snug mb-0.5">Garçom / Garçonete</h3>
+                <p className="text-sm text-white/65">Restaurante Bella Vista</p>
+              </div>
+
+              {/* Corpo branco */}
+              <div className="bg-white px-5 py-4">
                 <div className="mb-4">
-                  <span className="inline-flex items-center text-xs font-medium bg-muted text-muted-foreground px-2.5 py-0.5 rounded-md">
+                  <span className="inline-flex items-center text-xs font-medium bg-primary/10 text-primary px-2.5 py-0.5 rounded-md">
                     Garçom
                   </span>
                 </div>
@@ -93,31 +94,40 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
           </div>
         </div>
 
-        {/* Grid de vagas reais */}
+        {/* Grid de vagas reais — cards com header verde */}
         {vagas.length > 0 && (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {vagas.map((vaga) => (
                 <Link key={vaga._id} href={`/vagas/${vaga._id}`}>
-                  <div className="group h-full bg-white rounded-2xl border border-border/50 hover:border-primary/40 hover:shadow-lg transition-all duration-200 overflow-hidden">
-                    <div className="h-1.5 bg-gradient-to-r from-primary to-[#7de06a]" />
-                    <div className="p-5">
-                      <div className="flex items-start justify-between gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                          <Briefcase className="h-5 w-5 text-primary" strokeWidth={1.75} />
+                  <div className="group h-full rounded-2xl overflow-hidden border border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-200">
+
+                    {/* Header verde */}
+                    <div
+                      style={{ backgroundColor: "#1a5c38" }}
+                      className="px-5 pt-5 pb-4 relative group-hover:opacity-95 transition-opacity"
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+                          <Briefcase className="h-5 w-5 text-white/80" strokeWidth={1.75} />
                         </div>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${TIPO_COR[vaga.tipo]}`}>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/20 shrink-0 whitespace-nowrap">
                           {TIPO_LABEL[vaga.tipo]}
                         </span>
                       </div>
-                      <h3 className="font-bold text-base leading-snug mb-1 group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-base text-white leading-snug mb-0.5">
                         {vaga.titulo}
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-3">
+                      <p className="text-sm text-white/65">
                         {vaga.empresaId?.nomeFantasia}
                       </p>
+                    </div>
+
+                    {/* Corpo branco */}
+                    <div className="bg-white px-5 py-4">
                       <div className="mb-4">
-                        <Badge variant="secondary" className="text-xs font-medium">
+                        <Badge variant="secondary" className="text-xs font-medium bg-primary/10 text-primary hover:bg-primary/10">
                           {ESPECIALIDADES.find((e) => e.value === vaga.especialidade)?.label ?? vaga.especialidade}
                         </Badge>
                       </div>
@@ -131,6 +141,7 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
                         </span>
                       </div>
                     </div>
+
                   </div>
                 </Link>
               ))}
