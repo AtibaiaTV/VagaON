@@ -3,7 +3,7 @@ import Logo from "@/components/layout/Logo";
 
 export default function Footer() {
   return (
-    <footer style={{ backgroundColor: "#1a5c38" }} className="text-white">
+    <footer style={{ backgroundColor: "#143f28" }} className="text-white">
       <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid gap-10 sm:grid-cols-4">
           <div className="sm:col-span-2">
@@ -33,7 +33,7 @@ export default function Footer() {
         </div>
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/30">
           <span>© {new Date().getFullYear()} VagaON. Todos os direitos reservados.</span>
-          <span>Gastronomia &amp; Hotelaria — Brasil</span>
+          <span>Gastronomia, Hotelaria &amp; Eventos — Brasil</span>
         </div>
       </div>
     </footer>
