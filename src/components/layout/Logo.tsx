@@ -8,27 +8,24 @@ const heights = { sm: 36, md: 48, lg: 64 };
 
 export default function Logo({ size = "md", variant = "default" }: LogoProps) {
   if (variant === "white") {
-    // On dark backgrounds: show the real logo inside a white rounded container
+    // On dark green backgrounds: use screen blend mode for the ghost/light logo effect
     return (
-      <div
-        className="inline-flex items-center justify-center bg-white rounded-xl"
-        style={{ padding: "8px 14px" }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/logo-horizontal.png"
-          alt="VagaON"
-          style={{
-            width: widths[size],
-            height: heights[size],
-            objectFit: "contain",
-          }}
-        />
-      </div>
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src="/images/logo-horizontal.png"
+        alt="VagaON"
+        style={{
+          width: widths[size],
+          height: heights[size],
+          objectFit: "contain",
+          mixBlendMode: "screen",
+          flexShrink: 0,
+        }}
+      />
     );
   }
 
-  // Default: on light backgrounds, use the PNG directly with multiply blend
+  // Default: on light/white backgrounds
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
