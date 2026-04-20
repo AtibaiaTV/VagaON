@@ -14,7 +14,7 @@ const setores = [
   {
     icone: CalendarDays,
     nome: "Eventos",
-    descricao: "Casamentos, aniversários, feiras e eventos corporativos",
+    descricao: "Casamentos, aniversários, feiras e eventos",
   },
 ];
 
