@@ -62,7 +62,7 @@ export default function EntrarPage() {
         {/* Quote central */}
         <div className="relative">
           <blockquote className="text-white/90 text-2xl font-semibold leading-snug mb-4">
-            "Conectamos talentos da gastronomia e hotelaria com as melhores oportunidades do Brasil."
+            "Conectamos talentos da gastronomia, hotelaria e eventos com as melhores oportunidades do Brasil."
           </blockquote>
           <p className="text-white/50 text-sm">Plataforma 100% gratuita para profissionais</p>
         </div>

@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "VagaON — Vagas para Gastronomia e Hotelaria",
+  title: "VagaON — Vagas para Gastronomia, Hotelaria e Eventos",
   description:
-    "Plataforma de conexão entre profissionais e empresas do setor gastronômico e hoteleiro. Vagas CLT, temporárias e sazonais.",
+    "Plataforma de conexão entre profissionais e empresas dos setores de gastronomia, hotelaria e eventos. Vagas CLT, temporárias e sazonais.",
 };
 
 export default function RootLayout({

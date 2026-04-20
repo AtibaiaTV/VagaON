@@ -26,7 +26,7 @@ export default function CadastroPage() {
         <div className="relative space-y-8">
           {/* Frase principal */}
           <blockquote className="text-white/90 text-2xl font-semibold leading-snug">
-            "Sua próxima oportunidade em gastronomia e hotelaria começa aqui. Cadastre-se e seja encontrado pelas melhores empresas do Brasil."
+            "Sua próxima oportunidade em gastronomia, hotelaria e eventos começa aqui. Cadastre-se e seja encontrado pelas melhores empresas do Brasil."
           </blockquote>
           <p className="text-white/50 text-sm">Plataforma 100% gratuita para profissionais</p>
 

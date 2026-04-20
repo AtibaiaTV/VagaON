@@ -36,7 +36,7 @@ export default function Hero() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.1] tracking-tight text-white mb-6">
-              Encontre o emprego certo em Gastronomia e Hotelaria
+              Encontre o emprego certo em Gastronomia, Hotelaria e Eventos
             </h1>
 
             <p className="text-lg text-white/70 leading-relaxed mb-8 max-w-lg">
@@ -58,7 +58,7 @@ export default function Hero() {
 
               {/* Profissional */}
               <Link href="/cadastro/profissional" className="group">
-                <div className="bg-white hover:bg-white/95 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                   <p className="font-bold text-[#1a5c38] text-sm leading-tight">Sou Profissional</p>
                   <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Cadastrar dados →</p>
                 </div>
@@ -66,17 +66,17 @@ export default function Hero() {
 
               {/* Empresa */}
               <Link href="/cadastro/empresa" className="group">
-                <div className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
-                  <p className="font-bold text-white text-sm leading-tight">Sou Empresa</p>
-                  <p className="text-xs text-white/55 mt-1 font-medium">Fazer Cadastro →</p>
+                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <p className="font-bold text-[#1a5c38] text-sm leading-tight">Sou Empresa</p>
+                  <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Fazer Cadastro →</p>
                 </div>
               </Link>
 
               {/* Vagas */}
               <Link href="/vagas" className="group">
-                <div className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
-                  <p className="font-bold text-white text-sm leading-tight">Vagas em Aberto</p>
-                  <p className="text-xs text-white/55 mt-1 font-medium">Consulte Aqui →</p>
+                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <p className="font-bold text-[#1a5c38] text-sm leading-tight">Vagas em Aberto</p>
+                  <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Consulte Aqui →</p>
                 </div>
               </Link>
 
