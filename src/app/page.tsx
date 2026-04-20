@@ -17,7 +17,7 @@ export default async function HomePage() {
     await connectDB();
     vagasDestaque = await Vaga.find({ status: "ativa", aprovadaPorAdmin: true })
       .sort({ createdAt: -1 })
-      .limit(6)
+      .limit(20)
       .populate("empresaId", "nomeFantasia")
       .lean();
   } catch (err) {
