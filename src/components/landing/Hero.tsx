@@ -62,7 +62,7 @@ export default function Hero() {
 
               {/* Profissional */}
               <Link href="/cadastro/profissional" className="group">
-                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer text-center">
                   <p className="font-bold text-[#1a5c38] text-sm leading-tight">Sou Profissional</p>
                   <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Cadastrar dados →</p>
                 </div>
@@ -70,7 +70,7 @@ export default function Hero() {
 
               {/* Empresa */}
               <Link href="/cadastro/empresa" className="group">
-                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer text-center">
                   <p className="font-bold text-[#1a5c38] text-sm leading-tight">Sou Empresa</p>
                   <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Fazer Cadastro →</p>
                 </div>
@@ -78,7 +78,7 @@ export default function Hero() {
 
               {/* Vagas */}
               <Link href="/vagas" className="group">
-                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                <div className="bg-white hover:bg-white/90 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer text-center">
                   <p className="font-bold text-[#1a5c38] text-sm leading-tight">Vagas em Aberto</p>
                   <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Consulte Aqui →</p>
                 </div>
