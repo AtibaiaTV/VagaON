@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, UserCheck, UserX, ShieldCheck } from "lucide-react";
+import { Search, UserCheck, UserX, ShieldCheck, FileText } from "lucide-react";
+import CurriculumModal from "@/components/admin/CurriculumModal";
 
 interface Usuario {
   _id: string;
@@ -33,6 +34,7 @@ export default function AdminUsuariosPage() {
   const [busca, setBusca] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [atualizando, setAtualizando] = useState<string | null>(null);
+  const [curriculumAberto, setCurriculumAberto] = useState<{ id: string; nome: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/usuarios")
@@ -139,6 +141,18 @@ export default function AdminUsuariosPage() {
                       </td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Botão Ver Curriculum — apenas para profissionais */}
+                          {u.role === "profissional" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1 text-[#1a5c38] border-[#c6e9d9] hover:bg-[#f0faf5]"
+                              onClick={() => setCurriculumAberto({ id: u._id, nome: u.name })}
+                            >
+                              <FileText className="h-3 w-3" />
+                              Ver Curriculum
+                            </Button>
+                          )}
                           {u.status !== "ativo" && u.role !== "admin" && (
                             <Button
                               size="sm"
@@ -173,6 +187,15 @@ export default function AdminUsuariosPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Curriculum */}
+      {curriculumAberto && (
+        <CurriculumModal
+          userId={curriculumAberto.id}
+          userName={curriculumAberto.nome}
+          onClose={() => setCurriculumAberto(null)}
+        />
+      )}
     </div>
   );
 }
