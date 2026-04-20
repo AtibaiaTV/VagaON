@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
+import "@/models/Empresa"; // registra o modelo para o populate funcionar
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/landing/Hero";
@@ -11,13 +12,18 @@ import StatsBar from "@/components/landing/StatsBar";
 import CriarPerfilBox from "@/components/landing/CriarPerfilBox";
 
 export default async function HomePage() {
-  await connectDB();
+  let vagasDestaque: any[] = [];
 
-  const vagasDestaque = await Vaga.find({ status: "ativa", aprovadaPorAdmin: true })
-    .sort({ createdAt: -1 })
-    .limit(6)
-    .populate("empresaId", "nomeFantasia")
-    .lean();
+  try {
+    await connectDB();
+    vagasDestaque = await Vaga.find({ status: "ativa", aprovadaPorAdmin: true })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .populate("empresaId", "nomeFantasia")
+      .lean();
+  } catch (err) {
+    console.error("Erro ao buscar vagas destaque:", err);
+  }
 
   return (
     <>
