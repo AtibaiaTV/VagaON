@@ -140,7 +140,7 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             {/* Área */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Área</p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <Chip label="Gastronomia" active={area === "gastronomia"} onClick={() => setArea(area === "gastronomia" ? "todas" : "gastronomia")} />
                 <Chip label="Hotelaria"   active={area === "hotelaria"}   onClick={() => setArea(area === "hotelaria"   ? "todas" : "hotelaria")} />
                 <Chip label="Eventos"     active={area === "eventos"}     onClick={() => setArea(area === "eventos"     ? "todas" : "eventos")} />
@@ -150,7 +150,7 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             {/* Período */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Período</p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <Chip label="CLT"        active={tipo === "clt"}        onClick={() => setTipo(tipo === "clt"        ? "todos" : "clt")} />
                 <Chip label="Temporário" active={tipo === "temporario"} onClick={() => setTipo(tipo === "temporario" ? "todos" : "temporario")} />
                 <Chip label="Sazonal"    active={tipo === "sazonal"}    onClick={() => setTipo(tipo === "sazonal"    ? "todos" : "sazonal")} />

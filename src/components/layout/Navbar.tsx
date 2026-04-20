@@ -8,7 +8,7 @@ export default async function Navbar() {
 
   return (
     <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
-      <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3">
         <Link href="/" className="shrink-0">
           <Logo size="md" />
         </Link>
@@ -27,7 +27,10 @@ export default async function Navbar() {
                 <Button variant="ghost" size="sm">Entrar</Button>
               </Link>
               <Link href="/cadastro">
-                <Button size="sm" className="px-5">Cadastre-se grátis</Button>
+                <Button size="sm" className="px-3 sm:px-5">
+                  <span className="sm:hidden">Cadastrar</span>
+                  <span className="hidden sm:inline">Cadastre-se grátis</span>
+                </Button>
               </Link>
             </>
           )}
