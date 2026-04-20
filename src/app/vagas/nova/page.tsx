@@ -90,7 +90,7 @@ export default function NovaVagaPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
-      <div style={{ backgroundColor: "#1a5c38" }} className="py-8">
+      <div style={{ backgroundColor: "#143f28" }} className="py-8">
         <div className="max-w-2xl mx-auto px-4 flex items-center gap-3">
           <Link href="/painel" className="text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5" />

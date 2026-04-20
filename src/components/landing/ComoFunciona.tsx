@@ -92,8 +92,8 @@ export default function ComoFunciona() {
             </div>
           </div>
 
-          {/* Card Empresa — escuro */}
-          <div className="relative bg-[#1a2e22] rounded-2xl p-8 text-white overflow-hidden">
+          {/* Card Empresa — verde escuro empresa */}
+          <div className="relative bg-[#143f28] rounded-2xl p-8 text-white overflow-hidden">
             {/* Decoração */}
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/8 rounded-full translate-y-1/2 -translate-x-1/4" />

@@ -30,14 +30,14 @@ export default async function PerfilPage() {
         <Navbar />
 
         {/* Hero */}
-        <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+        <div style={{ backgroundColor: "#143f28" }} className="py-10">
           <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white">Perfil da Empresa</h1>
               <p className="text-white/70 text-sm mt-1">{empresa.nomeFantasia}</p>
             </div>
             <Link href="/perfil/editar">
-              <Button size="sm" className="bg-white text-[#1a5c38] hover:bg-white/90 font-semibold gap-2">
+              <Button size="sm" className="bg-white text-[#143f28] hover:bg-white/90 font-semibold gap-2">
                 <Pencil className="h-4 w-4" />
                 Editar
               </Button>

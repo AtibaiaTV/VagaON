@@ -52,7 +52,7 @@ export default function CadastroEmpresaPage() {
       {/* Lado esquerdo — verde */}
       <div
         className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden"
-        style={{ backgroundColor: "#1a5c38" }}
+        style={{ backgroundColor: "#143f28" }}
       >
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.06]"

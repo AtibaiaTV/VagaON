@@ -30,8 +30,8 @@ export default async function PainelPage() {
     <div className="min-h-screen bg-[#f4f7f5]">
       <Navbar />
 
-      {/* Hero */}
-      <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+      {/* Hero — verde escuro para empresa, verde padrão para outros */}
+      <div style={{ backgroundColor: role === "empresa" ? "#143f28" : "#1a5c38" }} className="py-10">
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">

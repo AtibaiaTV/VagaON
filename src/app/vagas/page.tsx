@@ -70,7 +70,7 @@ export default async function VagasPage() {
       <Navbar />
 
       {/* Hero da página */}
-      <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+      <div style={{ backgroundColor: isEmpresa ? "#143f28" : "#1a5c38" }} className="py-10">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">
