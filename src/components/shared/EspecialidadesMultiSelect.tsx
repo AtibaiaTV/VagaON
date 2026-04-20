@@ -49,16 +49,19 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
     });
   }
 
+  const qtd = selecionadas.length;
+
   return (
     <div className="space-y-3">
 
       {/* Chips selecionadas */}
-      {selecionadas.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 p-3 bg-primary/5 rounded-lg border border-primary/20">
+      {qtd > 0 && (
+        <div className="flex flex-wrap gap-1.5 p-3 rounded-lg border" style={{ backgroundColor: "#f0faf5", borderColor: "#a3d9be" }}>
           {selecionadas.map((v) => (
             <span
               key={v}
-              className="inline-flex items-center gap-1 text-xs bg-primary text-white px-2.5 py-1 rounded-full font-medium"
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{ backgroundColor: "#2DB87A", color: "#ffffff" }}
             >
               {labelEspecialidade(v)}
               <button
@@ -94,7 +97,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
         )}
       </div>
 
-      {/* Resultados da busca — chips inline, sem container de scroll */}
+      {/* Resultados da busca */}
       {termoBusca && (
         <div className="border rounded-lg p-3">
           {resultadosBusca.length === 0 ? (
@@ -110,11 +113,12 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                     key={esp.value}
                     type="button"
                     onClick={() => toggle(esp.value)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                    className="px-3 py-1.5 rounded-full text-sm font-medium border transition-all"
+                    style={
                       ativa
-                        ? "bg-primary text-white border-primary shadow-sm"
-                        : "bg-white text-foreground border-border hover:border-primary hover:text-primary"
-                    }`}
+                        ? { backgroundColor: "#2DB87A", color: "#fff", borderColor: "#2DB87A" }
+                        : { backgroundColor: "#fff", color: "#111", borderColor: "#d1d5db" }
+                    }
                   >
                     {esp.label}
                   </button>
@@ -125,7 +129,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
         </div>
       )}
 
-      {/* Categorias acordeão — sem busca */}
+      {/* Categorias acordeão */}
       {!termoBusca && (
         <div className="border rounded-lg divide-y divide-border/60">
           {grupos.map(({ cat, itens }) => {
@@ -133,7 +137,6 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
             const qtdSel = itens.filter((i) => selecionadas.includes(i.value)).length;
             return (
               <div key={cat.value}>
-                {/* Header da categoria */}
                 <button
                   type="button"
                   onClick={() => toggleCategoria(cat.value)}
@@ -142,7 +145,10 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                   <span className="flex items-center gap-2">
                     {cat.label}
                     {qtdSel > 0 && (
-                      <span className="text-xs font-medium bg-primary text-white px-1.5 py-0.5 rounded-full">
+                      <span
+                        className="text-xs font-medium px-1.5 py-0.5 rounded-full"
+                        style={{ backgroundColor: "#2DB87A", color: "#fff" }}
+                      >
                         {qtdSel}
                       </span>
                     )}
@@ -154,7 +160,6 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                   )}
                 </button>
 
-                {/* Chips da categoria — aparecem abaixo do header */}
                 {aberta && (
                   <div className="px-4 pb-4 pt-1 flex flex-wrap gap-2 bg-muted/20">
                     {itens.map((esp) => {
@@ -164,11 +169,12 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                           key={esp.value}
                           type="button"
                           onClick={() => toggle(esp.value)}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                          className="px-3 py-1.5 rounded-full text-sm font-medium border transition-all"
+                          style={
                             ativa
-                              ? "bg-primary text-white border-primary shadow-sm"
-                              : "bg-white text-foreground border-border hover:border-primary hover:text-primary"
-                          }`}
+                              ? { backgroundColor: "#2DB87A", color: "#fff", borderColor: "#2DB87A" }
+                              : { backgroundColor: "#fff", color: "#111", borderColor: "#d1d5db" }
+                          }
                         >
                           {esp.label}
                         </button>
@@ -182,8 +188,9 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
         </div>
       )}
 
+      {/* Contador */}
       <p className="text-xs text-muted-foreground">
-        {selecionadas.length} função{selecionadas.length !== 1 ? "ões" : ""} selecionada{selecionadas.length !== 1 ? "s" : ""}
+        {qtd === 0 ? "Nenhuma função selecionada" : qtd === 1 ? "1 função selecionada" : `${qtd} funções selecionadas`}
       </p>
     </div>
   );
