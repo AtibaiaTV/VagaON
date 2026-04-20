@@ -23,7 +23,14 @@ export default function CadastroPage() {
           <Logo size="md" variant="white" />
         </div>
 
-        <div className="relative space-y-6">
+        <div className="relative space-y-8">
+          {/* Frase principal */}
+          <blockquote className="text-white/90 text-2xl font-semibold leading-snug">
+            "Sua próxima oportunidade em gastronomia e hotelaria começa aqui. Cadastre-se e seja encontrado pelas melhores empresas do Brasil."
+          </blockquote>
+          <p className="text-white/50 text-sm">Plataforma 100% gratuita para profissionais</p>
+
+          {/* Benefícios */}
           <div className="space-y-3">
             {[
               "Cadastro gratuito e sem burocracia",

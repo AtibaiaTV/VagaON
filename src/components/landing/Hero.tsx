@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { MapPin, Briefcase, Clock, CheckCircle } from "lucide-react";
 
 const vagasDestaque = [
@@ -54,41 +53,33 @@ export default function Hero() {
               ))}
             </ul>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <Link href="/cadastro/profissional">
-                <Button size="lg" className="w-full sm:w-auto text-base px-7 h-12 font-semibold bg-white text-[#1a5c38] hover:bg-white/90">
-                  Sou profissional
-                </Button>
-              </Link>
-              <Link href="/cadastro/empresa">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto gap-2 text-base px-7 h-12 border-2 border-white/30 text-white hover:bg-white/10 hover:text-white"
-                >
-                  Sou empresa
-                </Button>
-              </Link>
-            </div>
+            {/* 3 CTAs principais */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-            {/* Botões de navegação */}
-            <div className="flex flex-wrap gap-3">
-              <Link href="/vagas">
-                <Button
-                  size="sm"
-                  className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 font-medium"
-                >
-                  Vagas em aberto
-                </Button>
+              {/* Profissional */}
+              <Link href="/cadastro/profissional" className="group">
+                <div className="bg-white hover:bg-white/95 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <p className="font-bold text-[#1a5c38] text-sm leading-tight">Sou Profissional</p>
+                  <p className="text-xs text-[#1a5c38]/55 mt-1 font-medium">Cadastrar dados →</p>
+                </div>
               </Link>
-              <Link href="/cadastro/empresa">
-                <Button
-                  size="sm"
-                  className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 font-medium"
-                >
-                  Para Empresas
-                </Button>
+
+              {/* Empresa */}
+              <Link href="/cadastro/empresa" className="group">
+                <div className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <p className="font-bold text-white text-sm leading-tight">Sou Empresa</p>
+                  <p className="text-xs text-white/55 mt-1 font-medium">Fazer Cadastro →</p>
+                </div>
               </Link>
+
+              {/* Vagas */}
+              <Link href="/vagas" className="group">
+                <div className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-xl px-4 py-4 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <p className="font-bold text-white text-sm leading-tight">Vagas em Aberto</p>
+                  <p className="text-xs text-white/55 mt-1 font-medium">Consulte Aqui →</p>
+                </div>
+              </Link>
+
             </div>
           </div>
 
