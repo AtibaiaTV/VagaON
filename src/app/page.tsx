@@ -7,7 +7,6 @@ import Hero from "@/components/landing/Hero";
 import ComoFunciona from "@/components/landing/ComoFunciona";
 import Especialidades from "@/components/landing/Especialidades";
 import VagasDestaque from "@/components/landing/VagasDestaque";
-import CTA from "@/components/landing/CTA";
 import StatsBar from "@/components/landing/StatsBar";
 import CriarPerfilBox from "@/components/landing/CriarPerfilBox";
 
@@ -35,7 +34,6 @@ export default async function HomePage() {
         <Especialidades />
         <CriarPerfilBox />
         <VagasDestaque vagas={JSON.parse(JSON.stringify(vagasDestaque))} />
-        <CTA />
       </main>
       <Footer />
     </>
