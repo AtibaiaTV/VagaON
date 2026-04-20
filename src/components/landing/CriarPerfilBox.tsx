@@ -5,7 +5,7 @@ import { ChefHat, MapPin, Briefcase, CheckCircle, ArrowRight } from "lucide-reac
 const beneficios = [
   "Perfil visível para centenas de empresas",
   "Candidate-se com um clique",
-  "CLT, temporário e sazonal",
+  "CLT · Temporário · Sazonal",
   "Sem taxas — 100% gratuito",
 ];
 
@@ -29,7 +29,7 @@ export default function CriarPerfilBox() {
             </p>
             <ul className="space-y-3 mb-8">
               {beneficios.map((b) => (
-                <li key={b} className="flex items-center gap-3 text-sm text-foreground">
+                <li key={b} className="flex items-center gap-3 text-sm text-foreground whitespace-nowrap">
                   <CheckCircle className="h-5 w-5 text-primary shrink-0" />
                   {b}
                 </li>

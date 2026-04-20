@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Briefcase, Clock, CheckCircle } from "lucide-react";
+import { MapPin, Briefcase, Clock, CheckCircle } from "lucide-react";
 
 const vagasDestaque = [
   { cargo: "Garçom", empresa: "Restaurante Bella Vista", cidade: "São Paulo, SP", tipo: "CLT" },
@@ -56,9 +56,8 @@ export default function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <Link href="/cadastro/profissional">
-                <Button size="lg" className="w-full sm:w-auto gap-2 text-base px-7 h-12 font-semibold bg-white text-[#1a5c38] hover:bg-white/90">
+                <Button size="lg" className="w-full sm:w-auto text-base px-7 h-12 font-semibold bg-white text-[#1a5c38] hover:bg-white/90">
                   Sou profissional
-                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/cadastro/empresa">

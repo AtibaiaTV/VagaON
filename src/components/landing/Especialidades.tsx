@@ -1,31 +1,21 @@
-import {
-  UtensilsCrossed,
-  ChefHat,
-  GlassWater,
-  Cake,
-  Flame,
-  Fish,
-  Coffee,
-  ConciergeBell,
-  Wine,
-  Star,
-  BedDouble,
-  CalendarDays,
-} from "lucide-react";
+import { UtensilsCrossed, BedDouble, CalendarDays } from "lucide-react";
 
-const especialidades = [
-  { icone: UtensilsCrossed, nome: "Garçom / Garçonete" },
-  { icone: ChefHat,         nome: "Cozinheiro(a)"      },
-  { icone: GlassWater,      nome: "Barman / Bartender"  },
-  { icone: Cake,            nome: "Confeiteiro(a)"      },
-  { icone: Flame,           nome: "Pizzaiolo"           },
-  { icone: Fish,            nome: "Sushiman"            },
-  { icone: Coffee,          nome: "Barista"             },
-  { icone: ConciergeBell,   nome: "Recepcionista"       },
-  { icone: Wine,            nome: "Sommelier"           },
-  { icone: Star,            nome: "Chefe de Cozinha"    },
-  { icone: BedDouble,       nome: "Camareira"           },
-  { icone: CalendarDays,    nome: "Eventos / Buffet"    },
+const setores = [
+  {
+    icone: UtensilsCrossed,
+    nome: "Estabelecimentos Gastronômicos",
+    descricao: "Restaurantes, bares, lanchonetes, cafés e muito mais",
+  },
+  {
+    icone: BedDouble,
+    nome: "Hospedagens",
+    descricao: "Hotéis, pousadas, resorts e apart-hotéis",
+  },
+  {
+    icone: CalendarDays,
+    nome: "Eventos",
+    descricao: "Casamentos, aniversários, feiras e eventos corporativos",
+  },
 ];
 
 export default function Especialidades() {
@@ -34,35 +24,40 @@ export default function Especialidades() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold mb-3">
-            Profissionais de todos os setores
+            Onde você vai trabalhar
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Do salão à cozinha, do bar à recepção — conectamos todos os talentos da hospitalidade.
+            Conectamos profissionais aos melhores estabelecimentos do setor de gastronomia e hospitalidade.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {especialidades.map((esp) => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {setores.map((setor) => (
             <div
-              key={esp.nome}
-              className="group rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default"
+              key={setor.nome}
+              className="group rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-default"
             >
-              {/* Topo — verde médio com ícone branco */}
+              {/* Topo — verde médio com ícone */}
               <div
-                className="flex items-center justify-center py-7"
+                className="flex items-center justify-center py-12"
                 style={{ backgroundColor: "#1a5c38" }}
               >
-                <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                  <esp.icone className="h-6 w-6 text-white" strokeWidth={1.75} />
+                <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                  <setor.icone className="h-8 w-8 text-white" strokeWidth={1.5} />
                 </div>
               </div>
 
-              {/* Base — verde escuro com texto branco */}
+              {/* Base — verde escuro com título e descrição */}
               <div
-                className="px-3 py-3 text-center"
+                className="px-5 py-5 text-center"
                 style={{ backgroundColor: "#143f28" }}
               >
-                <p className="text-sm font-medium text-white leading-tight">{esp.nome}</p>
+                <p className="text-base font-semibold text-white leading-snug mb-1.5">
+                  {setor.nome}
+                </p>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  {setor.descricao}
+                </p>
               </div>
             </div>
           ))}
