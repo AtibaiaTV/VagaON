@@ -3,7 +3,10 @@ import Logo from "@/components/layout/Logo";
 
 export default function Footer() {
   return (
-    <footer style={{ backgroundColor: "#143f28" }} className="text-white">
+    <footer style={{ backgroundColor: "#143f28" }} className="relative overflow-hidden text-white">
+      {/* Meias-luas decorativas */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
       <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid gap-10 sm:grid-cols-4">
           <div className="sm:col-span-2">

@@ -63,7 +63,9 @@ export default async function CandidaturasPage() {
       <Navbar />
 
       {/* Hero */}
-      <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+      <div style={{ backgroundColor: "#1a5c38" }} className="relative overflow-hidden py-10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="text-2xl font-bold text-white">Minhas Candidaturas</h1>
           <p className="text-white/70 text-sm mt-1">

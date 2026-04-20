@@ -30,7 +30,9 @@ export default async function PerfilPage() {
         <Navbar />
 
         {/* Hero */}
-        <div style={{ backgroundColor: "#143f28" }} className="py-10">
+        <div style={{ backgroundColor: "#143f28" }} className="relative overflow-hidden py-10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
           <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white">Perfil da Empresa</h1>
@@ -116,7 +118,9 @@ export default async function PerfilPage() {
         <Navbar />
 
         {/* Hero */}
-        <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+        <div style={{ backgroundColor: "#1a5c38" }} className="relative overflow-hidden py-10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
           <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white">Meu Perfil</h1>

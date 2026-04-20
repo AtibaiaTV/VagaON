@@ -39,9 +39,11 @@ export default function Especialidades() {
             >
               {/* Topo — verde médio com ícone */}
               <div
-                className="flex items-center justify-center py-12"
+                className="relative overflow-hidden flex items-center justify-center py-12"
                 style={{ backgroundColor: "#1a5c38" }}
               >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.06] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/[0.06] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
                 <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                   <setor.icone className="h-8 w-8 text-white" strokeWidth={1.5} />
                 </div>

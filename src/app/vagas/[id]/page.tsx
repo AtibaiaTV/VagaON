@@ -85,7 +85,9 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
         <div className="bg-white rounded-2xl shadow-md overflow-hidden mb-6">
 
           {/* Header verde */}
-          <div style={{ backgroundColor: "#1a5c38" }} className="relative px-8 py-8">
+          <div style={{ backgroundColor: "#1a5c38" }} className="relative overflow-hidden px-8 py-8">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
             {/* Linha decorativa dourada */}
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
 
