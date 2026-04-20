@@ -2,17 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
 
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
+
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    return NextResponse.json(
+      { error: "Upload de foto não configurado. Contate o administrador." },
+      { status: 503 }
+    );
+  }
+
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
@@ -48,6 +55,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: result.secure_url });
   } catch {
-    return NextResponse.json({ error: "Erro ao fazer upload da imagem." }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao enviar foto. Tente novamente." }, { status: 500 });
   }
 }

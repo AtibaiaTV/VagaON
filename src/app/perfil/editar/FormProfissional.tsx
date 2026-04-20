@@ -176,7 +176,7 @@ export default function FormProfissional({ profileId, dados }: Props) {
             {ETAPAS.map((nome, i) => (
               <button
                 key={i}
-                onClick={() => setEtapa(i)}
+                onClick={() => { setEtapa(i); setErro(""); }}
                 className={`flex-1 text-center text-xs font-medium pb-2 border-b-2 transition-colors ${
                   i === etapa
                     ? "border-primary text-primary"
@@ -556,7 +556,7 @@ export default function FormProfissional({ profileId, dados }: Props) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setEtapa((e) => e - 1)}
+              onClick={() => { setEtapa((e) => e - 1); setErro(""); }}
               className="flex-1"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -566,7 +566,7 @@ export default function FormProfissional({ profileId, dados }: Props) {
           {etapa < ETAPAS.length - 1 ? (
             <Button
               type="button"
-              onClick={() => setEtapa((e) => e + 1)}
+              onClick={() => { setEtapa((e) => e + 1); setErro(""); }}
               className="flex-1"
             >
               Próximo

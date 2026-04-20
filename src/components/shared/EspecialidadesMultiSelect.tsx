@@ -126,30 +126,18 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                   {grupo.itens.map((esp) => {
                     const ativa = selecionadas.includes(esp.value);
                     return (
-                      <div
+                      <button
                         key={esp.value}
-                        role="checkbox"
-                        aria-checked={ativa}
-                        tabIndex={0}
-                        onPointerDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggle(esp.value);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === " " || e.key === "Enter") {
-                            e.preventDefault();
-                            toggle(esp.value);
-                          }
-                        }}
-                        className={`w-full px-4 py-2.5 text-sm flex items-center gap-2.5 cursor-pointer select-none touch-manipulation transition-colors ${
+                        type="button"
+                        onClick={() => toggle(esp.value)}
+                        className={`w-full px-4 py-2.5 text-sm flex items-center gap-2.5 text-left transition-colors ${
                           ativa
                             ? "bg-primary/10 text-primary font-medium"
                             : "hover:bg-muted/50 text-foreground"
                         }`}
                       >
                         <span
-                          className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 flex-shrink-0 transition-colors ${
                             ativa ? "bg-primary border-primary" : "border-muted-foreground/30"
                           }`}
                         >
@@ -166,7 +154,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                           )}
                         </span>
                         {esp.label}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
