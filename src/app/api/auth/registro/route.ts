@@ -8,7 +8,7 @@ import Empresa from "@/models/Empresa";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nome, email, senha, role, nomeFantasia } = body;
+    const { nome, email, senha, role, nomeFantasia, foto } = body;
 
     if (!nome || !email || !senha || !role) {
       return NextResponse.json(
@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
       password: senhaHash,
       role,
       status: "ativo",
+      image: foto || null,
     });
 
     // Cria o perfil vinculado ao usuário

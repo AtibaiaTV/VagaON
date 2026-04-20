@@ -5,29 +5,20 @@ import Candidatura from "@/models/Candidatura";
 import Profissional from "@/models/Profissional";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Building2, ArrowLeft, Calendar, Users } from "lucide-react";
+import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle } from "lucide-react";
 import BotaoCandidatar from "./BotaoCandidatar";
 import ListaCandidatos from "./ListaCandidatos";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
 };
-const TIPO_COR: Record<string, string> = {
-  clt: "bg-blue-100 text-blue-700",
-  temporario: "bg-orange-100 text-orange-700",
-  sazonal: "bg-purple-100 text-purple-700",
-};
 
 interface EmpresaPopulada {
-  _id: string;
-  nomeFantasia: string;
-  cidade: string;
-  estado: string;
-  setor: string;
-  descricao: string;
+  _id: string; nomeFantasia: string; cidade: string;
+  estado: string; setor: string; descricao: string; anoFundacao?: number;
 }
 
 export default async function DetalheVagaPage({ params }: { params: { id: string } }) {
@@ -35,12 +26,11 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   await connectDB();
 
   const vaga = await Vaga.findById(params.id)
-    .populate("empresaId", "nomeFantasia cidade estado setor descricao")
-    .lean() as (Awaited<ReturnType<typeof Vaga.findById>> & { empresaId: EmpresaPopulada }) | null;
+    .populate("empresaId", "nomeFantasia cidade estado setor descricao anoFundacao")
+    .lean() as any;
 
   if (!vaga) notFound();
 
-  // Verifica se profissional já se candidatou
   let jaCandidatou = false;
   let profissionalId: string | null = null;
 
@@ -53,7 +43,6 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
     }
   }
 
-  // Empresa dona da vaga vê candidatos
   let isDonoEmpresa = false;
   let candidatos: unknown[] = [];
 
@@ -61,9 +50,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
     const empresa = vaga.empresaId as EmpresaPopulada;
     if (session.user.profileId === empresa._id.toString()) {
       isDonoEmpresa = true;
-      candidatos = await Candidatura.find({ vagaId: params.id })
-        .sort({ createdAt: -1 })
-        .lean();
+      candidatos = await Candidatura.find({ vagaId: params.id }).sort({ createdAt: -1 }).lean();
     }
   }
 
@@ -78,123 +65,185 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
     return `R$ ${s.min?.toLocaleString("pt-BR")} – ${s.max?.toLocaleString("pt-BR")}${p[s.periodo]}`;
   }
 
-  return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-white border-b">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
-          <Link href="/vagas" className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <span className="font-semibold">Detalhe da Vaga</span>
-        </div>
-      </header>
+  const especialidadeLabel = ESPECIALIDADES.find((e) => e.value === vagaObj.especialidade)?.label ?? vagaObj.especialidade;
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {/* Card principal */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl font-bold mb-2">{vagaObj.titulo}</h1>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3">
-                  <Building2 className="h-4 w-4" />
-                  <span>{empresa.nomeFantasia}</span>
-                  <span>·</span>
-                  <MapPin className="h-4 w-4" />
-                  <span>{vagaObj.cidade}, {vagaObj.estado}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${TIPO_COR[vagaObj.tipo]}`}>
-                    {TIPO_LABEL[vagaObj.tipo]}
+  return (
+    <div className="min-h-screen bg-[#f4f7f5]">
+      <Navbar />
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 mb-6">
+          <Link href="/vagas" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar às vagas
+          </Link>
+        </div>
+
+        {/* Card principal — estilo currículo */}
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden mb-6">
+
+          {/* Header verde */}
+          <div style={{ backgroundColor: "#1a5c38" }} className="relative px-8 py-8">
+            {/* Linha decorativa dourada */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
+
+            <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+              {/* Ícone da empresa */}
+              <div className="w-20 h-20 rounded-xl bg-white/15 border-2 border-white/30 flex items-center justify-center shrink-0">
+                <Building2 className="h-10 w-10 text-white/80" strokeWidth={1.5} />
+              </div>
+
+              {/* Info principal */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-2">
+                  {vagaObj.titulo}
+                </h1>
+                <p className="text-white/80 text-lg font-medium mb-3">{empresa.nomeFantasia}</p>
+
+                <div className="flex flex-wrap gap-3 text-sm text-white/70">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />{vagaObj.cidade}, {vagaObj.estado}
                   </span>
-                  <Badge variant="secondary">
-                    {ESPECIALIDADES.find((e) => e.value === vagaObj.especialidade)?.label ?? vagaObj.especialidade}
-                  </Badge>
-                  {vagaObj.remoto && <Badge variant="outline">Remoto</Badge>}
+                  <span className="flex items-center gap-1.5">
+                    <Briefcase className="h-4 w-4" />{especialidadeLabel}
+                  </span>
+                  {(vagaObj.periodo?.dataInicio || vagaObj.periodo?.dataFim) && (
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4" />
+                      {vagaObj.periodo.dataInicio && new Date(vagaObj.periodo.dataInicio).toLocaleDateString("pt-BR")}
+                      {vagaObj.periodo.dataFim && ` até ${new Date(vagaObj.periodo.dataFim).toLocaleDateString("pt-BR")}`}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-lg font-bold text-primary">{formatarSalario()}</p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end mt-1">
-                  <Users className="h-3 w-3" />
-                  {vagaObj.totalCandidaturas} candidatura(s)
+
+              {/* Salário */}
+              <div className="sm:text-right shrink-0">
+                <p className="text-2xl font-bold text-white">{formatarSalario()}</p>
+                <p className="text-white/60 text-xs mt-1 flex items-center gap-1 sm:justify-end">
+                  <Users className="h-3 w-3" />{vagaObj.totalCandidaturas} candidatura(s)
                 </p>
               </div>
             </div>
 
-            {/* Período */}
-            {(vagaObj.periodo?.dataInicio || vagaObj.periodo?.dataFim) && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {vagaObj.periodo.dataInicio && new Date(vagaObj.periodo.dataInicio).toLocaleDateString("pt-BR")}
-                  {vagaObj.periodo.dataFim && ` até ${new Date(vagaObj.periodo.dataFim).toLocaleDateString("pt-BR")}`}
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2 mt-5">
+              <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
+                <Clock className="h-3.5 w-3.5" />{TIPO_LABEL[vagaObj.tipo]}
+              </span>
+              {vagaObj.remoto && (
+                <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
+                  Remoto
                 </span>
-              </div>
-            )}
+              )}
+            </div>
+          </div>
 
-            {/* Botão candidatar */}
+          {/* Ação — candidatar */}
+          <div className="px-8 py-5 border-b bg-[#f9fdf9]">
             {session?.user.role === "profissional" && (
-              <BotaoCandidatar
-                vagaId={params.id}
-                jaCandidatou={jaCandidatou}
-                vagaAtiva={vagaObj.status === "ativa"}
-              />
+              <BotaoCandidatar vagaId={params.id} jaCandidatou={jaCandidatou} vagaAtiva={vagaObj.status === "ativa"} />
             )}
-
             {!session && (
-              <div className="mt-4 p-4 bg-muted rounded-lg text-center">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Faça login para se candidatar a esta vaga.
-                </p>
-                <Link href="/entrar">
-                  <button className="text-sm font-medium text-primary hover:underline">
-                    Entrar / Cadastrar
-                  </button>
-                </Link>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <p className="text-sm text-muted-foreground">Faça login para se candidatar a esta vaga.</p>
+                <div className="flex gap-2">
+                  <Link href="/entrar">
+                    <button className="text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-5 py-2 rounded-lg transition-colors">
+                      Entrar
+                    </button>
+                  </Link>
+                  <Link href="/cadastro">
+                    <button className="text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/5 px-5 py-2 rounded-lg transition-colors">
+                      Cadastrar
+                    </button>
+                  </Link>
+                </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Descrição */}
-        <Card>
-          <CardHeader><CardTitle className="text-base">Descrição da vaga</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-line">{vagaObj.descricao}</p>
-          </CardContent>
-        </Card>
+          {/* Corpo do card — 2 colunas */}
+          <div className="grid md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-border/40">
 
-        {/* Requisitos */}
-        {vagaObj.requisitos && (
-          <Card>
-            <CardHeader><CardTitle className="text-base">Requisitos</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-sm whitespace-pre-line">{vagaObj.requisitos}</p>
-            </CardContent>
-          </Card>
-        )}
+            {/* Coluna principal */}
+            <div className="md:col-span-2 p-8 space-y-8">
 
-        {/* Empresa */}
-        <Card>
-          <CardHeader><CardTitle className="text-base">Sobre a empresa</CardTitle></CardHeader>
-          <CardContent>
-            <p className="font-semibold">{empresa.nomeFantasia}</p>
-            {empresa.descricao && <p className="text-sm text-muted-foreground mt-1">{empresa.descricao}</p>}
-            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-              <MapPin className="h-3 w-3" />{empresa.cidade}, {empresa.estado}
-            </p>
-          </CardContent>
-        </Card>
+              {/* Descrição */}
+              <section>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
+                  <span className="w-6 h-0.5 bg-primary inline-block" />
+                  Descrição da vaga
+                </h2>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{vagaObj.descricao}</p>
+              </section>
 
-        {/* Lista de candidatos (só para empresa dona) */}
+              {/* Requisitos */}
+              {vagaObj.requisitos && (
+                <section>
+                  <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
+                    <span className="w-6 h-0.5 bg-primary inline-block" />
+                    Requisitos
+                  </h2>
+                  <ul className="space-y-1.5">
+                    {vagaObj.requisitos.split("\n").filter(Boolean).map((r: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                        <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </div>
+
+            {/* Coluna lateral — empresa */}
+            <div className="p-8">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
+                <span className="w-6 h-0.5 bg-primary inline-block" />
+                Sobre a empresa
+              </h2>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Building2 className="h-6 w-6 text-primary" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="font-bold text-sm">{empresa.nomeFantasia}</p>
+                  {empresa.anoFundacao && (
+                    <p className="text-xs text-muted-foreground">Início em {empresa.anoFundacao}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary/60 shrink-0" />
+                  {empresa.cidade}, {empresa.estado}
+                </p>
+              </div>
+
+              {empresa.descricao && (
+                <p className="text-sm text-muted-foreground mt-4 leading-relaxed">{empresa.descricao}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Lista de candidatos (empresa dona) */}
         {isDonoEmpresa && (
-          <ListaCandidatos
-            candidatos={JSON.parse(JSON.stringify(candidatos))}
-            vagaId={params.id}
-          />
+          <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+            <ListaCandidatos
+              candidatos={JSON.parse(JSON.stringify(candidatos))}
+              vagaId={params.id}
+            />
+          </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

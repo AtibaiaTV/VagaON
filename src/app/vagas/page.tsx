@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { MapPin, Clock, Plus, ArrowLeft, Briefcase } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
@@ -64,28 +66,29 @@ export default async function VagasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/painel" className="text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <Briefcase className="h-5 w-5 text-primary" />
-            <span className="font-semibold">
+    <div className="min-h-screen bg-[#f4f7f5]">
+      <Navbar />
+
+      {/* Hero da página */}
+      <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
               {isEmpresa ? "Minhas Vagas" : "Vagas disponíveis"}
-            </span>
+            </h1>
+            <p className="text-white/70 text-sm mt-1">
+              {isEmpresa ? "Gerencie suas oportunidades publicadas" : "Encontre sua próxima oportunidade"}
+            </p>
           </div>
           {isEmpresa && (
             <Link href="/vagas/nova">
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Vaga
+              <Button size="sm" className="bg-white text-[#1a5c38] hover:bg-white/90 font-semibold gap-2">
+                <Plus className="h-4 w-4" />Nova Vaga
               </Button>
             </Link>
           )}
         </div>
-      </header>
+      </div>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {vagas.length === 0 ? (
@@ -149,6 +152,7 @@ export default async function VagasPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
