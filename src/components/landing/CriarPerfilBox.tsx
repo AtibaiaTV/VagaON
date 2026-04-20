@@ -21,7 +21,7 @@ export default function CriarPerfilBox() {
               Para profissionais
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
-              Crie seu perfil e apareça para as melhores empresas
+              Crie seu perfil e apareça para milhares de empresas
             </h2>
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
               Preencha suas especialidades, experiências e disponibilidade. Em minutos

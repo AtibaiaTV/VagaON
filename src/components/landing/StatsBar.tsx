@@ -1,6 +1,6 @@
 const stats = [
   { valor: "100%", rotulo: "Gratuito para profissionais" },
-  { valor: "CLT · Temp. · Sazonal", rotulo: "Tipos de contrato" },
+  { valor: "CLT · Temporário · Sazonal", rotulo: "Tipos de contrato" },
   { valor: "24h", rotulo: "Para receber candidatos" },
   { valor: "Todo o Brasil", rotulo: "Cobertura nacional" },
 ];

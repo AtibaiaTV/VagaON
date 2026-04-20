@@ -54,7 +54,7 @@ export default function Hero() {
               ))}
             </ul>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <Link href="/cadastro/profissional">
                 <Button size="lg" className="w-full sm:w-auto gap-2 text-base px-7 h-12 font-semibold bg-white text-[#1a5c38] hover:bg-white/90">
                   Sou profissional
@@ -68,6 +68,26 @@ export default function Hero() {
                   className="w-full sm:w-auto gap-2 text-base px-7 h-12 border-2 border-white/30 text-white hover:bg-white/10 hover:text-white"
                 >
                   Sou empresa
+                </Button>
+              </Link>
+            </div>
+
+            {/* Botões de navegação */}
+            <div className="flex flex-wrap gap-3">
+              <Link href="/vagas">
+                <Button
+                  size="sm"
+                  className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 font-medium"
+                >
+                  Vagas em aberto
+                </Button>
+              </Link>
+              <Link href="/cadastro/empresa">
+                <Button
+                  size="sm"
+                  className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 font-medium"
+                >
+                  Para Empresas
                 </Button>
               </Link>
             </div>
