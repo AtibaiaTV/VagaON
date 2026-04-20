@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { SETORES } from "@/constants/setores";
-import { MapPin, Phone, Globe, Mail, Pencil, Building2, ChefHat, ArrowLeft } from "lucide-react";
+import { MapPin, Phone, Globe, Mail, Pencil, Building2, ChefHat } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export default async function PerfilPage() {
   const session = await auth();
@@ -24,24 +26,24 @@ export default async function PerfilPage() {
     const setor = SETORES.find((s) => s.value === empresa.setor)?.label ?? empresa.setor;
 
     return (
-      <div className="min-h-screen bg-muted/30">
-        <header className="bg-white border-b">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/painel" className="text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-              <Building2 className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Perfil da Empresa</span>
+      <div className="min-h-screen bg-[#f4f7f5]">
+        <Navbar />
+
+        {/* Hero */}
+        <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+          <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Perfil da Empresa</h1>
+              <p className="text-white/70 text-sm mt-1">{empresa.nomeFantasia}</p>
             </div>
             <Link href="/perfil/editar">
-              <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4 mr-2" />
+              <Button size="sm" className="bg-white text-[#1a5c38] hover:bg-white/90 font-semibold gap-2">
+                <Pencil className="h-4 w-4" />
                 Editar
               </Button>
             </Link>
           </div>
-        </header>
+        </div>
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
           <Card>
@@ -51,7 +53,7 @@ export default async function PerfilPage() {
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">{empresa.nomeFantasia}</h1>
+                  <h2 className="text-2xl font-bold">{empresa.nomeFantasia}</h2>
                   {empresa.razaoSocial && (
                     <p className="text-muted-foreground text-sm">{empresa.razaoSocial}</p>
                   )}
@@ -66,25 +68,25 @@ export default async function PerfilPage() {
               <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
                 {(empresa.cidade || empresa.estado) && (
                   <span className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
+                    <MapPin className="h-4 w-4 text-primary/60" />
                     {[empresa.cidade, empresa.estado].filter(Boolean).join(", ")}
                   </span>
                 )}
                 {empresa.telefone && (
                   <span className="flex items-center gap-1">
-                    <Phone className="h-4 w-4" />
+                    <Phone className="h-4 w-4 text-primary/60" />
                     {empresa.telefone}
                   </span>
                 )}
                 {empresa.email && (
                   <span className="flex items-center gap-1">
-                    <Mail className="h-4 w-4" />
+                    <Mail className="h-4 w-4 text-primary/60" />
                     {empresa.email}
                   </span>
                 )}
                 {empresa.website && (
                   <span className="flex items-center gap-1">
-                    <Globe className="h-4 w-4" />
+                    <Globe className="h-4 w-4 text-primary/60" />
                     {empresa.website}
                   </span>
                 )}
@@ -92,6 +94,8 @@ export default async function PerfilPage() {
             </CardContent>
           </Card>
         </main>
+
+        <Footer />
       </div>
     );
   }
@@ -108,24 +112,30 @@ export default async function PerfilPage() {
     };
 
     return (
-      <div className="min-h-screen bg-muted/30">
-        <header className="bg-white border-b">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/painel" className="text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-              <ChefHat className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Meu Perfil</span>
+      <div className="min-h-screen bg-[#f4f7f5]">
+        <Navbar />
+
+        {/* Hero */}
+        <div style={{ backgroundColor: "#1a5c38" }} className="py-10">
+          <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Meu Perfil</h1>
+              <p className="text-white/70 text-sm mt-1">{prof.nomeCompleto}</p>
             </div>
-            <Link href="/perfil/editar">
-              <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-            </Link>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-white/60 text-xs">Perfil completo</p>
+                <p className="text-xl font-bold text-[#4ade80]">{prof.completude}%</p>
+              </div>
+              <Link href="/perfil/editar">
+                <Button size="sm" className="bg-white text-[#1a5c38] hover:bg-white/90 font-semibold gap-2">
+                  <Pencil className="h-4 w-4" />
+                  Editar
+                </Button>
+              </Link>
+            </div>
           </div>
-        </header>
+        </div>
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
           <Card>
@@ -135,7 +145,7 @@ export default async function PerfilPage() {
                   <ChefHat className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold">{prof.nomeCompleto}</h1>
+                  <h2 className="text-2xl font-bold">{prof.nomeCompleto}</h2>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {(prof.especialidades ?? []).slice(0, 3).map((e) => (
                       <Badge key={e}>
@@ -146,21 +156,17 @@ export default async function PerfilPage() {
                   <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
                     {(prof.cidade || prof.estado) && (
                       <span className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-4 w-4 text-primary/60" />
                         {[prof.cidade, prof.estado].filter(Boolean).join(", ")}
                       </span>
                     )}
                     {prof.telefone && (
                       <span className="flex items-center gap-1">
-                        <Phone className="h-4 w-4" />
+                        <Phone className="h-4 w-4 text-primary/60" />
                         {prof.telefone}
                       </span>
                     )}
                   </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-xs text-muted-foreground">Perfil completo</p>
-                  <p className="text-2xl font-bold text-primary">{prof.completude}%</p>
                 </div>
               </div>
 
@@ -221,6 +227,8 @@ export default async function PerfilPage() {
             </Card>
           )}
         </main>
+
+        <Footer />
       </div>
     );
   }

@@ -64,30 +64,29 @@ export default function VagasDestaque({ vagas }: { vagas: VagaCard[] }) {
             </div>
           </div>
 
-          {/* Direita — mock de vaga */}
+          {/* Direita — mock de vaga (mesmo design dos cards reais) */}
           <div className="flex items-center justify-center">
-            <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-border/40 overflow-hidden">
+            <div className="w-full max-w-sm bg-white rounded-2xl border border-border/50 shadow-xl overflow-hidden">
               <div className="h-1.5 bg-gradient-to-r from-primary to-[#7de06a]" />
-              <div className="p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Briefcase className="h-5 w-5 text-primary" strokeWidth={1.75} />
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">CLT</span>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 bg-blue-100 text-blue-700">CLT</span>
                 </div>
-                <div>
-                  <h3 className="font-bold text-base mb-0.5">Garçom / Garçonete</h3>
-                  <p className="text-sm text-muted-foreground">Restaurante Bella Vista</p>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="text-xs bg-muted px-2.5 py-1 rounded-full font-medium">Salão</span>
-                  <span className="text-xs bg-muted px-2.5 py-1 rounded-full font-medium">Experiência 1 ano</span>
+                <h3 className="font-bold text-base leading-snug mb-1">Garçom / Garçonete</h3>
+                <p className="text-sm text-muted-foreground mb-3">Restaurante Bella Vista</p>
+                <div className="mb-4">
+                  <span className="inline-flex items-center text-xs font-medium bg-muted text-muted-foreground px-2.5 py-0.5 rounded-md">
+                    Garçom
+                  </span>
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border/40">
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 text-primary/60" /> São Paulo, SP
+                    <MapPin className="h-3.5 w-3.5 text-primary/60" />São Paulo, SP
                   </span>
-                  <span className="text-sm font-semibold">R$ 2.500/mês</span>
+                  <span className="text-sm font-semibold text-foreground">R$ 2.500/mês</span>
                 </div>
               </div>
             </div>

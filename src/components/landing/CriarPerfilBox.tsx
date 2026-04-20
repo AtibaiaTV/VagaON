@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChefHat, MapPin, Briefcase, CheckCircle, ArrowRight } from "lucide-react";
+import { MapPin, Briefcase, CheckCircle, ArrowRight, User, Star, Clock } from "lucide-react";
 
 const beneficios = [
   "Perfil visível para centenas de empresas",
@@ -13,7 +13,7 @@ export default function CriarPerfilBox() {
   return (
     <section className="py-20 bg-[#f0faf5]">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
 
           {/* Esquerda — texto */}
           <div>
@@ -43,62 +43,108 @@ export default function CriarPerfilBox() {
             </Link>
           </div>
 
-          {/* Direita — card de perfil ilustrativo */}
+          {/* Direita — currículo mock */}
           <div className="flex items-center justify-center">
-            <div className="w-full max-w-sm">
-              {/* Card de perfil mock */}
-              <div className="bg-white rounded-2xl shadow-xl border border-border/40 overflow-hidden">
-                {/* Header do card */}
-                <div className="bg-[#1a5c38] px-6 py-8 text-white text-center">
-                  <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center mx-auto mb-3">
-                    <ChefHat className="h-8 w-8 text-white" />
-                  </div>
-                  <p className="font-bold text-lg">Seu nome aqui</p>
-                  <p className="text-white/70 text-sm mt-0.5">Cozinheiro · São Paulo, SP</p>
-                </div>
+            <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-border/20">
 
-                {/* Corpo do card */}
-                <div className="p-5 space-y-4">
-                  {/* Especialidades */}
+              {/* Header verde */}
+              <div style={{ backgroundColor: "#1a5c38" }} className="px-6 pt-7 pb-5 text-white text-center relative">
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
+                {/* Foto */}
+                <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center mx-auto mb-3">
+                  <User className="h-10 w-10 text-white/80" strokeWidth={1.5} />
+                </div>
+                <p className="font-bold text-lg leading-tight">Maria Santos</p>
+                <p className="text-white/70 text-sm mt-0.5">Cozinheira</p>
+              </div>
+
+              {/* Corpo — 2 colunas */}
+              <div className="grid grid-cols-5">
+
+                {/* Coluna esquerda — verde escuro */}
+                <div style={{ backgroundColor: "#143f28" }} className="col-span-2 p-4 space-y-5">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Especialidades</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {["Cozinha Italiana", "Grelhados", "Sushiman"].map((tag) => (
-                        <span key={tag} className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">
-                          {tag}
+                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">Contato</p>
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-white/70 flex items-center gap-1.5">
+                        <MapPin className="h-2.5 w-2.5 shrink-0" />São Paulo, SP
+                      </p>
+                      <p className="text-[10px] text-white/70 truncate">maria@email.com</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">Especialidades</p>
+                    <div className="space-y-1">
+                      {["Cozinha Italiana", "Grelhados", "Confeitaria"].map((e) => (
+                        <span key={e} className="block text-[10px] text-white/80 bg-white/10 rounded px-2 py-0.5">
+                          {e}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      Disponível em São Paulo e região
+                  <div>
+                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">Disponível</p>
+                    <div className="space-y-1">
+                      {["CLT", "Temporário"].map((t) => (
+                        <p key={t} className="text-[10px] text-white/80 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] shrink-0" />{t}
+                        </p>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Briefcase className="h-4 w-4 text-primary" />
-                      CLT e Temporário
+                  </div>
+                </div>
+
+                {/* Coluna direita — branca */}
+                <div className="col-span-3 bg-white p-4 space-y-4">
+                  <div>
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-1">
+                      <span className="w-3 h-px bg-primary inline-block" />Experiência
+                    </p>
+                    <div className="space-y-2.5">
+                      <div>
+                        <p className="text-[11px] font-semibold text-foreground leading-tight">Sous Chef</p>
+                        <p className="text-[10px] text-muted-foreground">Restaurante Pátio · 2022–2024</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">Responsável pelo cardápio e equipe de cozinha.</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-foreground leading-tight">Cozinheira</p>
+                        <p className="text-[10px] text-muted-foreground">Hotel Vista · 2019–2022</p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* CTA */}
-                  <div className="pt-2">
-                    <div className="w-full h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-medium text-primary">Perfil 100% completo ✓</span>
+                  <div>
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-1">
+                      <span className="w-3 h-px bg-primary inline-block" />Habilidades
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {["Gestão", "BPF", "HACCP"].map((h) => (
+                        <span key={h} className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">{h}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-border/40">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 text-primary fill-primary" />
+                      <p className="text-[10px] font-semibold text-primary">Perfil 100% completo</p>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Badge flutuante */}
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                Cadastro em menos de 5 minutos
-              </div>
             </div>
+
+            {/* Badge */}
+            <div className="hidden" />
           </div>
+        </div>
+
+        {/* Badge abaixo */}
+        <div className="mt-6 flex items-center justify-end gap-2 text-sm text-muted-foreground">
+          <CheckCircle className="h-4 w-4 text-primary" />
+          Cadastro em menos de 5 minutos
         </div>
       </div>
     </section>

@@ -89,16 +89,16 @@ export default function NovaVagaPage() {
   const mostrarPeriodo = form.tipo === "temporario" || form.tipo === "sazonal";
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-white border-b">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <Link href="/painel" className="text-muted-foreground hover:text-foreground">
+    <div className="min-h-screen bg-[#f4f7f5]">
+      <div style={{ backgroundColor: "#1a5c38" }} className="py-8">
+        <div className="max-w-2xl mx-auto px-4 flex items-center gap-3">
+          <Link href="/painel" className="text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <Briefcase className="h-5 w-5 text-primary" />
-          <span className="font-semibold">Publicar Nova Vaga</span>
+          <Briefcase className="h-5 w-5 text-white/80" />
+          <span className="font-semibold text-white">Publicar Nova Vaga</span>
         </div>
-      </header>
+      </div>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
