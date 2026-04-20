@@ -11,7 +11,6 @@ interface Props {
   onChange: (selecionadas: string[]) => void;
 }
 
-/** Seletor múltiplo com busca e agrupamento por categoria — para perfil do profissional */
 export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Props) {
   const [busca, setBusca] = useState("");
   const [categoriaAberta, setCategoriaAberta] = useState<string | null>(null);
@@ -24,8 +23,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
 
   const agrupadas = useMemo(() => {
     if (busca.trim()) {
-      // Busca ativa: mostra resultado flat sem agrupamento
-      return [{ categoriaLabel: "Resultados", itens: filtradas }];
+      return [{ categoriaLabel: "Resultados", catValue: "", itens: filtradas }];
     }
     return CATEGORIAS.map((cat) => ({
       categoriaLabel: cat.label,
@@ -48,6 +46,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
 
   return (
     <div className="space-y-3">
+
       {/* Chips selecionadas */}
       {selecionadas.length > 0 && (
         <div className="flex flex-wrap gap-1.5 p-3 bg-primary/5 rounded-lg border border-primary/20">
@@ -57,7 +56,11 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
               className="inline-flex items-center gap-1 text-xs bg-primary text-white px-2.5 py-1 rounded-full font-medium"
             >
               {labelEspecialidade(v)}
-              <button type="button" onClick={() => remover(v)} className="hover:opacity-70 ml-0.5">
+              <button
+                type="button"
+                onClick={() => remover(v)}
+                className="hover:opacity-70 ml-0.5"
+              >
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -67,7 +70,7 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
 
       {/* Campo de busca */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         <Input
           placeholder="Buscar função..."
           value={busca}
@@ -84,9 +87,9 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
 
           return (
             <div key={grupo.categoriaLabel}>
+
               {/* Header da categoria */}
               {busca.trim() ? (
-                // Durante busca: header não-clicável, sem sticky
                 <div className="flex items-center justify-between px-3 py-2 bg-muted/60 text-xs font-bold uppercase tracking-wide text-muted-foreground border-b border-border/40">
                   <span>{grupo.categoriaLabel}</span>
                   {qtdSelecionadas > 0 && (
@@ -96,7 +99,6 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                   )}
                 </div>
               ) : (
-                // Sem busca: header clicável para expandir/recolher
                 <button
                   type="button"
                   className="w-full flex items-center justify-between px-3 py-2 bg-muted/60 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted transition-colors border-b border-border/40"
@@ -118,35 +120,47 @@ export default function EspecialidadesMultiSelect({ selecionadas, onChange }: Pr
                 </button>
               )}
 
-              {/* Itens da categoria */}
+              {/* Itens — usa <label> + <input checkbox> para máxima confiabilidade de clique */}
               {expandida && (
                 <div>
                   {grupo.itens.map((esp) => {
                     const ativa = selecionadas.includes(esp.value);
                     return (
-                      <button
+                      <label
                         key={esp.value}
-                        type="button"
-                        onClick={() => toggle(esp.value)}
-                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors ${
+                        className={`w-full px-4 py-2.5 text-sm flex items-center gap-2.5 cursor-pointer transition-colors select-none ${
                           ativa
                             ? "bg-primary/10 text-primary font-medium"
                             : "hover:bg-muted/50 text-foreground"
                         }`}
                       >
+                        {/* Checkbox nativo oculto — garante compatibilidade total de clique */}
+                        <input
+                          type="checkbox"
+                          checked={ativa}
+                          onChange={() => toggle(esp.value)}
+                          className="sr-only"
+                        />
+                        {/* Visual customizado do checkbox */}
                         <span
-                          className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                          className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
                             ativa ? "bg-primary border-primary" : "border-muted-foreground/30"
                           }`}
                         >
                           {ativa && (
                             <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12">
-                              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path
+                                d="M2 6l3 3 5-5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                           )}
                         </span>
                         {esp.label}
-                      </button>
+                      </label>
                     );
                   })}
                 </div>

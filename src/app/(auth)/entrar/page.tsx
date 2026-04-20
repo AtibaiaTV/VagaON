@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/layout/Logo";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function EntrarPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function EntrarPage() {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [verSenha, setVerSenha] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -119,19 +121,28 @@ export default function EntrarPage() {
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
+              <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
+              <div className="relative">
+                <Input
+                  id="senha"
+                  type={verSenha ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  className="h-11 bg-white pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setVerSenha((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                  aria-label={verSenha ? "Ocultar senha" : "Ver senha"}
+                >
+                  {verSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
-              <Input
-                id="senha"
-                type="password"
-                placeholder="••••••••"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-                autoComplete="current-password"
-                className="h-11 bg-white"
-              />
             </div>
 
             <Button type="submit" className="w-full h-11 font-semibold text-base" disabled={carregando}>
