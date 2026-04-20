@@ -8,7 +8,7 @@ const heights = { sm: 36, md: 48, lg: 64 };
 
 export default function Logo({ size = "md", variant = "default" }: LogoProps) {
   if (variant === "white") {
-    // On dark green backgrounds: use screen blend mode for the ghost/light logo effect
+    // On dark green backgrounds: invert to pure white logo
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
@@ -18,7 +18,7 @@ export default function Logo({ size = "md", variant = "default" }: LogoProps) {
           width: widths[size],
           height: heights[size],
           objectFit: "contain",
-          mixBlendMode: "screen",
+          filter: "brightness(0) invert(1)",
           flexShrink: 0,
         }}
       />
