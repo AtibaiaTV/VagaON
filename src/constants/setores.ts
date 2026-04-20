@@ -1,0 +1,15 @@
+export const SETORES = [
+  { value: "restaurante",   label: "Restaurante" },
+  { value: "hotel",         label: "Hotel / Pousada / Resort" },
+  { value: "bar",           label: "Bar / Pub / Cervejaria" },
+  { value: "cafe",          label: "Café / Cafeteria" },
+  { value: "padaria",       label: "Padaria / Confeitaria" },
+  { value: "buffet",        label: "Buffet / Catering" },
+  { value: "eventos",       label: "Eventos / Festas" },
+  { value: "dark_kitchen",  label: "Dark Kitchen / Delivery" },
+  { value: "industrial",    label: "Cozinha Industrial / Refeitório" },
+  { value: "spa_resort",    label: "Spa / Resort de Lazer" },
+  { value: "cruzeiro",      label: "Cruzeiro / Embarcação" },
+  { value: "clube",         label: "Clube / Associação" },
+  { value: "outros",        label: "Outros" },
+];
