@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
       .limit(500)
       .lean();
 
-    const empresaIdsResult = [...new Set(vagas.map((v) => v.empresaId?.toString()))];
+    const empresaIdsResult = Array.from(new Set(vagas.map((v) => v.empresaId?.toString())));
     const empresas = await Empresa.find({
       _id: { $in: empresaIdsResult },
     }).select("_id nomeFantasia").lean();

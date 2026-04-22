@@ -106,7 +106,7 @@ export default function ExcluirVagasPage() {
       const res = await fetch("/api/admin/vagas/excluir", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: [...selecionados] }),
+        body: JSON.stringify({ ids: Array.from(selecionados) }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro ao excluir.");
