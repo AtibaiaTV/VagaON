@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 // POST /api/admin/vagas/excluir
 // body: { ids?: string[], filtros?: { empresa?, titulo?, dataInicio?, dataFim?, status?, tipo? } }
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session || session.user.role !== "admin") {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
 // GET /api/admin/vagas/excluir?empresa=&titulo=&dataInicio=&dataFim=&status=&tipo=
 // Retorna vagas que seriam afetadas pelos filtros (preview antes de excluir)
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
     const session = await auth();
     if (!session || session.user.role !== "admin") {
@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    const p = req.nextUrl.searchParams;
+    const p = new URL(req.url).searchParams;
     const empresa    = p.get("empresa")    || "";
     const titulo     = p.get("titulo")     || "";
     const dataInicio = p.get("dataInicio") || "";
@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
       .limit(500)
       .lean();
 
-    const empresaIdsResult = [...new Set(vagas.map((v) => v.empresaId?.toString()))];
+    const empresaIdsResult = Array.from(new Set(vagas.map((v) => v.empresaId?.toString())));
     const empresas = await Empresa.find({
       _id: { $in: empresaIdsResult },
     }).select("_id nomeFantasia").lean();
