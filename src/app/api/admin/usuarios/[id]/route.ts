@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export async function PATCH(
-  req: NextRequest,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -13,16 +14,39 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
-    const { status, role } = await req.json();
+    const body = await req.json() as {
+      name?: string;
+      email?: string;
+      status?: string;
+      role?: string;
+      novaSenha?: string;
+    };
 
     await connectDB();
 
     const atualizacao: Record<string, string> = {};
-    if (status && ["ativo", "suspenso", "pendente"].includes(status)) {
-      atualizacao.status = status;
+
+    if (body.name?.trim()) atualizacao.name = body.name.trim();
+
+    if (body.email?.trim()) {
+      const emailLower = body.email.trim().toLowerCase();
+      const jaExiste = await User.findOne({ email: emailLower, _id: { $ne: params.id } });
+      if (jaExiste) {
+        return NextResponse.json({ error: "E-mail já está em uso por outro usuário." }, { status: 409 });
+      }
+      atualizacao.email = emailLower;
     }
-    if (role && ["profissional", "empresa", "admin"].includes(role)) {
-      atualizacao.role = role;
+
+    if (body.status && ["ativo", "suspenso", "pendente"].includes(body.status)) {
+      atualizacao.status = body.status;
+    }
+
+    if (body.role && ["profissional", "empresa", "admin"].includes(body.role)) {
+      atualizacao.role = body.role;
+    }
+
+    if (body.novaSenha && body.novaSenha.length >= 6) {
+      atualizacao.password = await bcrypt.hash(body.novaSenha, 10);
     }
 
     const usuario = await User.findByIdAndUpdate(
