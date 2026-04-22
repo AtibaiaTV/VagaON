@@ -52,17 +52,19 @@ export default async function VagasPage() {
     isEmpresa = true;
     const empresa = await Empresa.findOne({ userId: session.user.id });
     if (empresa) {
-      vagas = await Vaga.find({ empresaId: empresa._id })
+      const raw = await Vaga.find({ empresaId: empresa._id })
         .sort({ createdAt: -1 })
         .populate("empresaId", "nomeFantasia cidade estado")
-        .lean() as unknown as VagaPopulada[];
+        .lean();
+      vagas = JSON.parse(JSON.stringify(raw));
     }
   } else {
-    vagas = await Vaga.find({ status: "ativa", aprovadaPorAdmin: true })
+    const raw = await Vaga.find({ status: "ativa", aprovadaPorAdmin: true })
       .sort({ createdAt: -1 })
       .limit(20)
       .populate("empresaId", "nomeFantasia cidade estado")
-      .lean() as unknown as VagaPopulada[];
+      .lean();
+    vagas = JSON.parse(JSON.stringify(raw));
   }
 
   return (
