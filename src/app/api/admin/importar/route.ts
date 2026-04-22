@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { MongoClient, ObjectId } from "mongodb";
@@ -114,7 +114,7 @@ function parseCSV(text: string): Record<string, string>[] {
 
 // ── POST /api/admin/importar ──────────────────────────────────────────────────
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const session = await auth();
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
@@ -147,46 +147,64 @@ export async function POST(req: NextRequest) {
       try {
         const emailBase = r.email || `${slugify(r.nomeFantasia)}@import.vagaon.com.br`;
         const email = emailBase.toLowerCase();
+        const titulo = r.tituloVaga || "Vaga em aberto";
 
-        const existente = await users.findOne({ email });
-        if (existente) {
-          resultados.push({ nome: r.nomeFantasia, status: "pulado", detalhe: "e-mail já cadastrado" });
+        let empresaId: ObjectId;
+        let empresaNova = false;
+
+        const userExistente = await users.findOne({ email });
+        if (userExistente) {
+          // Empresa já existe — reutiliza o empresaId
+          const empresaExistente = await empresas.findOne({ userId: userExistente._id });
+          if (!empresaExistente) {
+            resultados.push({ nome: r.nomeFantasia, status: "erro", detalhe: "empresa não encontrada para o usuário existente" });
+            continue;
+          }
+          empresaId = empresaExistente._id as ObjectId;
+        } else {
+          // Cria usuário + empresa novos
+          const userId = new ObjectId();
+          empresaId = new ObjectId();
+          empresaNova = true;
+
+          await users.insertOne({
+            _id: userId, name: r.nomeFantasia, email,
+            emailVerified: null, image: null, password: senhaHash,
+            role: "empresa", profileId: empresaId, status: "ativo",
+            createdAt: new Date(), updatedAt: new Date(),
+          });
+
+          await empresas.insertOne({
+            _id: empresaId, userId,
+            nomeFantasia: r.nomeFantasia,
+            razaoSocial:  r.razaoSocial  || "",
+            cnpj:         r.cnpj         || "",
+            telefone:     r.telefone     || "",
+            email:        r.email        || "",
+            website:      r.site         || null,
+            logo:         null,
+            setor:        mapSetor(r.classificacao),
+            descricao:    r.descricao    || "",
+            cidade:       r.cidade       || "Atibaia",
+            estado:       r.estado       || "SP",
+            cep:          r.cep          || "",
+            endereco:     r.endereco     || "",
+            verificada:   false,
+            documentos:   [],
+            createdAt: new Date(), updatedAt: new Date(),
+          });
+        }
+
+        // Verifica se a vaga com mesmo título já existe para esta empresa
+        const vagaExistente = await vagas.findOne({ empresaId, titulo });
+        if (vagaExistente) {
+          resultados.push({ nome: titulo, status: "pulado", detalhe: "vaga já cadastrada" });
           continue;
         }
 
-        const userId    = new ObjectId();
-        const empresaId = new ObjectId();
-
-        await users.insertOne({
-          _id: userId, name: r.nomeFantasia, email,
-          emailVerified: null, image: null, password: senhaHash,
-          role: "empresa", profileId: empresaId, status: "ativo",
-          createdAt: new Date(), updatedAt: new Date(),
-        });
-
-        await empresas.insertOne({
-          _id: empresaId, userId,
-          nomeFantasia: r.nomeFantasia,
-          razaoSocial:  r.razaoSocial  || "",
-          cnpj:         r.cnpj         || "",
-          telefone:     r.telefone     || "",
-          email:        r.email        || "",
-          website:      r.site         || null,
-          logo:         null,
-          setor:        mapSetor(r.classificacao),
-          descricao:    r.descricao    || "",
-          cidade:       r.cidade       || "Atibaia",
-          estado:       r.estado       || "SP",
-          cep:          r.cep          || "",
-          endereco:     r.endereco     || "",
-          verificada:   false,
-          documentos:   [],
-          createdAt: new Date(), updatedAt: new Date(),
-        });
-
         await vagas.insertOne({
           _id: new ObjectId(), empresaId,
-          titulo:        r.tituloVaga    || "Vaga em aberto",
+          titulo,
           descricao:     r.descricaoVaga || "",
           requisitos:    r.requisitos    || "",
           tipo:          mapTipo(r.tipoContrato),
@@ -205,7 +223,11 @@ export async function POST(req: NextRequest) {
           createdAt: new Date(), updatedAt: new Date(),
         });
 
-        resultados.push({ nome: r.nomeFantasia, status: "criado", detalhe: email });
+        resultados.push({
+          nome: titulo,
+          status: "criado",
+          detalhe: empresaNova ? `nova empresa: ${email}` : `empresa existente: ${r.nomeFantasia}`,
+        });
       } catch (err: unknown) {
         resultados.push({
           nome: r.nomeFantasia,
