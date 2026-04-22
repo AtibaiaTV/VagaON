@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
-import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload, Trash2 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/admin/empresas", label: "Empresas", icon: Building2 },
   { href: "/admin/vagas", label: "Vagas", icon: Briefcase },
   { href: "/admin/importar", label: "Importar CSV", icon: Upload },
+  { href: "/admin/excluir-vagas", label: "Excluir Vagas", icon: Trash2 },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
