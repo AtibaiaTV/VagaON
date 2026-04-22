@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, UserCheck, UserX, ShieldCheck, FileText } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Search, UserCheck, UserX, ShieldCheck, FileText, Pencil, X, Loader2 } from "lucide-react";
 import CurriculumModal from "@/components/admin/CurriculumModal";
 
 interface Usuario {
@@ -15,6 +16,14 @@ interface Usuario {
   role: string;
   status: string;
   createdAt: string;
+}
+
+interface FormEdicao {
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  novaSenha: string;
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -36,14 +45,45 @@ export default function AdminUsuariosPage() {
   const [atualizando, setAtualizando] = useState<string | null>(null);
   const [curriculumAberto, setCurriculumAberto] = useState<{ id: string; nome: string } | null>(null);
 
+  // Modal de edição
+  const [editando, setEditando] = useState<Usuario | null>(null);
+  const [form, setForm] = useState<FormEdicao>({ name: "", email: "", role: "", status: "", novaSenha: "" });
+  const [erroEdicao, setErroEdicao] = useState<string | null>(null);
+  const [salvando, setSalvando] = useState(false);
+
   useEffect(() => {
     fetch("/api/admin/usuarios")
       .then((r) => r.json())
-      .then((data) => {
-        setUsuarios(data);
-        setCarregando(false);
-      });
+      .then((data) => { setUsuarios(data); setCarregando(false); });
   }, []);
+
+  function abrirEdicao(u: Usuario) {
+    setEditando(u);
+    setForm({ name: u.name, email: u.email, role: u.role, status: u.status, novaSenha: "" });
+    setErroEdicao(null);
+  }
+
+  async function salvarEdicao() {
+    if (!editando) return;
+    setSalvando(true);
+    setErroEdicao(null);
+    try {
+      const res = await fetch(`/api/admin/usuarios/${editando._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      if (!res.ok) { setErroEdicao(json.error ?? "Erro ao salvar."); return; }
+      setUsuarios((prev) => prev.map((u) => u._id === editando._id
+        ? { ...u, name: json.name, email: json.email, role: json.role, status: json.status }
+        : u
+      ));
+      setEditando(null);
+    } finally {
+      setSalvando(false);
+    }
+  }
 
   async function atualizarStatus(id: string, status: string) {
     setAtualizando(id);
@@ -54,9 +94,7 @@ export default function AdminUsuariosPage() {
     });
     if (res.ok) {
       const atualizado = await res.json();
-      setUsuarios((prev) =>
-        prev.map((u) => (u._id === id ? { ...u, status: atualizado.status } : u))
-      );
+      setUsuarios((prev) => prev.map((u) => u._id === id ? { ...u, status: atualizado.status } : u));
     }
     setAtualizando(null);
   }
@@ -71,9 +109,7 @@ export default function AdminUsuariosPage() {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Usuários</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Gerencie todos os usuários da plataforma.
-        </p>
+        <p className="text-muted-foreground text-sm mt-1">Gerencie todos os usuários da plataforma.</p>
       </div>
 
       <Card>
@@ -94,13 +130,9 @@ export default function AdminUsuariosPage() {
         </CardHeader>
         <CardContent>
           {carregando ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Carregando...
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-8">Carregando...</p>
           ) : filtrados.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Nenhum usuário encontrado.
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-8">Nenhum usuário encontrado.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -121,18 +153,12 @@ export default function AdminUsuariosPage() {
                       <td className="py-3 pr-4 text-muted-foreground">{u.email}</td>
                       <td className="py-3 pr-4">
                         <span className="flex items-center gap-1">
-                          {u.role === "admin" && (
-                            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                          )}
+                          {u.role === "admin" && <ShieldCheck className="h-3.5 w-3.5 text-primary" />}
                           {ROLE_LABEL[u.role] ?? u.role}
                         </span>
                       </td>
                       <td className="py-3 pr-4">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            STATUS_BADGE[u.status] ?? "bg-gray-100 text-gray-600"
-                          }`}
-                        >
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[u.status] ?? "bg-gray-100 text-gray-600"}`}>
                           {u.status}
                         </span>
                       </td>
@@ -141,40 +167,36 @@ export default function AdminUsuariosPage() {
                       </td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Botão Ver Curriculum — apenas para profissionais */}
                           {u.role === "profissional" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
+                            <Button size="sm" variant="outline"
                               className="h-7 text-xs gap-1 text-[#1a5c38] border-[#c6e9d9] hover:bg-[#f0faf5]"
                               onClick={() => setCurriculumAberto({ id: u._id, nome: u.name })}
                             >
-                              <FileText className="h-3 w-3" />
-                              Ver Curriculum
+                              <FileText className="h-3 w-3" />Curriculum
                             </Button>
                           )}
+                          <Button size="sm" variant="outline"
+                            className="h-7 text-xs gap-1"
+                            onClick={() => abrirEdicao(u)}
+                          >
+                            <Pencil className="h-3 w-3" />Editar
+                          </Button>
                           {u.status !== "ativo" && u.role !== "admin" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
+                            <Button size="sm" variant="outline"
                               className="h-7 text-xs gap-1 text-green-700 border-green-200 hover:bg-green-50"
                               disabled={atualizando === u._id}
                               onClick={() => atualizarStatus(u._id, "ativo")}
                             >
-                              <UserCheck className="h-3 w-3" />
-                              Ativar
+                              <UserCheck className="h-3 w-3" />Ativar
                             </Button>
                           )}
                           {u.status !== "suspenso" && u.role !== "admin" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
+                            <Button size="sm" variant="outline"
                               className="h-7 text-xs gap-1 text-red-700 border-red-200 hover:bg-red-50"
                               disabled={atualizando === u._id}
                               onClick={() => atualizarStatus(u._id, "suspenso")}
                             >
-                              <UserX className="h-3 w-3" />
-                              Suspender
+                              <UserX className="h-3 w-3" />Suspender
                             </Button>
                           )}
                         </div>
@@ -187,6 +209,86 @@ export default function AdminUsuariosPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ── Modal de edição ─────────────────────────────────── */}
+      {editando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h2 className="font-semibold">Editar usuário</h2>
+              <button onClick={() => setEditando(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Campos */}
+            <div className="px-6 py-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-name">Nome</Label>
+                <Input id="edit-name" value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-email">E-mail</Label>
+                <Input id="edit-email" type="email" value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-role">Perfil</Label>
+                  <select id="edit-role" value={form.role}
+                    onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+                    className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="profissional">Profissional</option>
+                    <option value="empresa">Empresa</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-status">Status</Label>
+                  <select id="edit-status" value={form.status}
+                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+                    className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="ativo">Ativo</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="suspenso">Suspenso</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-senha">Nova senha <span className="text-muted-foreground font-normal">(deixe em branco para não alterar)</span></Label>
+                <Input id="edit-senha" type="password" placeholder="Mínimo 6 caracteres"
+                  value={form.novaSenha}
+                  onChange={(e) => setForm((f) => ({ ...f, novaSenha: e.target.value }))} />
+              </div>
+
+              {erroEdicao && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {erroEdicao}
+                </p>
+              )}
+            </div>
+
+            {/* Rodapé */}
+            <div className="flex justify-end gap-3 px-6 py-4 border-t bg-muted/30 rounded-b-xl">
+              <Button variant="outline" onClick={() => setEditando(null)} disabled={salvando}>
+                Cancelar
+              </Button>
+              <Button onClick={salvarEdicao} disabled={salvando} className="gap-2">
+                {salvando && <Loader2 className="h-4 w-4 animate-spin" />}
+                Salvar alterações
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Curriculum */}
       {curriculumAberto && (
