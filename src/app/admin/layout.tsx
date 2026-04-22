@@ -4,13 +4,14 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
-import { LayoutDashboard, Users, Building2, Briefcase, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/empresas", label: "Empresas", icon: Building2 },
   { href: "/admin/vagas", label: "Vagas", icon: Briefcase },
+  { href: "/admin/importar", label: "Importar CSV", icon: Upload },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
