@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IEmpresa extends Document {
   userId: mongoose.Types.ObjectId;
+  redesaId?: string;
   nomeFantasia: string;
   razaoSocial: string;
   cnpj: string;
@@ -24,6 +25,7 @@ export interface IEmpresa extends Document {
 const EmpresaSchema = new Schema<IEmpresa>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+    redesaId: { type: String, index: true, sparse: true },
     nomeFantasia: { type: String, required: true },
     razaoSocial: { type: String, default: "" },
     cnpj: { type: String, default: "" },
