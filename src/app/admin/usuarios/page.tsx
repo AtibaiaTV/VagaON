@@ -54,7 +54,8 @@ export default function AdminUsuariosPage() {
   useEffect(() => {
     fetch("/api/admin/usuarios")
       .then((r) => r.json())
-      .then((data) => { setUsuarios(data); setCarregando(false); });
+      .then((data) => { setUsuarios(Array.isArray(data) ? data : []); setCarregando(false); })
+      .catch(() => setCarregando(false));
   }, []);
 
   function abrirEdicao(u: Usuario) {
