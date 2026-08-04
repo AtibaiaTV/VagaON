@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Clock, Plus, ArrowLeft, Briefcase } from "lucide-react";
+import { MapPin, Clock, Plus, Briefcase } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import VagasListaPublica from "@/components/vagas/VagasListaPublica";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
@@ -58,13 +59,6 @@ export default async function VagasPage() {
         .lean();
       vagas = JSON.parse(JSON.stringify(raw));
     }
-  } else {
-    const raw = await Vaga.find({ status: "ativa", aprovadaPorAdmin: true })
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .populate("empresaId", "nomeFantasia cidade estado")
-      .lean();
-    vagas = JSON.parse(JSON.stringify(raw));
   }
 
   return (
@@ -95,50 +89,43 @@ export default async function VagasPage() {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {vagas.length === 0 ? (
-          <div className="text-center py-16">
-            <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-lg font-semibold mb-2">
-              {isEmpresa ? "Você ainda não publicou vagas" : "Nenhuma vaga disponível"}
-            </h2>
-            {isEmpresa && (
+        {/* Vista Empresa: lista próprias vagas */}
+        {isEmpresa && (
+          vagas.length === 0 ? (
+            <div className="text-center py-16">
+              <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-lg font-semibold mb-2">Você ainda não publicou vagas</h2>
               <Link href="/vagas/nova">
                 <Button className="mt-4">Publicar primeira vaga</Button>
               </Link>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {vagas.map((vaga) => (
-              <Link key={vaga._id} href={`/vagas/${vaga._id}`}>
-                <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-                  <CardContent className="pt-5">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h3 className="font-semibold leading-tight">{vaga.titulo}</h3>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${TIPO_COR[vaga.tipo]}`}>
-                        {TIPO_LABEL[vaga.tipo]}
-                      </span>
-                    </div>
-
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {vaga.empresaId?.nomeFantasia}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <Badge variant="secondary" className="text-xs">
-                        {ESPECIALIDADES.find((e) => e.value === vaga.especialidade)?.label ?? vaga.especialidade}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {vaga.cidade}, {vaga.estado}
-                      </span>
-                      <span>{formatarSalario(vaga.salario)}</span>
-                    </div>
-
-                    {isEmpresa && (
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {vagas.map((vaga) => (
+                <Link key={vaga._id} href={`/vagas/${vaga._id}`}>
+                  <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+                    <CardContent className="pt-5">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <h3 className="font-semibold leading-tight">{vaga.titulo}</h3>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${TIPO_COR[vaga.tipo]}`}>
+                          {TIPO_LABEL[vaga.tipo]}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {vaga.empresaId?.nomeFantasia}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <Badge variant="secondary" className="text-xs">
+                          {ESPECIALIDADES.find((e) => e.value === vaga.especialidade)?.label ?? vaga.especialidade}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {vaga.cidade}, {vaga.estado}
+                        </span>
+                        <span>{formatarSalario(vaga.salario)}</span>
+                      </div>
                       <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
                         <span className={`font-medium ${vaga.status === "ativa" ? "text-green-600" : "text-muted-foreground"}`}>
                           {vaga.status === "ativa" ? "Ativa" : vaga.status}
@@ -148,13 +135,16 @@ export default async function VagasPage() {
                           {vaga.totalCandidaturas} candidatura(s)
                         </span>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )
         )}
+
+        {/* Vista Pública / Profissional: filtros + lista via API */}
+        {!isEmpresa && <VagasListaPublica />}
       </main>
       <Footer />
     </div>

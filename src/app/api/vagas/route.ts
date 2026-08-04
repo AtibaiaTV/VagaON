@@ -3,6 +3,13 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
+import { ESPECIALIDADES } from "@/constants/especialidades";
+
+const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
+  gastronomia: ["cozinha", "bar", "salao"],
+  hotelaria: ["hospedagem", "governanca", "lazer_hospede", "transporte"],
+  eventos: ["eventos_catering", "audiovisual", "beleza", "decoracao", "entretenimento"],
+};
 
 // GET /api/vagas — busca pública de vagas com filtros
 export async function GET(req: NextRequest) {
@@ -14,6 +21,8 @@ export async function GET(req: NextRequest) {
     const especialidade = searchParams.get("especialidade");
     const tipo = searchParams.get("tipo");
     const empresaId = searchParams.get("empresaId");
+    const cidade = searchParams.get("cidade");
+    const superCategoria = searchParams.get("superCategoria");
     const pagina = parseInt(searchParams.get("pagina") ?? "1");
     const limite = 12;
 
@@ -22,6 +31,12 @@ export async function GET(req: NextRequest) {
     if (estado) filtro.estado = estado;
     if (especialidade) filtro.especialidade = especialidade;
     if (tipo) filtro.tipo = tipo;
+    if (cidade) filtro.cidade = { $regex: new RegExp(cidade.trim(), "i") };
+    if (superCategoria && SUPER_CATEGORIAS_MAP[superCategoria]) {
+      const cats = SUPER_CATEGORIAS_MAP[superCategoria];
+      const vals = ESPECIALIDADES.filter((e) => cats.includes(e.categoria)).map((e) => e.value);
+      if (vals.length > 0) filtro.especialidade = { $in: vals };
+    }
     if (empresaId) {
       // Empresa vendo suas próprias vagas (sem filtro de status)
       delete filtro.status;

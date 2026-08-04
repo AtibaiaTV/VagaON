@@ -5,6 +5,8 @@ import Candidatura from "@/models/Candidatura";
 import Vaga from "@/models/Vaga";
 import Profissional from "@/models/Profissional";
 import Empresa from "@/models/Empresa";
+import User from "@/models/User";
+import { notifyRedesaCandidatura } from "@/lib/redesa-webhook";
 
 // GET — empresa lista candidatos da vaga
 export async function GET(
@@ -86,6 +88,22 @@ export async function POST(
 
     // Incrementa contador de candidaturas na vaga
     await Vaga.findByIdAndUpdate(params.id, { $inc: { totalCandidaturas: 1 } });
+
+    // Notifica a Redesa se a vaga veio de lá (fire-and-forget)
+    const empresa = await Empresa.findById(vaga.empresaId).lean();
+    if (empresa?.redesaId) {
+      const user = await User.findById(profissional.userId).lean();
+      void notifyRedesaCandidatura({
+        vagaonId: vaga._id.toString(),
+        vagaonCandidaturaId: candidatura._id.toString(),
+        nome: profissional.nomeCompleto,
+        email: user?.email || undefined,
+        telefone: profissional.telefone || undefined,
+        linkedin: profissional.linkedinUrl || undefined,
+        curriculoUrl: profissional.curriculoUrl || undefined,
+        mensagem: mensagem ?? undefined,
+      });
+    }
 
     return NextResponse.json(candidatura, { status: 201 });
   } catch (err: unknown) {
