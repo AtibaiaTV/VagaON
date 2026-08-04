@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
     const empresaId = searchParams.get("empresaId");
     const cidade = searchParams.get("cidade");
     const superCategoria = searchParams.get("superCategoria");
+    const busca = searchParams.get("busca");
     const pagina = parseInt(searchParams.get("pagina") ?? "1");
     const limite = 12;
 
@@ -32,6 +33,7 @@ export async function GET(req: NextRequest) {
     if (especialidade) filtro.especialidade = especialidade;
     if (tipo) filtro.tipo = tipo;
     if (cidade) filtro.cidade = { $regex: new RegExp(cidade.trim(), "i") };
+    if (busca) filtro.titulo = { $regex: new RegExp(busca.trim(), "i") };
     if (superCategoria && SUPER_CATEGORIAS_MAP[superCategoria]) {
       const cats = SUPER_CATEGORIAS_MAP[superCategoria];
       const vals = ESPECIALIDADES.filter((e) => cats.includes(e.categoria)).map((e) => e.value);
