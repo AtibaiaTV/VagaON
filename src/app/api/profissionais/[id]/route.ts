@@ -58,6 +58,7 @@ export async function PUT(
       "cidade", "estado", "cep", "dispostoViajar",
       "especialidades", "resumoProfissional", "habilidades",
       "disponibilidade", "experiencias",
+      "linkedinUrl", "curriculoUrl",
     ];
 
     const atualizacao: Record<string, unknown> = {};

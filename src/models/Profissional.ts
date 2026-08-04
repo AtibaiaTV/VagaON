@@ -31,6 +31,8 @@ export interface IProfissional extends Document {
   };
   experiencias: IExperiencia[];
   habilidades: string[];
+  linkedinUrl: string | null;
+  curriculoUrl: string | null;
   completude: number;
   createdAt: Date;
   updatedAt: Date;
@@ -67,6 +69,8 @@ const ProfissionalSchema = new Schema<IProfissional>(
     },
     experiencias: [ExperienciaSchema],
     habilidades: [{ type: String }],
+    linkedinUrl: { type: String, default: null },
+    curriculoUrl: { type: String, default: null },
     completude: { type: Number, default: 0, min: 0, max: 100 },
   },
   { timestamps: true }

@@ -51,6 +51,8 @@ export default function FormProfissional({ profileId, dados }: Props) {
     cep: (dados?.cep as string) ?? "",
     dispostoViajar: (dados?.dispostoViajar as boolean) ?? false,
     resumoProfissional: (dados?.resumoProfissional as string) ?? "",
+    linkedinUrl: (dados?.linkedinUrl as string) ?? "",
+    curriculoUrl: (dados?.curriculoUrl as string) ?? "",
   });
 
   const [especialidades, setEspecialidades] = useState<string[]>(
@@ -322,6 +324,29 @@ export default function FormProfissional({ profileId, dados }: Props) {
                 />
                 <p className="text-xs text-muted-foreground text-right">
                   {pessoal.resumoProfissional.length}/500
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="linkedinUrl">LinkedIn</Label>
+                <Input
+                  id="linkedinUrl"
+                  type="url"
+                  value={pessoal.linkedinUrl}
+                  onChange={(e) => setPessoal((p) => ({ ...p, linkedinUrl: e.target.value }))}
+                  placeholder="https://linkedin.com/in/seuperfil"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="curriculoUrl">Currículo (link)</Label>
+                <Input
+                  id="curriculoUrl"
+                  type="url"
+                  value={pessoal.curriculoUrl}
+                  onChange={(e) => setPessoal((p) => ({ ...p, curriculoUrl: e.target.value }))}
+                  placeholder="https://drive.google.com/... ou similar"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Cole o link público do seu currículo (Google Drive, Dropbox, etc.)
                 </p>
               </div>
               <div className="flex items-center gap-2">
