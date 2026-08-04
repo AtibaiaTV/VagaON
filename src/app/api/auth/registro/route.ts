@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Profissional from "@/models/Profissional";
 import Empresa from "@/models/Empresa";
+import { notifyRedesaTalento } from "@/lib/redesa-webhook";
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,6 +61,13 @@ export async function POST(req: NextRequest) {
         habilidades: [],
       });
       await User.findByIdAndUpdate(novoUsuario._id, { profileId: perfil._id });
+
+      // Notifica o banco de talentos da Redesa (fire-and-forget)
+      void notifyRedesaTalento({
+        vagaonCandidatoId: perfil._id.toString(),
+        nome,
+        email: email.toLowerCase(),
+      });
     } else if (role === "empresa") {
       const perfil = await Empresa.create({
         userId: novoUsuario._id,
