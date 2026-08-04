@@ -55,6 +55,8 @@ export default function VagasListaPublica() {
   const [tipo, setTipo] = useState("");
   const [cidade, setCidade] = useState("");
   const [cidadeInput, setCidadeInput] = useState("");
+  const [busca, setBusca] = useState("");
+  const [buscaInput, setBuscaInput] = useState("");
   const [vagas, setVagas] = useState<VagaCard[]>([]);
   const [total, setTotal] = useState(0);
   const [pagina, setPagina] = useState(1);
@@ -68,6 +70,7 @@ export default function VagasListaPublica() {
     if (superCategoria) params.set("superCategoria", superCategoria);
     if (tipo) params.set("tipo", tipo);
     if (cidade) params.set("cidade", cidade);
+    if (busca) params.set("busca", busca);
     params.set("pagina", pagina.toString());
 
     try {
@@ -81,7 +84,7 @@ export default function VagasListaPublica() {
     } finally {
       setLoading(false);
     }
-  }, [superCategoria, tipo, cidade, pagina]);
+  }, [superCategoria, tipo, cidade, busca, pagina]);
 
   useEffect(() => {
     fetchVagas();
@@ -102,6 +105,15 @@ export default function VagasListaPublica() {
   function limparCidade() {
     setCidadeInput("");
     setCidade("");
+    setPagina(1);
+  }
+  function aplicarBusca() {
+    setBusca(buscaInput.trim());
+    setPagina(1);
+  }
+  function limparBusca() {
+    setBuscaInput("");
+    setBusca("");
     setPagina(1);
   }
 
@@ -136,12 +148,44 @@ export default function VagasListaPublica() {
     }
   }
 
-  const filtroAtivo = superCategoria || tipo || cidade;
+  const filtroAtivo = superCategoria || tipo || cidade || busca;
 
   return (
     <div className="space-y-6">
       {/* Barra de filtros */}
       <div className="bg-white rounded-xl border border-border/60 p-4 space-y-4 shadow-sm">
+
+        {/* Busca por cargo / título */}
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Cargo</p>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                value={buscaInput}
+                onChange={(e) => setBuscaInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && aplicarBusca()}
+                placeholder="Ex: Recepcionista, Chef, Garçom..."
+                className="pl-8 pr-8"
+              />
+              {buscaInput && (
+                <button
+                  onClick={limparBusca}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-lg leading-none"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            <button
+              onClick={aplicarBusca}
+              disabled={!buscaInput}
+              className="px-3 py-2 rounded-md bg-primary text-white text-sm font-medium disabled:opacity-40 hover:bg-primary/90 transition-colors"
+            >
+              Buscar
+            </button>
+          </div>
+        </div>
 
         {/* Categoria */}
         <div>
@@ -233,6 +277,12 @@ export default function VagasListaPublica() {
         {filtroAtivo && (
           <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/50">
             <span className="text-xs text-muted-foreground">Filtros:</span>
+            {busca && (
+              <span className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                🔍 {busca}
+                <button onClick={limparBusca} className="hover:opacity-70">×</button>
+              </span>
+            )}
             {superCategoria && (
               <span className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
                 {SUPER_CATS.find((c) => c.value === superCategoria)?.label}
@@ -252,7 +302,7 @@ export default function VagasListaPublica() {
               </span>
             )}
             <button
-              onClick={() => { setSuperCategoria(""); setTipo(""); limparCidade(); }}
+              onClick={() => { setSuperCategoria(""); setTipo(""); limparCidade(); limparBusca(); }}
               className="text-xs text-muted-foreground hover:text-foreground underline ml-auto"
             >
               Limpar tudo

@@ -54,7 +54,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const vaga = await Vaga.create({ ...body, empresaId: empresa._id });
+    // status e aprovadaPorAdmin sempre forçados — vagas da Redesa são confiáveis
+    const vaga = await Vaga.create({
+      ...body,
+      empresaId: empresa._id,
+      status: "ativa",
+      aprovadaPorAdmin: true,
+    });
 
     return NextResponse.json(vaga, { status: 201 });
   } catch (err) {
