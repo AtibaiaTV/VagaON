@@ -98,7 +98,7 @@ export default function VagasListaPublica() {
       try {
         const res = await fetch(`/api/vagas?busca=${encodeURIComponent(buscaInput.trim())}`);
         const data = await res.json();
-        const titulos = [...new Set<string>((data.vagas ?? []).map((v: VagaCard) => v.titulo))].slice(0, 6);
+        const titulos = Array.from(new Set<string>((data.vagas ?? []).map((v: VagaCard) => v.titulo))).slice(0, 6);
         setSugestoes(titulos);
         setShowSugestoes(titulos.length > 0);
       } catch {
