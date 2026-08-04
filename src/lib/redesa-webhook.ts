@@ -11,17 +11,29 @@ interface RedesaCandidaturaPayload {
   curriculoUrl?: string;
 }
 
-export async function notifyRedesaCandidatura(data: RedesaCandidaturaPayload): Promise<void> {
+interface RedesaTalentoPayload {
+  vagaonCandidatoId: string;
+  nome: string;
+  email?: string;
+  telefone?: string;
+  linkedin?: string;
+  mensagem?: string;
+  curriculoUrl?: string;
+  categoria?: string;
+  cidade?: string;
+  estado?: string;
+}
+
+function makeToken(): string {
   const secret = process.env.CROSS_PLATFORM_SECRET;
-  if (!secret) {
-    console.error("[Redesa webhook] CROSS_PLATFORM_SECRET não configurado");
-    return;
-  }
+  if (!secret) throw new Error("CROSS_PLATFORM_SECRET não configurado");
+  return jwt.sign({ type: "cross-platform" }, secret, { expiresIn: "5m" });
+}
 
-  const token = jwt.sign({ type: "cross-platform" }, secret, { expiresIn: "5m" });
-
+async function postWebhook(url: string, data: unknown, label: string): Promise<void> {
   try {
-    const res = await fetch("https://api.redesa.com.br/v1/webhooks/vagaon/candidaturas", {
+    const token = makeToken();
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -29,12 +41,27 @@ export async function notifyRedesaCandidatura(data: RedesaCandidaturaPayload): P
       },
       body: JSON.stringify(data),
     });
-
     if (!res.ok) {
       const body = await res.text();
-      console.error(`[Redesa webhook] Falhou com status ${res.status}: ${body}`);
+      console.error(`[Redesa webhook/${label}] Falhou com status ${res.status}: ${body}`);
     }
   } catch (err) {
-    console.error("[Redesa webhook] Erro ao notificar candidatura:", err);
+    console.error(`[Redesa webhook/${label}] Erro:`, err);
   }
+}
+
+export async function notifyRedesaCandidatura(data: RedesaCandidaturaPayload): Promise<void> {
+  await postWebhook(
+    "https://api.redesa.com.br/v1/webhooks/vagaon/candidaturas",
+    data,
+    "candidaturas"
+  );
+}
+
+export async function notifyRedesaTalento(data: RedesaTalentoPayload): Promise<void> {
+  await postWebhook(
+    "https://api.redesa.com.br/v1/webhooks/vagaon/talentos",
+    data,
+    "talentos"
+  );
 }
