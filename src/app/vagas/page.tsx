@@ -11,6 +11,7 @@ import { MapPin, Clock, Plus, Briefcase } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import VagasListaPublica from "@/components/vagas/VagasListaPublica";
+import BrandBand from "@/components/shared/BrandBand";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
@@ -66,9 +67,7 @@ export default async function VagasPage() {
       <Navbar />
 
       {/* Hero da página */}
-      <div style={{ backgroundColor: isEmpresa ? "#143f28" : "#1a5c38" }} className="relative overflow-hidden py-10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+      <BrandBand color={isEmpresa ? "darker" : "dark"} className="py-10">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">
@@ -86,7 +85,7 @@ export default async function VagasPage() {
             </Link>
           )}
         </div>
-      </div>
+      </BrandBand>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Vista Empresa: lista próprias vagas */}

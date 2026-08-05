@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import Logo from "@/components/layout/Logo";
+import BrandBand from "@/components/shared/BrandBand";
 
 const beneficios = [
   "Publicação gratuita de vagas",
@@ -50,18 +51,7 @@ export default function CadastroEmpresaPage() {
     <div className="min-h-screen grid lg:grid-cols-2">
 
       {/* Lado esquerdo — verde */}
-      <div
-        className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden"
-        style={{ backgroundColor: "#143f28" }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.06]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-
+      <BrandBand color="darker" dots circles={false} className="hidden lg:flex flex-col justify-between p-12">
         <div className="relative">
           <Logo size="md" variant="white" />
         </div>
@@ -92,7 +82,7 @@ export default function CadastroEmpresaPage() {
             <p className="text-white/50 text-xs">Gastronomia, Hotelaria e Eventos</p>
           </div>
         </div>
-      </div>
+      </BrandBand>
 
       {/* Lado direito — formulário */}
       <div className="flex items-center justify-center px-6 py-12 bg-[#f4f7f5]">
@@ -104,49 +94,51 @@ export default function CadastroEmpresaPage() {
           </div>
 
           {/* Cabeçalho */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-foreground">Cadastro de Empresa</h1>
             <p className="text-muted-foreground text-sm mt-1">
               Publique vagas e encontre os melhores profissionais.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {erro && (
-              <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-                {erro}
+          <div className="bg-white rounded-2xl border border-border/40 shadow-sm p-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {erro && (
+                <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+                  {erro}
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <Label htmlFor="nomeFantasia" className="text-sm font-medium">Nome da empresa</Label>
+                <Input id="nomeFantasia" name="nomeFantasia" placeholder="Ex: Restaurante Sabor & Arte" value={form.nomeFantasia} onChange={handleChange} required className="h-11 bg-white" />
               </div>
-            )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="nomeFantasia" className="text-sm font-medium">Nome da empresa</Label>
-              <Input id="nomeFantasia" name="nomeFantasia" placeholder="Ex: Restaurante Sabor & Arte" value={form.nomeFantasia} onChange={handleChange} required className="h-11 bg-white" />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="nome" className="text-sm font-medium">Seu nome (responsável)</Label>
+                <Input id="nome" name="nome" placeholder="Nome do responsável" value={form.nome} onChange={handleChange} required className="h-11 bg-white" />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="nome" className="text-sm font-medium">Seu nome (responsável)</Label>
-              <Input id="nome" name="nome" placeholder="Nome do responsável" value={form.nome} onChange={handleChange} required className="h-11 bg-white" />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm font-medium">E-mail corporativo</Label>
+                <Input id="email" name="email" type="email" placeholder="contato@suaempresa.com" value={form.email} onChange={handleChange} required className="h-11 bg-white" />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">E-mail corporativo</Label>
-              <Input id="email" name="email" type="email" placeholder="contato@suaempresa.com" value={form.email} onChange={handleChange} required className="h-11 bg-white" />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
+                <Input id="senha" name="senha" type="password" placeholder="Mínimo 8 caracteres" value={form.senha} onChange={handleChange} required className="h-11 bg-white" />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
-              <Input id="senha" name="senha" type="password" placeholder="Mínimo 8 caracteres" value={form.senha} onChange={handleChange} required className="h-11 bg-white" />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmarSenha" className="text-sm font-medium">Confirmar senha</Label>
+                <Input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="Repita a senha" value={form.confirmarSenha} onChange={handleChange} required className="h-11 bg-white" />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmarSenha" className="text-sm font-medium">Confirmar senha</Label>
-              <Input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="Repita a senha" value={form.confirmarSenha} onChange={handleChange} required className="h-11 bg-white" />
-            </div>
-
-            <Button type="submit" className="w-full h-11 font-semibold text-base" disabled={carregando}>
-              {carregando ? "Criando conta..." : "Criar conta da empresa"}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full h-11 font-semibold text-base" disabled={carregando}>
+                {carregando ? "Criando conta..." : "Criar conta da empresa"}
+              </Button>
+            </form>
+          </div>
 
           <p className="text-xs text-muted-foreground text-center mt-4">
             Ao se cadastrar, você concorda com nossos{" "}
