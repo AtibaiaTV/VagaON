@@ -80,12 +80,15 @@ export async function PUT(
       { new: true }
     );
 
-    // Notifica o banco de talentos da Redesa com os dados atualizados
-    // (fire-and-forget) — mesmo vagaonCandidatoId do cadastro inicial,
-    // para que a Redesa atualize o registro em vez de duplicar.
+    // Notifica o banco de talentos da Redesa com os dados atualizados —
+    // mesmo vagaonCandidatoId do cadastro inicial, para que a Redesa
+    // atualize o registro em vez de duplicar. Aguardado (não fire-and-
+    // forget): funções serverless da Vercel encerram a execução assim que
+    // a resposta é enviada, então um `void` aqui corre risco de a chamada
+    // nunca completar.
     if (atualizado) {
       const user = await User.findById(atualizado.userId).lean();
-      void notifyRedesaTalento({
+      await notifyRedesaTalento({
         vagaonCandidatoId: atualizado._id.toString(),
         nome: atualizado.nomeCompleto,
         email: user?.email || undefined,

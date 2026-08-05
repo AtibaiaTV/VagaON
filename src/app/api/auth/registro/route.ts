@@ -62,8 +62,10 @@ export async function POST(req: NextRequest) {
       });
       await User.findByIdAndUpdate(novoUsuario._id, { profileId: perfil._id });
 
-      // Notifica o banco de talentos da Redesa (fire-and-forget)
-      void notifyRedesaTalento({
+      // Notifica o banco de talentos da Redesa — aguardado, pois funções
+      // serverless da Vercel encerram a execução assim que a resposta é
+      // enviada, então um `void` aqui corre risco de nunca completar.
+      await notifyRedesaTalento({
         vagaonCandidatoId: perfil._id.toString(),
         nome,
         email: email.toLowerCase(),

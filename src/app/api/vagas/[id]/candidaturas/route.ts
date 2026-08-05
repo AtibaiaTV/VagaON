@@ -89,11 +89,13 @@ export async function POST(
     // Incrementa contador de candidaturas na vaga
     await Vaga.findByIdAndUpdate(params.id, { $inc: { totalCandidaturas: 1 } });
 
-    // Notifica a Redesa se a vaga veio de lá (fire-and-forget)
+    // Notifica a Redesa se a vaga veio de lá — aguardado, pois funções
+    // serverless da Vercel encerram a execução assim que a resposta é
+    // enviada, então um `void` aqui corre risco de nunca completar.
     const empresa = await Empresa.findById(vaga.empresaId).lean();
     if (empresa?.redesaId) {
       const user = await User.findById(profissional.userId).lean();
-      void notifyRedesaCandidatura({
+      await notifyRedesaCandidatura({
         vagaonId: vaga._id.toString(),
         vagaonCandidaturaId: candidatura._id.toString(),
         nome: profissional.nomeCompleto,
