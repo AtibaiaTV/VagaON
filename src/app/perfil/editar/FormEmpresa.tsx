@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SETORES } from "@/constants/setores";
 import { ESTADOS } from "@/constants/estados";
-import { Building2, ArrowLeft, CheckCircle } from "lucide-react";
+import { Building2, ArrowLeft, CheckCircle, Phone, MapPin } from "lucide-react";
+import BrandBand from "@/components/shared/BrandBand";
 
 interface Props {
   profileId: string;
@@ -73,17 +74,19 @@ export default function FormEmpresa({ profileId, dados }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
-      <div style={{ backgroundColor: "#143f28" }} className="py-8">
+      <BrandBand color="darker" className="py-8">
         <div className="max-w-2xl mx-auto px-4 flex items-center gap-3">
           <Link href="/painel" className="text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-white/80" />
+            <div className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
             <span className="font-semibold text-white">Perfil da Empresa</span>
           </div>
         </div>
-      </div>
+      </BrandBand>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         {sucesso && (
@@ -97,7 +100,12 @@ export default function FormEmpresa({ profileId, dados }: Props) {
           {/* Informações básicas */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Informações da empresa</CardTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Building2 className="h-4 w-4 text-primary" />
+                </div>
+                <CardTitle className="text-base">Informações da empresa</CardTitle>
+              </div>
               <CardDescription>Dados principais que aparecem nas suas vagas.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -171,7 +179,12 @@ export default function FormEmpresa({ profileId, dados }: Props) {
           {/* Contato */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Contato</CardTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Phone className="h-4 w-4 text-primary" />
+                </div>
+                <CardTitle className="text-base">Contato</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -213,7 +226,12 @@ export default function FormEmpresa({ profileId, dados }: Props) {
           {/* Localização */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Localização</CardTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <MapPin className="h-4 w-4 text-primary" />
+                </div>
+                <CardTitle className="text-base">Localização</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

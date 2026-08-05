@@ -1,24 +1,14 @@
 import Link from "next/link";
 import { ChefHat, Building2, ArrowRight } from "lucide-react";
 import Logo from "@/components/layout/Logo";
+import BrandBand from "@/components/shared/BrandBand";
 
 export default function CadastroPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
 
       {/* Lado esquerdo — verde */}
-      <div
-        className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden"
-        style={{ backgroundColor: "#1a5c38" }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.06]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-
+      <BrandBand color="dark" dots circles={false} className="hidden lg:flex flex-col justify-between p-12">
         <div className="relative">
           <Logo size="md" variant="white" />
         </div>
@@ -57,7 +47,7 @@ export default function CadastroPage() {
             <p className="text-white/50 text-xs">Gastronomia & Hotelaria</p>
           </div>
         </div>
-      </div>
+      </BrandBand>
 
       {/* Lado direito */}
       <div className="flex items-center justify-center px-6 py-12 bg-[#f4f7f5]">
@@ -81,7 +71,8 @@ export default function CadastroPage() {
 
             {/* Profissional */}
             <Link href="/cadastro/profissional">
-              <div className="group w-full bg-white hover:border-primary border-2 border-transparent rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all hover:shadow-md">
+              <div className="group relative w-full overflow-hidden bg-white hover:border-primary border-2 border-transparent rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all hover:shadow-md">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
                 <div className="w-12 h-12 rounded-xl bg-primary/10 group-hover:bg-primary/15 flex items-center justify-center shrink-0 transition-colors">
                   <ChefHat className="h-6 w-6 text-primary" />
                 </div>
@@ -97,7 +88,8 @@ export default function CadastroPage() {
 
             {/* Empresa */}
             <Link href="/cadastro/empresa">
-              <div className="group w-full bg-white hover:border-primary border-2 border-transparent rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all hover:shadow-md mt-3">
+              <div className="group relative w-full overflow-hidden bg-white hover:border-primary border-2 border-transparent rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all hover:shadow-md mt-3">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28]" />
                 <div className="w-12 h-12 rounded-xl bg-primary/10 group-hover:bg-primary/15 flex items-center justify-center shrink-0 transition-colors">
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>

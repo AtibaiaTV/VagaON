@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/layout/Logo";
+import BrandBand from "@/components/shared/BrandBand";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function EntrarPage() {
@@ -43,19 +44,7 @@ export default function EntrarPage() {
     <div className="min-h-screen grid lg:grid-cols-2">
 
       {/* Lado esquerdo — verde */}
-      <div
-        className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden"
-        style={{ backgroundColor: "#1a5c38" }}
-      >
-        {/* Padrão de pontos */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.06]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-
+      <BrandBand color="dark" dots circles={false} className="hidden lg:flex flex-col justify-between p-12">
         {/* Logo */}
         <div className="relative">
           <Logo size="md" variant="white" />
@@ -79,7 +68,7 @@ export default function EntrarPage() {
             <p className="text-white/50 text-xs">Gastronomia & Hotelaria</p>
           </div>
         </div>
-      </div>
+      </BrandBand>
 
       {/* Lado direito — formulário */}
       <div className="flex items-center justify-center px-6 py-12 bg-[#f4f7f5]">
@@ -91,7 +80,7 @@ export default function EntrarPage() {
           </div>
 
           {/* Cabeçalho */}
-          <div className="mb-8">
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-foreground">Bem-vindo de volta</h1>
             <p className="text-muted-foreground text-sm mt-1">
               Acesse sua conta para continuar.
@@ -99,56 +88,58 @@ export default function EntrarPage() {
           </div>
 
           {/* Formulário */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {erro && (
-              <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-                {erro}
-              </div>
-            )}
+          <div className="bg-white rounded-2xl border border-border/40 shadow-sm p-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {erro && (
+                <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+                  {erro}
+                </div>
+              )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="h-11 bg-white"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
-              <div className="relative">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
                 <Input
-                  id="senha"
-                  type={verSenha ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="current-password"
-                  className="h-11 bg-white pr-10"
+                  autoComplete="email"
+                  className="h-11 bg-white"
                 />
-                <button
-                  type="button"
-                  onClick={() => setVerSenha((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  tabIndex={-1}
-                  aria-label={verSenha ? "Ocultar senha" : "Ver senha"}
-                >
-                  {verSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
-            </div>
 
-            <Button type="submit" className="w-full h-11 font-semibold text-base" disabled={carregando}>
-              {carregando ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
+              <div className="space-y-1.5">
+                <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="senha"
+                    type={verSenha ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="h-11 bg-white pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setVerSenha((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                    aria-label={verSenha ? "Ocultar senha" : "Ver senha"}
+                  >
+                    {verSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full h-11 font-semibold text-base" disabled={carregando}>
+                {carregando ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+          </div>
 
           {/* Divisor */}
           <div className="my-6 flex items-center gap-3">

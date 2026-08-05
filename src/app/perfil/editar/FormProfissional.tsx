@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
+import BrandBand from "@/components/shared/BrandBand";
 import { ESTADOS } from "@/constants/estados";
-import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X } from "lucide-react";
+import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock } from "lucide-react";
 
 interface Experiencia {
   _id?: string;
@@ -152,17 +153,19 @@ export default function FormProfissional({ profileId, dados }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
-      <div style={{ backgroundColor: "#1a5c38" }} className="py-8">
+      <BrandBand color="dark" className="py-8">
         <div className="max-w-2xl mx-auto px-4 flex items-center gap-3">
           <Link href="/painel" className="text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="flex items-center gap-2">
-            <ChefHat className="h-5 w-5 text-white/80" />
+            <div className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center">
+              <ChefHat className="h-4 w-4 text-white" />
+            </div>
             <span className="font-semibold text-white">Meu Perfil Profissional</span>
           </div>
         </div>
-      </div>
+      </BrandBand>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         {sucesso && (
@@ -194,6 +197,12 @@ export default function FormProfissional({ profileId, dados }: Props) {
               </button>
             ))}
           </div>
+          <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#4ade80] via-[#2DB87A] to-[#143f28] transition-all duration-300"
+              style={{ width: `${((etapa + 1) / ETAPAS.length) * 100}%` }}
+            />
+          </div>
         </div>
 
         {erro && (
@@ -206,13 +215,18 @@ export default function FormProfissional({ profileId, dados }: Props) {
         {etapa === 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Dados pessoais</CardTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <CardTitle className="text-base">Dados pessoais</CardTitle>
+              </div>
               <CardDescription>Informações básicas do seu perfil.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
 
               {/* Foto de perfil */}
-              <div className="flex items-center gap-4 pb-2 border-b border-border/50">
+              <div className="flex items-center gap-4 bg-primary/5 rounded-xl p-4">
                 <div className="shrink-0">
                   {fotoPerfil ? (
                     <img
@@ -369,7 +383,12 @@ export default function FormProfissional({ profileId, dados }: Props) {
         {etapa === 1 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Especialidades</CardTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <CardTitle className="text-base">Especialidades</CardTitle>
+              </div>
               <CardDescription>Selecione todas as funções que você desempenha.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -398,7 +417,12 @@ export default function FormProfissional({ profileId, dados }: Props) {
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Experiências profissionais</CardTitle>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">Experiências profissionais</CardTitle>
+                </div>
                 <CardDescription>Adicione seus empregos anteriores e atuais.</CardDescription>
               </CardHeader>
               <CardContent>
@@ -508,7 +532,12 @@ export default function FormProfissional({ profileId, dados }: Props) {
         {etapa === 3 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Disponibilidade</CardTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <CalendarClock className="h-4 w-4 text-primary" />
+                </div>
+                <CardTitle className="text-base">Disponibilidade</CardTitle>
+              </div>
               <CardDescription>
                 Informe que tipo de trabalho você está buscando.
               </CardDescription>
