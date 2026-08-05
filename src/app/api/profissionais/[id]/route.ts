@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Profissional from "@/models/Profissional";
+import User from "@/models/User";
+import { notifyRedesaTalento } from "@/lib/redesa-webhook";
 
 function calcularCompletude(p: Record<string, unknown>): number {
   let pontos = 0;
@@ -77,6 +79,25 @@ export async function PUT(
       { $set: atualizacao },
       { new: true }
     );
+
+    // Notifica o banco de talentos da Redesa com os dados atualizados
+    // (fire-and-forget) — mesmo vagaonCandidatoId do cadastro inicial,
+    // para que a Redesa atualize o registro em vez de duplicar.
+    if (atualizado) {
+      const user = await User.findById(atualizado.userId).lean();
+      void notifyRedesaTalento({
+        vagaonCandidatoId: atualizado._id.toString(),
+        nome: atualizado.nomeCompleto,
+        email: user?.email || undefined,
+        telefone: atualizado.telefone || undefined,
+        linkedin: atualizado.linkedinUrl || undefined,
+        curriculoUrl: atualizado.curriculoUrl || undefined,
+        mensagem: atualizado.resumoProfissional || undefined,
+        categoria: atualizado.especialidades?.[0] || undefined,
+        cidade: atualizado.cidade || undefined,
+        estado: atualizado.estado || undefined,
+      });
+    }
 
     return NextResponse.json(atualizado);
   } catch {
