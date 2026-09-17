@@ -3,12 +3,15 @@
  * Deliberadamente conservador:
  *  - /api/* nunca passa pelo cache (dados de sessão e do match são sempre frescos);
  *  - páginas (navegações) não são cacheadas — são autenticadas e mudam por usuário;
- *  - só estáticos imutáveis (/_next/static, ícones, imagens) ficam em cache-first;
+ *  - ícones, manifest e imagens ficam em cache-first (não mudam);
+ *  - /_next/static é network-first com fallback ao cache: em produção os chunks
+ *    têm hash e o navegador já os trata como imutáveis, então cache-first não
+ *    ganhava nada — e em dev, sem hash na URL, prendia chunk velho para sempre;
  *  - offline, uma navegação cai numa página mínima em vez de erro do navegador.
  *
  * Suba a versão de CACHE ao mudar esta lógica para invalidar o cache antigo.
  */
-const CACHE = "vagaon-static-v2";
+const CACHE = "vagaon-static-v3";
 const PRE_CACHE = ["/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 const OFFLINE_HTML = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
@@ -38,13 +41,24 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-function ehEstatico(url) {
+function ehImutavel(url) {
   return (
-    url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/images/") ||
     url.pathname === "/manifest.webmanifest"
   );
+}
+
+function ehChunk(url) {
+  return url.pathname.startsWith("/_next/static/");
+}
+
+function guardar(request, resposta) {
+  if (resposta && resposta.ok) {
+    const copia = resposta.clone();
+    caches.open(CACHE).then((cache) => cache.put(request, copia));
+  }
+  return resposta;
 }
 
 self.addEventListener("fetch", (event) => {
@@ -55,19 +69,18 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
 
-  if (ehEstatico(url)) {
+  // Cache-first: não muda entre deploys.
+  if (ehImutavel(url)) {
+    event.respondWith(caches.match(request).then((emCache) => emCache || fetch(request).then((r) => guardar(request, r))));
+    return;
+  }
+
+  // Network-first: sempre o chunk atual; o cache só serve offline.
+  if (ehChunk(url)) {
     event.respondWith(
-      caches.match(request).then(
-        (emCache) =>
-          emCache ||
-          fetch(request).then((resposta) => {
-            if (resposta.ok) {
-              const copia = resposta.clone();
-              caches.open(CACHE).then((cache) => cache.put(request, copia));
-            }
-            return resposta;
-          })
-      )
+      fetch(request)
+        .then((r) => guardar(request, r))
+        .catch(() => caches.match(request))
     );
     return;
   }
