@@ -76,6 +76,13 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
     }
   }
 
+  // Conta a visita de quem não é dono nem admin — alimenta "Visualizações" no
+  // painel da empresa. (A rota GET /api/vagas/[id] também conta, mas a página
+  // não passa por ela.)
+  if (!isDonoEmpresa && session?.user.role !== "admin") {
+    await Vaga.updateOne({ _id: vaga._id }, { $inc: { visualizacoes: 1 } });
+  }
+
   const empresa = vaga.empresaId as EmpresaPopulada;
   const vagaObj = JSON.parse(JSON.stringify(vaga));
 

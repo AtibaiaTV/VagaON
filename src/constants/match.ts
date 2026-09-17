@@ -36,6 +36,9 @@ export const TIPO_CONTRATO_LABEL: Record<string, string> = {
 /** Raio padrão de deslocamento, em km, quando o profissional não definiu. */
 export const RAIO_PADRAO_KM = 40;
 
+/** Likes por dia por profissional. Segura spam e força escolha. */
+export const LIMITE_LIKES_DIA = 50;
+
 /** Multiplicador do raio para quem marcou que está disposto a viajar. */
 export const MULTIPLICADOR_DISPOSTO_VIAJAR = 3;
 

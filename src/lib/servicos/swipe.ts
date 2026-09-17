@@ -11,10 +11,10 @@ import Profissional, { type IProfissional } from "@/models/Profissional";
 import Swipe, { type DirecaoSwipe } from "@/models/Swipe";
 import User from "@/models/User";
 import Vaga, { type IVaga } from "@/models/Vaga";
+import { LIMITE_LIKES_DIA } from "@/constants/match";
 import { ErroAtor, type Ator } from "./ator";
 
-/** Likes por dia por profissional. Segura spam e força escolha. */
-export const LIMITE_LIKES_DIA = 50;
+export { LIMITE_LIKES_DIA };
 
 const DIRECOES: DirecaoSwipe[] = ["like", "pass", "super"];
 

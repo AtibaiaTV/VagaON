@@ -7,6 +7,56 @@ import { Button } from "@/components/ui/button";
 import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PainelMetricas, { type Tile } from "@/components/painel/PainelMetricas";
+import { connectDB } from "@/lib/db";
+import { metricasEmpresa, metricasProfissional, type LinhaVaga } from "@/lib/servicos/metricas";
+import Empresa from "@/models/Empresa";
+import Profissional from "@/models/Profissional";
+
+export const dynamic = "force-dynamic";
+
+async function montarMetricas(role: string, userId: string): Promise<{ tiles: Tile[]; porVaga?: LinhaVaga[] } | null> {
+  await connectDB();
+
+  if (role === "empresa") {
+    const empresa = await Empresa.findOne({ userId }).select("_id").lean();
+    if (!empresa) return null;
+    const m = await metricasEmpresa(empresa._id);
+    return {
+      tiles: [
+        { rotulo: "Vagas ativas", valor: m.vagasAtivas },
+        { rotulo: "Visualizações", valor: m.visualizacoes, dica: "nas suas vagas" },
+        { rotulo: "Curtidas", valor: m.likesRecebidos, dica: "profissionais interessados" },
+        { rotulo: "Matches", valor: m.matches, destaque: true },
+        { rotulo: "Candidaturas", valor: m.candidaturas },
+        {
+          rotulo: "Contratações",
+          valor: m.contratacoes,
+          dica: m.tempoMedioContratacaoDias !== null ? `média de ${m.tempoMedioContratacaoDias} dia(s) do match à contratação` : "marque no chat do match",
+        },
+      ],
+      porVaga: m.porVaga,
+    };
+  }
+
+  if (role === "profissional") {
+    const prof = await Profissional.findOne({ userId }).select("_id completude").lean();
+    if (!prof) return null;
+    const m = await metricasProfissional(prof._id, prof.completude ?? 0);
+    return {
+      tiles: [
+        { rotulo: "Empresas que viram você", valor: m.avaliadoPorEmpresas, dica: "no Descobrir" },
+        { rotulo: "Curtiram seu perfil", valor: m.curtidoPorEmpresas },
+        { rotulo: "Matches ativos", valor: m.matchesAtivos, destaque: true },
+        { rotulo: "Candidaturas", valor: m.candidaturas },
+        { rotulo: "Likes hoje", valor: `${m.likesUsadosHoje}/${m.limiteLikesDia}` },
+        { rotulo: "Perfil completo", valor: `${m.completude}%`, dica: m.completude < 80 ? "complete para subir no ranking" : undefined },
+      ],
+    };
+  }
+
+  return null;
+}
 
 export default async function PainelPage() {
   const session = await auth();
@@ -14,6 +64,7 @@ export default async function PainelPage() {
   if (!session) redirect("/entrar");
 
   const { role, name } = session.user;
+  const metricas = await montarMetricas(role, session.user.id).catch(() => null);
 
   const titleMap: Record<string, string> = {
     profissional: "Painel do Profissional",
@@ -62,6 +113,8 @@ export default async function PainelPage() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-10">
+        {metricas && <PainelMetricas tiles={metricas.tiles} porVaga={metricas.porVaga} />}
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {role !== "admin" && (
             <>
