@@ -47,6 +47,28 @@ export const CATEGORIAS_ADJACENTES: Record<string, string[]> = {
 };
 
 /**
+ * Perfis "escopeta": quem marca 10–30 especialidades ganha "cargo exato" para
+ * quase qualquer vaga pela regra do máximo entre pares. Acima do limite, a
+ * nota de cargo cai `descontoPorExtra` por especialidade a mais, até o piso.
+ *   8 → ×1.00 · 9 → ×0.97 · 13 → ×0.85 · 18+ → ×0.70
+ * Como o teto do score deriva dessa nota, o perfil de 30 especialidades com
+ * cargo exato vale o mesmo que um perfil focado com cargo da mesma subcategoria.
+ */
+export const AMPLITUDE_ESPECIALIDADES = {
+  limite: 8,
+  descontoPorExtra: 0.03,
+  minimo: 0.7,
+} as const;
+
+export function fatorAmplitude(quantidadeEspecialidades: number): number {
+  const extras = Math.max(0, quantidadeEspecialidades - AMPLITUDE_ESPECIALIDADES.limite);
+  return Math.max(
+    AMPLITUDE_ESPECIALIDADES.minimo,
+    1 - extras * AMPLITUDE_ESPECIALIDADES.descontoPorExtra
+  );
+}
+
+/**
  * O cargo define o teto do score: teto = base + escala × notaEspecialidade.
  *   exato 1.0 → 100 · subcategoria 0.7 → 85 · categoria 0.45 → 72 · adjacente 0.3 → 65
  * Sem isso, uma vaga de garçom perfeita em tudo mais aparecia como "Match forte"

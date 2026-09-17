@@ -1,6 +1,6 @@
 import { paraSalarioMensal } from "@/constants/match";
 import { distanciaKm, notaDistancia, raioEfetivoKm } from "./geo";
-import { CONFIANCA, MULTIPLICADOR, PESOS, TETO_ESPECIALIDADE } from "./pesos";
+import { CONFIANCA, MULTIPLICADOR, PESOS, TETO_ESPECIALIDADE, fatorAmplitude } from "./pesos";
 import {
   coberturaHabilidades,
   explicarAderencia,
@@ -58,12 +58,18 @@ function avaliarEspecialidade(p: ProfissionalMatch, v: VagaMatch): ResultadoDime
   const aceitas = [v.especialidade, ...(v.especialidadesAceitas ?? [])].filter(Boolean);
   const m = melhorAderencia(p.especialidades, aceitas);
 
-  return dim(
-    "especialidade",
-    m.nota,
-    m.nota >= 0.45 ? explicarAderencia(m) : null,
-    m.nota < 0.45 ? "Cargo fora da sua área principal" : null
-  );
+  // Perfil com especialidades demais diz pouco sobre o cargo — desconta.
+  const amplitude = fatorAmplitude(p.especialidades.length);
+  const nota = m.nota * amplitude;
+
+  const alerta =
+    m.nota < 0.45
+      ? "Cargo fora da sua área principal"
+      : amplitude < 1
+        ? `Perfil lista ${p.especialidades.length} especialidades — aderência de cargo reduzida`
+        : null;
+
+  return dim("especialidade", nota, m.nota >= 0.45 ? explicarAderencia(m) : null, alerta);
 }
 
 function avaliarLocalizacao(

@@ -30,7 +30,7 @@ Modo "Tinder" do VagaON: o profissional desliza **vagas**, a empresa desliza
 
    | Dimensão | Peso | Nota |
    |---|---|---|
-   | especialidade | 30 | exato 1.0 · mesma subcategoria 0.7 · mesma categoria 0.45 · adjacente 0.3 |
+   | especialidade | 30 | exato 1.0 · mesma subcategoria 0.7 · mesma categoria 0.45 · adjacente 0.3 — × fator de amplitude: até 8 especialidades ×1.0, −0,03 por extra, piso ×0.7 (perfil "escopeta" com 30 cargos não ganha "exato" de graça) |
    | localizacao | 20 | remoto 1.0; platô até 25% do raio, decaimento quadrático até 0 no raio |
    | experiencia | 15 | anos ÷ exigido, saturando em 1 |
    | disponibilidade | 12 | 60% tipo de contrato + 40% data |

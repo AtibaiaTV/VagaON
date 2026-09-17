@@ -13,6 +13,7 @@ import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSe
 import BrandBand from "@/components/shared/BrandBand";
 import { ESTADOS } from "@/constants/estados";
 import { ESCALAS, RAIO_PADRAO_KM, TURNOS } from "@/constants/match";
+import { AMPLITUDE_ESPECIALIDADES } from "@/lib/match/pesos";
 import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock, Flame } from "lucide-react";
 
 interface Experiencia {
@@ -414,13 +415,22 @@ export default function FormProfissional({ profileId, dados }: Props) {
                 </div>
                 <CardTitle className="text-base">Especialidades</CardTitle>
               </div>
-              <CardDescription>Selecione todas as funções que você desempenha.</CardDescription>
+              <CardDescription>
+                Selecione as funções que você realmente desempenha. Até {AMPLITUDE_ESPECIALIDADES.limite} contam
+                integralmente no Descobrir — acima disso, o cargo pesa menos no match.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <EspecialidadesMultiSelect
                 selecionadas={especialidades}
                 onChange={setEspecialidades}
               />
+              {especialidades.length > AMPLITUDE_ESPECIALIDADES.limite && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 -mt-2">
+                  {especialidades.length} especialidades selecionadas. Focar nas principais melhora sua posição
+                  no ranking das empresas.
+                </p>
+              )}
               <div className="space-y-1">
                 <Label htmlFor="habilidades">Habilidades extras (separadas por vírgula)</Label>
                 <Input
