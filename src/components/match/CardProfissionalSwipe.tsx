@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Heart, MapPin, Plane, Zap, Languages } from "lucide-react";
+import { Briefcase, Heart, MapPin, Plane, Zap, Languages, EyeOff, UserRound } from "lucide-react";
 import { TIPO_CONTRATO_LABEL } from "@/constants/match";
 import type { FeedProfissionalItem } from "@/lib/servicos/feed";
 import ScoreBadge from "./ScoreBadge";
@@ -28,11 +28,22 @@ export default function CardProfissionalSwipe({ item, topo }: { item: FeedProfis
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-28 h-28 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center">
-              <span className="text-4xl font-black text-[#4ade80]">{iniciais(p.nome)}</span>
+              {p.oculto ? (
+                <UserRound className="h-14 w-14 text-[#4ade80]/80" strokeWidth={1.25} />
+              ) : (
+                <span className="text-4xl font-black text-[#4ade80]">{iniciais(p.nome)}</span>
+              )}
             </div>
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/75 to-transparent" />
+
+        {p.oculto && (
+          <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/25 text-white text-xs font-semibold">
+            <EyeOff className="h-3.5 w-3.5" />
+            Às cegas até o match
+          </div>
+        )}
 
         {jaCurtiu && (
           <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2DB87A] text-white text-xs font-bold shadow-lg">

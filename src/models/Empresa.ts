@@ -21,6 +21,10 @@ export interface IEmpresa extends Document {
   endereco: string;
   verificada: boolean;
   documentos: string[];
+  match: {
+    /** Modo às cegas: esconde foto e nome dos candidatos até a entrevista/match. */
+    modoCego: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +53,9 @@ const EmpresaSchema = new Schema<IEmpresa>(
     endereco: { type: String, default: "" },
     verificada: { type: Boolean, default: false },
     documentos: [{ type: String }],
+    match: {
+      modoCego: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );

@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, Building2, User, Send, Phone, Mail, ExternalLink, FileText, Globe, MapPin,
-  MoreVertical, CheckCircle2, CalendarCheck, XCircle, RefreshCw,
+  MoreVertical, CheckCircle2, CalendarCheck, XCircle, RefreshCw, CalendarPlus, CalendarX2, Clock, Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { MatchDetalhe, MensagemDTO } from "@/lib/servicos/matches";
+import type { EntrevistaDTO, MatchDetalhe, MensagemDTO } from "@/lib/servicos/matches";
 import type { ContatoEmpresa, ContatoProfissional } from "@/lib/servicos/projecoes";
 
 const INTERVALO_POLLING_MS = 4000;
@@ -18,6 +18,38 @@ function horaDe(iso: string) {
 
 function ehContatoProfissional(c: ContatoProfissional | ContatoEmpresa): c is ContatoProfissional {
   return "linkedinUrl" in c;
+}
+
+function dataCurta(iso: string) {
+  return new Date(iso).toLocaleString("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** "2026-09-20T14:30" no fuso do navegador — para o min do datetime-local. */
+function agoraLocal() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+
+function linkGoogleAgenda(e: EntrevistaDTO, titulo: string, url: string) {
+  if (!e.escolhida) return "#";
+  const ics = (iso: string) => iso.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const inicio = new Date(e.escolhida);
+  const fim = new Date(inicio.getTime() + 60 * 60 * 1000);
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `Entrevista — ${titulo}`,
+    dates: `${ics(inicio.toISOString())}/${ics(fim.toISOString())}`,
+    details: [e.observacao, `Conversa no VagaON: ${url}`].filter(Boolean).join("\n"),
+    location: e.local ?? "",
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
 /**
@@ -33,6 +65,11 @@ export default function Chat({ matchId, lado }: { matchId: string; lado: "profis
   const [erro, setErro] = useState<string | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
   const [mostrarContato, setMostrarContato] = useState(false);
+  const [agendando, setAgendando] = useState(false);
+  const [propostas, setPropostas] = useState(["", "", ""]);
+  const [localEntrevista, setLocalEntrevista] = useState("");
+  const [obsEntrevista, setObsEntrevista] = useState("");
+  const [salvandoEntrevista, setSalvandoEntrevista] = useState(false);
 
   const ultimaEm = useRef<string | null>(null);
   const fimRef = useRef<HTMLDivElement>(null);
@@ -81,6 +118,10 @@ export default function Chat({ matchId, lado }: { matchId: string; lado: "profis
       if (d.status && d.status !== detalhe.match.status) {
         setDetalhe((atual) => atual && { ...atual, match: { ...atual.match, status: d.status } });
       }
+      // A entrevista muda do outro lado (proposta, escolha, cancelamento) — acompanha.
+      if (d.entrevista !== undefined && JSON.stringify(d.entrevista) !== JSON.stringify(detalhe.match.entrevista)) {
+        setDetalhe((atual) => atual && { ...atual, match: { ...atual.match, entrevista: d.entrevista } });
+      }
     }, INTERVALO_POLLING_MS);
     return () => clearInterval(timer);
   }, [matchId, detalhe, acrescentar]);
@@ -127,6 +168,68 @@ export default function Chat({ matchId, lado }: { matchId: string; lado: "profis
       return;
     }
     setDetalhe((atual) => atual && { ...atual, match: d.match, contato: status === "encerrado" ? null : atual.contato });
+  }
+
+  function aplicarEntrevista(entrevista: EntrevistaDTO | null, status?: string) {
+    setDetalhe(
+      (atual) =>
+        atual && {
+          ...atual,
+          match: { ...atual.match, entrevista, ...(status ? { status: status as MatchDetalhe["match"]["status"] } : {}) },
+        }
+    );
+  }
+
+  async function proporHorarios(e: React.FormEvent) {
+    e.preventDefault();
+    const lista = propostas.filter(Boolean).map((v) => new Date(v).toISOString());
+    if (!lista.length) {
+      setErro("Informe pelo menos um horário.");
+      return;
+    }
+    setSalvandoEntrevista(true);
+    const r = await fetch(`/api/matches/${matchId}/entrevista`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propostas: lista, local: localEntrevista, observacao: obsEntrevista }),
+    });
+    const d = await r.json().catch(() => ({}));
+    setSalvandoEntrevista(false);
+    if (!r.ok) {
+      setErro(d.error ?? "Não foi possível propor os horários.");
+      return;
+    }
+    aplicarEntrevista(d.entrevista);
+    setAgendando(false);
+    setPropostas(["", "", ""]);
+  }
+
+  async function escolherHorario(iso: string) {
+    setSalvandoEntrevista(true);
+    const r = await fetch(`/api/matches/${matchId}/entrevista`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ escolhida: iso }),
+    });
+    const d = await r.json().catch(() => ({}));
+    setSalvandoEntrevista(false);
+    if (!r.ok) {
+      setErro(d.error ?? "Não foi possível confirmar.");
+      return;
+    }
+    aplicarEntrevista(d.entrevista, "entrevista");
+  }
+
+  async function cancelarEntrevista() {
+    if (!confirm("Cancelar a entrevista? Vocês podem combinar outro horário depois.")) return;
+    setSalvandoEntrevista(true);
+    const r = await fetch(`/api/matches/${matchId}/entrevista`, { method: "DELETE" });
+    setSalvandoEntrevista(false);
+    if (!r.ok) {
+      setErro("Não foi possível cancelar.");
+      return;
+    }
+    aplicarEntrevista(null);
   }
 
   if (erro && !detalhe) {
@@ -193,9 +296,21 @@ export default function Chat({ matchId, lado }: { matchId: string; lado: "profis
             </button>
             {menuAberto && (
               <div className="absolute right-0 top-9 z-20 w-56 bg-white rounded-xl shadow-xl border border-border/50 py-1 text-sm">
+                {lado === "empresa" && match.status !== "contratado" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuAberto(false);
+                      setAgendando(true);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2"
+                  >
+                    <CalendarPlus className="h-4 w-4 text-violet-600" /> Propor horários de entrevista
+                  </button>
+                )}
                 {lado === "empresa" && match.status !== "entrevista" && match.status !== "contratado" && (
                   <button type="button" onClick={() => mudarStatus("entrevista")} className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2">
-                    <CalendarCheck className="h-4 w-4 text-violet-600" /> Marcar entrevista
+                    <CalendarCheck className="h-4 w-4 text-violet-600" /> Marcar como em entrevista
                   </button>
                 )}
                 {lado === "empresa" && match.status !== "contratado" && (
@@ -250,6 +365,134 @@ export default function Chat({ matchId, lado }: { matchId: string; lado: "profis
                 <p className="flex items-center gap-2 text-emerald-900">
                   <MapPin className="h-4 w-4" /> {contato.endereco}
                 </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Propor horários (empresa) */}
+      {agendando && !encerrado && (
+        <form onSubmit={proporHorarios} className="px-4 py-3 bg-violet-50 border-b border-violet-100 space-y-2 text-sm">
+          <p className="text-xs font-semibold text-violet-800 uppercase tracking-wide">Propor horários de entrevista</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {propostas.map((v, i) => (
+              <input
+                key={i}
+                type="datetime-local"
+                min={agoraLocal()}
+                value={v}
+                required={i === 0}
+                onChange={(e) => setPropostas((p) => p.map((x, j) => (j === i ? e.target.value : x)))}
+                className="rounded-lg border border-violet-200 bg-white px-2 py-1.5 text-xs"
+              />
+            ))}
+          </div>
+          <input
+            type="text"
+            value={localEntrevista}
+            onChange={(e) => setLocalEntrevista(e.target.value)}
+            placeholder="Local (endereço ou 'online')"
+            maxLength={300}
+            className="w-full rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-xs"
+          />
+          <input
+            type="text"
+            value={obsEntrevista}
+            onChange={(e) => setObsEntrevista(e.target.value)}
+            placeholder="Observação (opcional): o que levar, com quem falar…"
+            maxLength={500}
+            className="w-full rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-xs"
+          />
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={salvandoEntrevista} className="bg-violet-600 hover:bg-violet-700 text-white">
+              {salvandoEntrevista ? "Enviando…" : "Enviar horários"}
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setAgendando(false)}>
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* Cartão da entrevista */}
+      {match.entrevista && !encerrado && (
+        <div className="px-4 py-3 bg-violet-50 border-b border-violet-100 text-sm space-y-2">
+          {match.entrevista.escolhida ? (
+            <>
+              <p className="flex items-center gap-2 font-semibold text-violet-900">
+                <CalendarCheck className="h-4 w-4" /> Entrevista confirmada: {dataCurta(match.entrevista.escolhida)}
+              </p>
+              {match.entrevista.local && (
+                <p className="flex items-center gap-2 text-violet-900/80 text-xs">
+                  <MapPin className="h-3.5 w-3.5" /> {match.entrevista.local}
+                </p>
+              )}
+              {match.entrevista.observacao && <p className="text-xs text-violet-900/80">{match.entrevista.observacao}</p>}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <a
+                  href={linkGoogleAgenda(match.entrevista, vaga.titulo, `${typeof window !== "undefined" ? window.location.origin : ""}/matches/${matchId}`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full bg-white border border-violet-200 px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100"
+                >
+                  <CalendarPlus className="h-3.5 w-3.5" /> Google Agenda
+                </a>
+                <a
+                  href={`/api/matches/${matchId}/entrevista/ics`}
+                  className="inline-flex items-center gap-1 rounded-full bg-white border border-violet-200 px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100"
+                >
+                  <Download className="h-3.5 w-3.5" /> Baixar .ics
+                </a>
+                <button
+                  type="button"
+                  onClick={cancelarEntrevista}
+                  disabled={salvandoEntrevista}
+                  className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                >
+                  <CalendarX2 className="h-3.5 w-3.5" /> Cancelar
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="flex items-center gap-2 font-semibold text-violet-900">
+                <Clock className="h-4 w-4" />
+                {lado === "profissional" ? "A empresa propôs horários — escolha um:" : "Horários propostos — aguardando o candidato"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {match.entrevista.propostas.map((iso) =>
+                  lado === "profissional" ? (
+                    <button
+                      key={iso}
+                      type="button"
+                      onClick={() => escolherHorario(iso)}
+                      disabled={salvandoEntrevista}
+                      className="rounded-full bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
+                    >
+                      {dataCurta(iso)}
+                    </button>
+                  ) : (
+                    <span key={iso} className="rounded-full bg-white border border-violet-200 px-3 py-1.5 text-xs font-semibold text-violet-800">
+                      {dataCurta(iso)}
+                    </span>
+                  )
+                )}
+              </div>
+              {match.entrevista.local && (
+                <p className="flex items-center gap-2 text-violet-900/80 text-xs">
+                  <MapPin className="h-3.5 w-3.5" /> {match.entrevista.local}
+                </p>
+              )}
+              {lado === "empresa" && (
+                <div className="flex gap-3 pt-1">
+                  <button type="button" onClick={() => setAgendando(true)} className="text-xs font-semibold text-violet-800 hover:underline">
+                    Propor outros horários
+                  </button>
+                  <button type="button" onClick={cancelarEntrevista} disabled={salvandoEntrevista} className="text-xs font-semibold text-red-700 hover:underline">
+                    Cancelar
+                  </button>
+                </div>
               )}
             </>
           )}

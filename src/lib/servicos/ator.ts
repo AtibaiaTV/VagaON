@@ -11,14 +11,9 @@ export type Ator =
   | { tipo: "profissional"; userId: string; profissional: IProfissional }
   | { tipo: "empresa"; userId: string; empresa: IEmpresa };
 
-export class ErroAtor extends Error {
-  constructor(
-    public status: number,
-    mensagem: string
-  ) {
-    super(mensagem);
-  }
-}
+import { ErroAtor } from "./erros";
+
+export { ErroAtor };
 
 export async function resolverAtor(): Promise<Ator> {
   const session = await auth();

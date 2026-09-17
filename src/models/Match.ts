@@ -42,6 +42,17 @@ export interface IMatch extends Document {
     profissional: number;
     empresa: number;
   };
+  /** Agendamento de entrevista combinado no chat. null = nenhum em aberto. */
+  entrevista: {
+    /** Até 3 horários propostos pela empresa. */
+    propostas: Date[];
+    /** Horário confirmado pelo profissional. */
+    escolhida: Date | null;
+    local: string | null;
+    observacao: string | null;
+    propostaEm: Date;
+    lembreteEnviadoEm: Date | null;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -85,11 +96,24 @@ const MatchSchema = new Schema<IMatch>(
       profissional: { type: Number, default: 0 },
       empresa: { type: Number, default: 0 },
     },
+    entrevista: {
+      type: {
+        propostas: { type: [Date], default: [] },
+        escolhida: { type: Date, default: null },
+        local: { type: String, default: null, maxlength: 300 },
+        observacao: { type: String, default: null, maxlength: 500 },
+        propostaEm: { type: Date, required: true },
+        lembreteEnviadoEm: { type: Date, default: null },
+      },
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
 MatchSchema.index({ vagaId: 1, profissionalId: 1 }, { unique: true });
+// Cron de lembretes: entrevistas confirmadas nas próximas 24 h ainda sem lembrete.
+MatchSchema.index({ "entrevista.escolhida": 1, "entrevista.lembreteEnviadoEm": 1 });
 // Listas de matches ordenadas por atividade, por lado.
 MatchSchema.index({ profissionalId: 1, status: 1, updatedAt: -1 });
 MatchSchema.index({ empresaId: 1, status: 1, updatedAt: -1 });

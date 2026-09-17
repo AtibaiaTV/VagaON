@@ -8,9 +8,13 @@ import Profissional from "@/models/Profissional";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink } from "lucide-react";
+import { labelAfirmativa } from "@/constants/match";
+import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink, HeartHandshake } from "lucide-react";
 import BotaoCandidatar from "./BotaoCandidatar";
-import ListaCandidatos from "./ListaCandidatos";
+import CandidaturaRapida from "./CandidaturaRapida";
+import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
+import { candidatosDaVaga, type CandidatoKanban } from "@/lib/servicos/candidaturas";
+import Empresa from "@/models/Empresa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -66,13 +70,18 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   }
 
   let isDonoEmpresa = false;
-  let candidatos: unknown[] = [];
+  let candidatos: CandidatoKanban[] = [];
+  let modoCego = false;
 
   if (session?.user.role === "empresa") {
-    const empresa = vaga.empresaId as EmpresaPopulada;
-    if (session.user.profileId === empresa._id.toString()) {
+    const empresaDaVaga = vaga.empresaId as EmpresaPopulada;
+    if (session.user.profileId === empresaDaVaga._id.toString()) {
       isDonoEmpresa = true;
-      candidatos = await Candidatura.find({ vagaId: params.id }).sort({ createdAt: -1 }).lean();
+      const dona = await Empresa.findById(empresaDaVaga._id).lean();
+      if (dona) {
+        modoCego = dona.match?.modoCego === true;
+        candidatos = await candidatosDaVaga(dona, vaga);
+      }
     }
   }
 
@@ -174,6 +183,12 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                   Remoto
                 </span>
               )}
+              {(vagaObj.afirmativa ?? []).map((a: string) => (
+                <span key={a} className="inline-flex items-center gap-1.5 bg-violet-500/30 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-violet-300/40">
+                  <HeartHandshake className="h-3.5 w-3.5" />
+                  Vaga afirmativa · {labelAfirmativa(a)}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -182,23 +197,18 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
             {session?.user.role === "profissional" && (
               <BotaoCandidatar vagaId={params.id} jaCandidatou={jaCandidatou} vagaAtiva={vagaObj.status === "ativa"} />
             )}
-            {!session && (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <p className="text-sm text-muted-foreground">Faça login para se candidatar a esta vaga.</p>
-                <div className="flex gap-2">
-                  <Link href="/entrar">
-                    <button className="text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-5 py-2 rounded-lg transition-colors">
-                      Entrar
-                    </button>
-                  </Link>
-                  <Link href="/cadastro">
-                    <button className="text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/5 px-5 py-2 rounded-lg transition-colors">
-                      Cadastrar
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            )}
+            {!session &&
+              (vagaObj.status === "ativa" ? (
+                <CandidaturaRapida
+                  vagaId={params.id}
+                  vagaTitulo={vagaObj.titulo}
+                  cidade={vagaObj.cidade}
+                  estado={vagaObj.estado}
+                  especialidade={vagaObj.especialidade}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">Esta vaga não está mais disponível.</p>
+              ))}
           </div>
 
           {/* Corpo do card — 2 colunas */}
@@ -284,14 +294,25 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
           </div>
         </div>
 
-        {/* Lista de candidatos (empresa dona) */}
+        {/* Funil de candidatos (empresa dona) */}
         {isDonoEmpresa && (
-          <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-            <ListaCandidatos
-              candidatos={JSON.parse(JSON.stringify(candidatos))}
-              vagaId={params.id}
-            />
-          </div>
+          <section className="bg-white rounded-2xl shadow-md p-4 sm:p-5">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
+              <span className="w-6 h-0.5 bg-primary inline-block" />
+              Candidatos
+            </h2>
+            {candidatos.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-6 text-center">
+                Nenhum candidato ainda. Quem der match ou se candidatar pelo site aparece aqui —{" "}
+                <Link href="/descobrir" className="text-primary font-semibold underline">
+                  descubra candidatos
+                </Link>
+                .
+              </p>
+            ) : (
+              <KanbanCandidatos candidatos={candidatos} modoCego={modoCego} />
+            )}
+          </section>
         )}
       </main>
 

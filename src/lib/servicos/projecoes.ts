@@ -52,6 +52,7 @@ export interface CardVaga {
   habilidadesDesejadas: string[];
   anosExperienciaMin: number;
   posicoes: number;
+  afirmativa: string[];
   empresa: {
     id: string;
     nome: string;
@@ -91,6 +92,7 @@ export function paraCardVaga(v: Doc): CardVaga {
     habilidadesDesejadas: v.habilidadesDesejadas ?? [],
     anosExperienciaMin: v.anosExperienciaMin ?? 0,
     posicoes: v.posicoes ?? 1,
+    afirmativa: v.afirmativa ?? [],
     empresa: {
       id: String(emp._id ?? v.empresaId ?? ""),
       nome: emp.nomeFantasia ?? "",
@@ -121,9 +123,12 @@ export interface CardProfissional {
   /** Cargos mais recentes, sem nome de empresa — contexto sem expor histórico inteiro. */
   ultimosCargos: string[];
   completude: number;
+  /** Modo às cegas da empresa: nome e foto escondidos até o match. */
+  oculto: boolean;
 }
 
-export function paraCardProfissional(p: Doc): CardProfissional {
+export function paraCardProfissional(p: Doc, opcoes: { oculto?: boolean } = {}): CardProfissional {
+  const oculto = opcoes.oculto === true;
   const experiencias: Doc[] = Array.isArray(p.experiencias) ? p.experiencias : [];
   const ultimosCargos = experiencias
     .slice()
@@ -134,8 +139,9 @@ export function paraCardProfissional(p: Doc): CardProfissional {
 
   return {
     id: String(p._id),
-    nome: p.nomeCompleto ?? "",
-    foto: p.fotoPerfil ?? null,
+    nome: oculto ? "Candidato(a)" : (p.nomeCompleto ?? ""),
+    foto: oculto ? null : (p.fotoPerfil ?? null),
+    oculto,
     cidade: p.cidade ?? "",
     estado: p.estado ?? "",
     especialidades: p.especialidades ?? [],

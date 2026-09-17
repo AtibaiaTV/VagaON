@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ErroAtor } from "./ator";
+import { ErroAtor } from "./erros";
 
 /** Converte erros de serviço em resposta HTTP; o resto vira 500 genérico. */
 export function responderErro(err: unknown) {

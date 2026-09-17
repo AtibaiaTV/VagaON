@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { ESCALA_VALUES, TURNO_VALUES } from "@/constants/match";
+import { AFIRMATIVA_VALUES, ESCALA_VALUES, TURNO_VALUES } from "@/constants/match";
 import { geocodificarCidade } from "@/constants/municipios";
 
 export interface IVaga extends Document {
@@ -41,6 +41,8 @@ export interface IVaga extends Document {
   idiomasDesejados: string[];
   /** Quantas posições a vaga tem — limita quantos matches fazem sentido. */
   posicoes: number;
+  /** Vaga afirmativa para estes grupos (ver AFIRMATIVAS). Vazio = aberta a todos. */
+  afirmativa: string[];
   /** GeoJSON Point [lng, lat]. */
   localizacao: { type: "Point"; coordinates: [number, number] } | null;
   match: {
@@ -106,6 +108,7 @@ const VagaSchema = new Schema<IVaga>(
     escala: { type: String, enum: [...ESCALA_VALUES, null], default: null },
     idiomasDesejados: [{ type: String }],
     posicoes: { type: Number, default: 1, min: 1 },
+    afirmativa: [{ type: String, enum: AFIRMATIVA_VALUES }],
     // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra
     // o índice 2dsphere. O pre-save abaixo preenche o objeto inteiro ou null.
     localizacao: {

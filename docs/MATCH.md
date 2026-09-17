@@ -76,3 +76,11 @@ telefone, e-mail, data de nascimento, CEP, currículo ou LinkedIn. Contato só e
    discorda, ajuste `pesos.ts` (não o motor) e recarregue.
 4. Depois de uma semana com swipes reais, compare score × taxa de like na
    coleção `swipes` — aí os pesos deixam de ser opinião.
+
+## Onda 2 — funil, entrevista, candidatura rápida, modo às cegas
+
+- **Funil (Kanban)** em `/vagas/[id]` para a empresa dona: Novos → Em análise → Entrevista → Aprovados → Recusados. `servicos/candidaturas.ts` monta os cards com o score do motor; `servicos/status.ts` mantém Candidatura e Match coerentes nos dois sentidos (Entrevista/Aprovado/Recusado ↔ entrevista/contratado/encerrado). Abrir o funil marca "enviada" como "visualizada".
+- **Entrevista no chat**: `Match.entrevista`; `servicos/entrevistas.ts` (propor / escolher / cancelar / .ics / lembretes). Escolher um horário move match e candidatura para "entrevista". Lembrete 24 h antes via cron da Vercel (`vercel.json`, `CRON_SECRET`).
+- **Candidatura rápida** (`POST /api/candidatura-rapida`): visitante sem conta cria usuário + perfil mínimo + candidatura e entra logado. Honeypot `site`; e-mail existente → 409 `existente`.
+- **Modo às cegas** (`Empresa.match.modoCego`): esconde nome e foto no deck e nas três primeiras colunas do funil. `PATCH /api/match/preferencias`.
+- **Vagas afirmativas** (`Vaga.afirmativa[]`, `AFIRMATIVAS` em `constants/match.ts`): selo na vaga e no card do deck.

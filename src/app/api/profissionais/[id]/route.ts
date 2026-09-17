@@ -4,18 +4,7 @@ import { connectDB } from "@/lib/db";
 import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import { notifyRedesaTalento } from "@/lib/redesa-webhook";
-
-function calcularCompletude(p: Record<string, unknown>): number {
-  let pontos = 0;
-  if (p.telefone) pontos += 10;
-  if (p.fotoPerfil) pontos += 10;
-  if (p.cidade && p.estado) pontos += 10;
-  if (p.resumoProfissional) pontos += 15;
-  if (Array.isArray(p.especialidades) && (p.especialidades as unknown[]).length > 0) pontos += 20;
-  if (Array.isArray(p.experiencias) && (p.experiencias as unknown[]).length > 0) pontos += 20;
-  if (Array.isArray((p.disponibilidade as Record<string, unknown>)?.tipo) && ((p.disponibilidade as Record<string, unknown[]>).tipo as unknown[]).length > 0) pontos += 15;
-  return pontos;
-}
+import { calcularCompletude } from "@/lib/completude";
 
 export async function GET(
   _req: NextRequest,

@@ -23,6 +23,23 @@ export const NIVEIS_IDIOMA = [
   { value: "fluente", label: "Fluente / nativo" },
 ] as const;
 
+/** Vagas afirmativas: grupos para os quais a vaga é preferencial ou exclusiva. */
+export const AFIRMATIVAS = [
+  { value: "pcd", label: "Pessoas com deficiência (PCD)" },
+  { value: "mulheres", label: "Mulheres" },
+  { value: "pessoas_negras", label: "Pessoas negras" },
+  { value: "lgbtqia", label: "Pessoas LGBTQIA+" },
+  { value: "50_mais", label: "Pessoas 50+" },
+  { value: "primeiro_emprego", label: "Primeiro emprego / jovens" },
+  { value: "refugiados_imigrantes", label: "Refugiados e imigrantes" },
+] as const;
+
+export const AFIRMATIVA_VALUES = AFIRMATIVAS.map((a) => a.value);
+
+export function labelAfirmativa(value: string): string {
+  return AFIRMATIVAS.find((a) => a.value === value)?.label ?? value;
+}
+
 export const TURNO_VALUES = TURNOS.map((t) => t.value);
 export const ESCALA_VALUES = ESCALAS.map((e) => e.value);
 export const NIVEL_IDIOMA_VALUES = NIVEIS_IDIOMA.map((n) => n.value);

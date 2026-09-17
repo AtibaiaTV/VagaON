@@ -208,10 +208,13 @@ export async function feedParaEmpresa(
       b.resultado.prioridade - a.resultado.prioridade
   );
 
+  // Modo às cegas: o deck decide pelo perfil, não pelo rosto ou pelo nome.
+  const oculto = empresa.match?.modoCego === true;
+
   const cards = aptos.slice(0, limite).map(({ profissional, resultado }) => ({
     score: resumirScore(resultado),
     jaCurtiu: curtiuSet.has(profissional._id),
-    profissional: paraCardProfissional(porId.get(profissional._id)!),
+    profissional: paraCardProfissional(porId.get(profissional._id)!, { oculto }),
   }));
 
   return { cards, restantes: Math.max(0, aptos.length - cards.length) };

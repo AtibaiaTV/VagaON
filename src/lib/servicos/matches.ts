@@ -8,6 +8,7 @@ import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor, type Ator } from "./ator";
+import { aplicarStatusMatch, registrarMensagemSistema, sincronizarCandidaturaComMatch } from "./status";
 import {
   paraCardProfissional,
   paraCardVaga,
@@ -38,7 +39,7 @@ function nomeDoAtor(match: IMatch, ator: Ator): string {
 }
 
 /** Carrega o match e garante que o ator é uma das partes. */
-async function carregarMatchDoAtor(ator: Ator, matchId: string): Promise<IMatch> {
+export async function carregarMatchDoAtor(ator: Ator, matchId: string): Promise<IMatch> {
   if (!isValidObjectId(matchId)) throw new ErroAtor(400, "Match inválido.");
 
   const match = await Match.findById(matchId);
@@ -53,6 +54,24 @@ async function carregarMatchDoAtor(ator: Ator, matchId: string): Promise<IMatch>
   return match;
 }
 
+export interface EntrevistaDTO {
+  propostas: string[];
+  escolhida: string | null;
+  local: string | null;
+  observacao: string | null;
+}
+
+export function resumirEntrevista(m: IMatch): EntrevistaDTO | null {
+  const e = m.entrevista;
+  if (!e) return null;
+  return {
+    propostas: (e.propostas ?? []).map((d) => new Date(d).toISOString()),
+    escolhida: e.escolhida ? new Date(e.escolhida).toISOString() : null,
+    local: e.local ?? null,
+    observacao: e.observacao ?? null,
+  };
+}
+
 export interface MatchResumo {
   id: string;
   status: StatusMatch;
@@ -64,11 +83,12 @@ export interface MatchResumo {
   vagaId: string;
   profissionalId: string;
   empresaId: string;
+  entrevista: EntrevistaDTO | null;
   criadoEm: string;
   atualizadoEm: string;
 }
 
-function resumir(m: IMatch, lado: "profissional" | "empresa"): MatchResumo {
+export function resumir(m: IMatch, lado: "profissional" | "empresa"): MatchResumo {
   return {
     id: String(m._id),
     status: m.status,
@@ -80,6 +100,7 @@ function resumir(m: IMatch, lado: "profissional" | "empresa"): MatchResumo {
     vagaId: String(m.vagaId),
     profissionalId: String(m.profissionalId),
     empresaId: String(m.empresaId),
+    entrevista: resumirEntrevista(m),
     criadoEm: m.createdAt.toISOString(),
     atualizadoEm: m.updatedAt.toISOString(),
   };
@@ -161,17 +182,9 @@ export async function atualizarStatusMatch(
   }
   if (match.status === "encerrado") throw new ErroAtor(409, "Match já encerrado.");
 
-  match.status = status;
-  if (status === "encerrado") match.encerradoPor = ator.tipo;
-  await match.save();
-
-  const aviso =
-    status === "encerrado"
-      ? `${ator.tipo === "empresa" ? "A empresa" : "O profissional"} encerrou esta conversa.`
-      : status === "entrevista"
-        ? "A empresa marcou este match como em entrevista."
-        : "A empresa marcou este match como contratado. Parabéns!";
-  await registrarMensagemSistema(match, aviso);
+  await aplicarStatusMatch(match, status, ator.tipo);
+  // Chat → Kanban: a candidatura ligada acompanha.
+  await sincronizarCandidaturaComMatch(match, status);
 
   if (status === "entrevista" || status === "contratado" || status === "encerrado") {
     await notificar(
@@ -189,21 +202,7 @@ export async function atualizarStatusMatch(
   return resumir(match, ator.tipo);
 }
 
-async function registrarMensagemSistema(match: IMatch, texto: string) {
-  const msg = await Mensagem.create({
-    matchId: match._id,
-    autorTipo: "sistema",
-    autorUserId: null,
-    texto,
-  });
-  await Match.updateOne(
-    { _id: match._id },
-    {
-      $set: { ultimaMensagem: { texto, autorTipo: "sistema", em: msg.createdAt } },
-      $inc: { "naoLidas.profissional": 1, "naoLidas.empresa": 1 },
-    }
-  );
-}
+export { registrarMensagemSistema };
 
 export interface MensagemDTO {
   id: string;
@@ -224,7 +223,7 @@ export async function listarMensagens(
   ator: Ator,
   matchId: string,
   depois?: Date | null
-): Promise<{ mensagens: MensagemDTO[]; agora: string; status: StatusMatch }> {
+): Promise<{ mensagens: MensagemDTO[]; agora: string; status: StatusMatch; entrevista: EntrevistaDTO | null }> {
   await connectDB();
   const match = await carregarMatchDoAtor(ator, matchId);
 
@@ -243,6 +242,7 @@ export async function listarMensagens(
 
   return {
     status: match.status,
+    entrevista: resumirEntrevista(match),
     agora: new Date().toISOString(),
     mensagens: docs.map((m) => ({
       id: String(m._id),
