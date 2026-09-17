@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     const {
       titulo, descricao, requisitos, tipo, especialidade, salario, periodo, cidade, estado, remoto,
       // Sinais do match (todos opcionais)
-      especialidadesAceitas, anosExperienciaMin, habilidadesDesejadas, turno, escala, idiomasDesejados, posicoes,
+      especialidadesAceitas, anosExperienciaMin, habilidadesDesejadas, turno, escala, idiomasDesejados, posicoes, afirmativa,
     } = body;
 
     if (!titulo || !descricao || !tipo || !especialidade || !cidade || !estado) {
@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
       escala: escala || null,
       idiomasDesejados: Array.isArray(idiomasDesejados) ? idiomasDesejados : [],
       posicoes: Math.max(1, Number(posicoes) || 1),
+      afirmativa: Array.isArray(afirmativa) ? afirmativa : [],
     });
 
     return NextResponse.json(vaga, { status: 201 });

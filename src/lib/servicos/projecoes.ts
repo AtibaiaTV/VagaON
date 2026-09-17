@@ -52,6 +52,7 @@ export interface CardVaga {
   habilidadesDesejadas: string[];
   anosExperienciaMin: number;
   posicoes: number;
+  afirmativa: string[];
   empresa: {
     id: string;
     nome: string;
@@ -91,6 +92,7 @@ export function paraCardVaga(v: Doc): CardVaga {
     habilidadesDesejadas: v.habilidadesDesejadas ?? [],
     anosExperienciaMin: v.anosExperienciaMin ?? 0,
     posicoes: v.posicoes ?? 1,
+    afirmativa: v.afirmativa ?? [],
     empresa: {
       id: String(emp._id ?? v.empresaId ?? ""),
       nome: emp.nomeFantasia ?? "",

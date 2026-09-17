@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Briefcase, BadgeCheck, Building2, Clock, MapPin, Wallet, CalendarClock, ChevronDown } from "lucide-react";
 import { formatarSalario } from "@/components/shared/VagaCard";
-import { ESCALAS, TIPO_CONTRATO_LABEL, TURNOS } from "@/constants/match";
+import { ESCALAS, TIPO_CONTRATO_LABEL, TURNOS, labelAfirmativa } from "@/constants/match";
 import type { FeedVagaItem } from "@/lib/servicos/feed";
 import ScoreBadge from "./ScoreBadge";
 
@@ -81,6 +81,16 @@ export default function CardVagaSwipe({ item, topo }: { item: FeedVagaItem; topo
             />
           )}
         </div>
+
+        {vaga.afirmativa.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {vaga.afirmativa.map((a) => (
+              <span key={a} className="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 font-semibold">
+                Vaga afirmativa · {labelAfirmativa(a)}
+              </span>
+            ))}
+          </div>
+        )}
 
         {vaga.habilidadesDesejadas.length > 0 && (
           <div className="flex flex-wrap gap-1.5">

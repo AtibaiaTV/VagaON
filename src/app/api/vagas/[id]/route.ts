@@ -52,7 +52,7 @@ export async function PUT(
       "salario", "periodo", "cidade", "estado", "remoto", "status",
       // Sinais do match
       "especialidadesAceitas", "anosExperienciaMin", "habilidadesDesejadas",
-      "turno", "escala", "idiomasDesejados", "posicoes"];
+      "turno", "escala", "idiomasDesejados", "posicoes", "afirmativa"];
 
     const atualizacao: Record<string, unknown> = {};
     for (const c of campos) {

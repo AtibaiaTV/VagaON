@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ESTADOS } from "@/constants/estados";
-import { ESCALAS, TURNOS } from "@/constants/match";
+import { AFIRMATIVAS, ESCALAS, TURNOS } from "@/constants/match";
 import { ArrowLeft, Briefcase, Flame } from "lucide-react";
 import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
@@ -40,6 +40,7 @@ export default function NovaVagaPage() {
     posicoes: "1",
   });
   const [especialidadesAceitas, setEspecialidadesAceitas] = useState<string[]>([]);
+  const [afirmativa, setAfirmativa] = useState<string[]>([]);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -82,6 +83,7 @@ export default function NovaVagaPage() {
       turno: form.turno || null,
       escala: form.escala || null,
       posicoes: form.posicoes ? parseInt(form.posicoes) : 1,
+      afirmativa,
     };
 
     const res = await fetch("/api/vagas", {
@@ -219,6 +221,31 @@ export default function NovaVagaPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label>Vaga afirmativa (opcional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Marque se a vaga é preferencial ou exclusiva para algum grupo. Aparece como selo na vaga.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {AFIRMATIVAS.map((a) => {
+                    const ativo = afirmativa.includes(a.value);
+                    return (
+                      <button
+                        key={a.value}
+                        type="button"
+                        onClick={() =>
+                          setAfirmativa((lista) => (ativo ? lista.filter((v) => v !== a.value) : [...lista, a.value]))
+                        }
+                        className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                          ativo ? "bg-[#1a5c38] text-white border-[#1a5c38]" : "bg-white border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {a.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <div className="space-y-1">

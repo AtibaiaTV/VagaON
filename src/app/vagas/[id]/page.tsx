@@ -8,7 +8,8 @@ import Profissional from "@/models/Profissional";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink } from "lucide-react";
+import { labelAfirmativa } from "@/constants/match";
+import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink, HeartHandshake } from "lucide-react";
 import BotaoCandidatar from "./BotaoCandidatar";
 import CandidaturaRapida from "./CandidaturaRapida";
 import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
@@ -182,6 +183,12 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                   Remoto
                 </span>
               )}
+              {(vagaObj.afirmativa ?? []).map((a: string) => (
+                <span key={a} className="inline-flex items-center gap-1.5 bg-violet-500/30 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-violet-300/40">
+                  <HeartHandshake className="h-3.5 w-3.5" />
+                  Vaga afirmativa · {labelAfirmativa(a)}
+                </span>
+              ))}
             </div>
           </div>
 
