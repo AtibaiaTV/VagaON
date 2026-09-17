@@ -20,11 +20,13 @@ Modo "Tinder" do VagaON: o profissional desliza **vagas**, a empresa desliza
 
 ## Como o score é calculado
 
-1. **Eliminatórias** (não pontua): distância > 1,5× o raio do profissional (só
-   com coordenadas reais dos dois lados); nenhuma relação entre especialidades.
+1. **Eliminatórias** (não pontua): perfil sem especialidade; distância > 1,5×
+   o raio do profissional (só com coordenadas reais dos dois lados); nenhuma
+   relação entre especialidades.
 2. **Dimensões ponderadas** — cada uma devolve nota 0–1, ou `null` quando não
    dá para avaliar (ex.: vaga com salário "a combinar"). Peso de dimensão
-   `null` é **redistribuído**, não zerado.
+   `null` é **redistribuído**, não zerado. Perfil sem cidade nem estado vale
+   0.3 em localização (com alerta), não `null`.
 
    | Dimensão | Peso | Nota |
    |---|---|---|
@@ -38,9 +40,12 @@ Modo "Tinder" do VagaON: o profissional desliza **vagas**, a empresa desliza
 
 3. **Teto pelo cargo**: `total ≤ 50 + 50 × notaEspecialidade`. Garçom perfeito
    em tudo não vira "match forte" para um sous chef (teto 65).
-4. **`total`** (exibido) = aderência pura. **`prioridade`** (só ordena o feed) =
-   total × boost de perfil (completude, empresa verificada, atividade recente;
-   ±5%) × confiança (quanto do peso deu para avaliar). Sem clamp em 100.
+4. **Confiança**: `× (0,75 + 0,25 × fraçãoDoPesoAvaliado)`. Com metade das
+   dimensões avaliáveis o teto é 87. Sem isso, nos dados reais, perfil vazio
+   pontuava 100 só com o default `imediata: true`.
+5. **`total`** (exibido) = os passos acima. **`prioridade`** (só ordena o feed)
+   = total × boost de perfil (completude, empresa verificada, atividade
+   recente; ±5%). Sem clamp em 100.
 5. Feed mostra só `total ≥ 35` (`SCORE_MINIMO_FEED`).
 
 O que **não** entra no score, por decisão: idade, foto, gênero, nome. O log de

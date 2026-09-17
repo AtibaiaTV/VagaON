@@ -74,6 +74,15 @@ function avaliarLocalizacao(
     return { dimensao: dim("localizacao", 1, "Vaga remota"), distancia: null };
   }
 
+  // Perfil sem cidade nem estado: para trabalho presencial isso é um
+  // negativo real, não uma lacuna neutra — a empresa não sabe se dá para ir.
+  if (!p.coords && !p.estado) {
+    return {
+      dimensao: dim("localizacao", 0.3, null, "Localização não informada no perfil"),
+      distancia: null,
+    };
+  }
+
   if (!p.coords || !v.coords) {
     // Sem coordenadas, o melhor que dá para afirmar é "mesmo estado".
     if (p.estado && v.estado) {
@@ -131,6 +140,10 @@ function avaliarDisponibilidade(p: ProfissionalMatch, v: VagaMatch): ResultadoDi
 
   const inicio = paraData(v.periodo?.dataInicio);
   const disponivel = paraData(p.disponibilidade?.dataDisponivel);
+
+  // Sem tipo de contrato nem data, o perfil nunca preencheu disponibilidade:
+  // o `imediata: true` é só o default do schema e não pode valer nota cheia.
+  if (!tipos.length && !disponivel) return dim("disponibilidade", null);
 
   let notaData: number | null;
   if (p.disponibilidade?.imediata) notaData = 1;
@@ -235,6 +248,9 @@ function avaliarTurnoEscala(p: ProfissionalMatch, v: VagaMatch): ResultadoDimens
  * mostrar o card seria desperdício de swipe para os dois lados.
  */
 function eliminar(p: ProfissionalMatch, v: VagaMatch): string | null {
+  // Sem especialidade não há o que comparar — e é o que o /descobrir também exige.
+  if (!p.especialidades?.length) return "Perfil sem especialidade definida";
+
   if (!v.remoto && p.coords && v.coords) {
     const d = distanciaKm(p.coords, v.coords);
     const limite = raioEfetivoKm(p.raioKm, p.dispostoViajar) * 1.5;
@@ -303,16 +319,20 @@ export function avaliarMatch(p: ProfissionalMatch, v: VagaMatch): Avaliacao {
   const teto = especialidade.nota === null
     ? 1
     : TETO_ESPECIALIDADE.base + TETO_ESPECIALIDADE.escala * especialidade.nota;
-  const base = Math.min(media, teto);
+
+  // Confiança: quanto do peso total deu para avaliar. Redistribuir sem piso
+  // fazia perfil vazio pontuar 100 só com o default de disponibilidade — o
+  // score exibido precisa dizer "só consigo confirmar parte da aderência".
+  const pesoMaximo = Object.values(PESOS).reduce((a, b) => a + b, 0);
+  const confianca = CONFIANCA.minimo + (1 - CONFIANCA.minimo) * (pesoTotal / pesoMaximo);
+  const base = Math.min(media, teto) * confianca;
 
   const total = Math.round(limitar(base) * 100);
 
-  // Ordenação: boost de perfil × confiança (fração do peso que deu para avaliar).
-  // Nenhum dos dois altera o número exibido — só quem aparece antes. Sem clamp
-  // em 100 de propósito: é aqui que os empates do topo precisam se resolver.
-  const pesoMaximo = Object.values(PESOS).reduce((a, b) => a + b, 0);
-  const confianca = CONFIANCA.minimo + (1 - CONFIANCA.minimo) * (pesoTotal / pesoMaximo);
-  const prioridade = Math.round(base * calcularMultiplicador(p, v) * confianca * 1000) / 10;
+  // Ordenação: boost de perfil sobre a mesma base. Não altera o número exibido
+  // — só quem aparece antes. Sem clamp em 100 de propósito: é aqui que os
+  // empates do topo precisam se resolver.
+  const prioridade = Math.round(base * calcularMultiplicador(p, v) * 1000) / 10;
 
   const explicacoes = avaliaveis
     .filter((d) => d.explicacao && d.nota >= 0.7)

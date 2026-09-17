@@ -55,11 +55,14 @@ export const CATEGORIAS_ADJACENTES: Record<string, string[]> = {
 export const TETO_ESPECIALIDADE = { base: 0.5, escala: 0.5 } as const;
 
 /**
- * Fator de confiança aplicado só à `prioridade` (ordenação): quanto menos
- * dimensões a vaga permitiu avaliar, menos ela sobe no feed — sem alterar o
- * score exibido, que continua sendo aderência sobre o que dá para medir.
+ * Fator de confiança sobre o score: quanto menos dimensões deu para avaliar,
+ * menor o teto. Com tudo avaliável → ×1.0; com metade → ×0.875 (teto 87).
+ *
+ * Vale para os dois lados de propósito: vaga com salário "a combinar" e sem
+ * habilidades também rebaixa um pouco — é o empurrão para preencher. E foi o
+ * que impediu, nos dados reais, perfil vazio de aparecer com 100.
  */
-export const CONFIANCA = { minimo: 0.9 } as const;
+export const CONFIANCA = { minimo: 0.75 } as const;
 
 /**
  * Ajuste fino aplicado ao score final. Mantido deliberadamente estreito:
