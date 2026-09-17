@@ -9,6 +9,12 @@ export interface IUser extends Document {
   role: "profissional" | "empresa" | "admin";
   profileId: mongoose.Types.ObjectId | null;
   status: "pendente" | "ativo" | "suspenso";
+  /** Canais que o usuário aceita receber. A notificação in-app não é opcional. */
+  notificacoes: {
+    email: boolean;
+    whatsapp: boolean;
+    push: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +36,11 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ["pendente", "ativo", "suspenso"],
       default: "ativo",
+    },
+    notificacoes: {
+      email: { type: Boolean, default: true },
+      whatsapp: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
     },
   },
   { timestamps: true }

@@ -8,7 +8,7 @@
  *
  * Suba a versão de CACHE ao mudar esta lógica para invalidar o cache antigo.
  */
-const CACHE = "vagaon-static-v1";
+const CACHE = "vagaon-static-v2";
 const PRE_CACHE = ["/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 const OFFLINE_HTML = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
@@ -79,4 +79,45 @@ self.addEventListener("fetch", (event) => {
       )
     );
   }
+});
+
+// ─── Push ─────────────────────────────────────────────────────────────────────
+// Payload: { titulo, corpo, url, categoria } (ver src/lib/notificacoes/canais/push.ts)
+
+self.addEventListener("push", (event) => {
+  let dados = {};
+  try {
+    dados = event.data ? event.data.json() : {};
+  } catch {
+    dados = { corpo: event.data ? event.data.text() : "" };
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(dados.titulo || "VagaON", {
+      body: dados.corpo || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: dados.url || "/notificacoes" },
+      // Mesma categoria substitui a anterior em vez de empilhar 10 avisos.
+      tag: dados.categoria || "vagaon",
+      renotify: true,
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const destino = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((abas) => {
+      for (const aba of abas) {
+        if ("focus" in aba) {
+          aba.navigate(destino);
+          return aba.focus();
+        }
+      }
+      return clients.openWindow(destino);
+    })
+  );
 });

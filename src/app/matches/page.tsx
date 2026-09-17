@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import ListaMatches from "@/components/match/ListaMatches";
+import AtivarPush from "@/components/notificacoes/AtivarPush";
 
 export const dynamic = "force-dynamic";
 
@@ -31,12 +32,15 @@ export default async function MatchesPage() {
               <p className="text-white/60 text-xs">Interesse mútuo confirmado</p>
             </div>
           </div>
-          <Link href="/descobrir">
-            <Button size="sm" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white gap-1.5">
-              <Flame className="h-4 w-4" />
-              Descobrir
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <AtivarPush />
+            <Link href="/descobrir">
+              <Button size="sm" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white gap-1.5">
+                <Flame className="h-4 w-4" />
+                Descobrir
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 

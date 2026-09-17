@@ -1,5 +1,6 @@
 import { isValidObjectId } from "mongoose";
 import { connectDB } from "@/lib/db";
+import { msgNovaMensagem, msgStatusMatch, notificar, type AlvoNotificacao } from "@/lib/notificacoes";
 import Empresa from "@/models/Empresa";
 import Match, { type IMatch, type StatusMatch } from "@/models/Match";
 import Mensagem from "@/models/Mensagem";
@@ -23,6 +24,17 @@ const LOTE_MENSAGENS = 200;
 
 function outroLado(ator: Ator): "profissional" | "empresa" {
   return ator.tipo === "profissional" ? "empresa" : "profissional";
+}
+
+/** Quem deve ser avisado: a outra parte do match. */
+function alvoOutroLado(match: IMatch, ator: Ator): AlvoNotificacao {
+  return ator.tipo === "profissional"
+    ? { tipo: "empresa", perfilId: match.empresaId }
+    : { tipo: "profissional", perfilId: match.profissionalId };
+}
+
+function nomeDoAtor(match: IMatch, ator: Ator): string {
+  return ator.tipo === "profissional" ? match.snapshot.profissionalNome : match.snapshot.empresaNome;
 }
 
 /** Carrega o match e garante que o ator é uma das partes. */
@@ -161,6 +173,19 @@ export async function atualizarStatusMatch(
         : "A empresa marcou este match como contratado. Parabéns!";
   await registrarMensagemSistema(match, aviso);
 
+  if (status === "entrevista" || status === "contratado" || status === "encerrado") {
+    await notificar(
+      alvoOutroLado(match, ator),
+      msgStatusMatch({
+        status,
+        lado: outroLado(ator),
+        outroNome: nomeDoAtor(match, ator),
+        vagaTitulo: match.snapshot.vagaTitulo,
+        matchId: String(match._id),
+      })
+    );
+  }
+
   return resumir(match, ator.tipo);
 }
 
@@ -246,6 +271,10 @@ export async function enviarMensagem(
   const match = await carregarMatchDoAtor(ator, matchId);
   if (match.status === "encerrado") throw new ErroAtor(409, "Esta conversa foi encerrada.");
 
+  // Só avisa a primeira mensagem não lida: quem está com a conversa aberta
+  // já vê chegar, e ninguém quer 10 pushes de uma conversa só.
+  const naoLidasAntes = match.naoLidas?.[outroLado(ator)] ?? 0;
+
   const msg = await Mensagem.create({
     matchId: match._id,
     autorTipo: ator.tipo,
@@ -263,6 +292,13 @@ export async function enviarMensagem(
       $inc: { [`naoLidas.${outroLado(ator)}`]: 1 },
     }
   );
+
+  if (naoLidasAntes === 0) {
+    await notificar(
+      alvoOutroLado(match, ator),
+      msgNovaMensagem({ autorNome: nomeDoAtor(match, ator), texto, matchId: String(match._id) })
+    );
+  }
 
   return {
     id: String(msg._id),
