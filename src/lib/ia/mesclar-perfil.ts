@@ -29,6 +29,12 @@ export interface IdiomaForm {
   nivel: string;
 }
 
+export interface FormacaoForm {
+  curso: string;
+  instituicao: string;
+  ano: string;
+}
+
 export interface EstadoPerfilForm {
   pessoal: {
     nomeCompleto: string;
@@ -41,6 +47,7 @@ export interface EstadoPerfilForm {
   /** Separadas por vírgula, como no campo do formulário. */
   habilidades: string;
   experiencias: ExperienciaForm[];
+  formacao: FormacaoForm[];
   idiomas: IdiomaForm[];
 }
 
@@ -49,7 +56,7 @@ export interface RelatorioMesclagem {
   preenchidos: string[];
   /** Campos que já tinham valor e foram mantidos. */
   mantidos: string[];
-  adicionados: { especialidades: number; habilidades: number; experiencias: number; idiomas: number };
+  adicionados: { especialidades: number; habilidades: number; experiencias: number; formacao: number; idiomas: number };
   /** Experiências importadas sem data de início — precisam de revisão. */
   experienciasSemData: number;
 }
@@ -149,6 +156,19 @@ export function mesclarPerfilExtraido<T extends EstadoPerfilForm>(
     expAdicionadas++;
   }
 
+  const chaveForm = (curso: string, inst: string) => `${chaveNormalizada(curso)}|${chaveNormalizada(inst)}`;
+  const formVistas = new Set(atual.formacao.map((f) => chaveForm(f.curso, f.instituicao)));
+  const formacao = [...atual.formacao];
+  let formAdicionadas = 0;
+  for (const f of extraido.formacao ?? []) {
+    if (!f.curso?.trim()) continue;
+    const chave = chaveForm(f.curso, f.instituicao ?? "");
+    if (formVistas.has(chave)) continue;
+    formVistas.add(chave);
+    formacao.push({ curso: f.curso.trim(), instituicao: f.instituicao?.trim() ?? "", ano: f.ano?.trim() ?? "" });
+    formAdicionadas++;
+  }
+
   const idiomasVistos = new Set(atual.idiomas.map((i) => chaveNormalizada(i.idioma)));
   const idiomas = [...atual.idiomas];
   let idiomasAdicionados = 0;
@@ -167,6 +187,7 @@ export function mesclarPerfilExtraido<T extends EstadoPerfilForm>(
       especialidades: esp.lista,
       habilidades: hab.lista.join(", "),
       experiencias,
+      formacao,
       idiomas,
     },
     relatorio: {
@@ -176,6 +197,7 @@ export function mesclarPerfilExtraido<T extends EstadoPerfilForm>(
         especialidades: esp.adicionados,
         habilidades: hab.adicionados,
         experiencias: expAdicionadas,
+        formacao: formAdicionadas,
         idiomas: idiomasAdicionados,
       },
       experienciasSemData,
@@ -191,6 +213,7 @@ export function descreverMesclagem(r: RelatorioMesclagem): string {
   const listas = [
     a.especialidades ? `${a.especialidades} especialidade${a.especialidades > 1 ? "s" : ""}` : null,
     a.experiencias ? `${a.experiencias} experiência${a.experiencias > 1 ? "s" : ""}` : null,
+    a.formacao ? `${a.formacao} formação${a.formacao > 1 ? "/cursos" : ""}` : null,
     a.habilidades ? `${a.habilidades} habilidade${a.habilidades > 1 ? "s" : ""}` : null,
     a.idiomas ? `${a.idiomas} idioma${a.idiomas > 1 ? "s" : ""}` : null,
   ].filter(Boolean);

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video } from "lucide-react";
+import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
 import { resumoReputacaoPublico } from "@/lib/reputacao";
@@ -33,6 +33,7 @@ interface IProfissionalLean {
   resumoProfissional: string;
   disponibilidade: { tipo: string[]; imediata: boolean; dataDisponivel: string | null };
   experiencias: IExperiencia[];
+  formacao?: { curso: string; instituicao: string; ano: string }[];
   habilidades: string[];
   reputacao?: unknown;
   videoApresentacao?: { url: string; duracao: number } | null;
@@ -237,6 +238,28 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                     <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                       {exp.descricao}
                     </p>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Formação */}
+        {(prof.formacao ?? []).length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-primary" />
+                Formação e cursos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {prof.formacao!.map((f, i) => (
+                <div key={i}>
+                  <p className="font-semibold">{f.curso}</p>
+                  {(f.instituicao || f.ano) && (
+                    <p className="text-sm text-muted-foreground">{[f.instituicao, f.ano].filter(Boolean).join(" · ")}</p>
                   )}
                 </div>
               ))}

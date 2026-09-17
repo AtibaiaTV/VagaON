@@ -12,9 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { SETORES } from "@/constants/setores";
-import { MapPin, Phone, Globe, Mail, Pencil, Building2, ChefHat } from "lucide-react";
+import { MapPin, Phone, Globe, Mail, Pencil, Building2, ChefHat, Printer, Check } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { MODELOS_CURRICULO, MODELO_PADRAO, ehModeloCurriculo } from "@/lib/curriculo";
 
 export default async function PerfilPage() {
   const session = await auth();
@@ -135,6 +136,7 @@ export default async function PerfilPage() {
       temporario: "Temporário",
       sazonal: "Sazonal",
     };
+    const modeloSalvo = ehModeloCurriculo(prof.curriculoModelo) ? prof.curriculoModelo : MODELO_PADRAO;
 
     return (
       <div className="min-h-screen bg-[#f4f7f5]">
@@ -200,6 +202,51 @@ export default async function PerfilPage() {
               {prof.resumoProfissional && (
                 <p className="mt-4 text-muted-foreground text-sm">{prof.resumoProfissional}</p>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Currículo para impressão — 1 clique com o modelo salvo */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Printer className="h-4 w-4 text-primary" />
+                    Meu currículo
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Três modelos prontos com os dados do seu perfil. Imprima ou salve em PDF.
+                  </p>
+                </div>
+                <Link href="/perfil/curriculo?imprimir=1">
+                  <Button size="sm" className="gap-2">
+                    <Printer className="h-4 w-4" />
+                    Imprimir agora
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-2">
+                {MODELOS_CURRICULO.map((m) => {
+                  const ativo = m.value === modeloSalvo;
+                  return (
+                    <Link
+                      key={m.value}
+                      href={`/perfil/curriculo?modelo=${m.value}`}
+                      className={`rounded-lg border-2 px-3 py-2 text-sm transition-colors ${
+                        ativo ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <span className="font-semibold flex items-center gap-1 leading-tight">
+                        {m.label}
+                        {ativo && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground hidden sm:block mt-0.5">{m.descricao}</span>
+                    </Link>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
 

@@ -96,3 +96,76 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ─── Currículo para impressão (src/components/curriculo) ─────────────────
+   A prévia na tela é a página real (210 mm), reduzida por transform para
+   caber. Na impressão, só ela sai: o resto tem a classe `nao-imprimir`. */
+.cv-pagina {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.cv-fundo-fixo {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .nao-imprimir {
+    display: none !important;
+  }
+  .cv-visor {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .cv-escalado {
+    transform: none !important;
+    width: auto !important;
+    box-shadow: none !important;
+  }
+  .cv-pagina {
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+  /* Lateral escura / barra azul em todas as folhas: elemento fixo imprime em cada página. */
+  .cv-fundo-fixo {
+    display: block;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+  }
+  .cv-pagina > *:not(.cv-fundo-fixo) {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Mesmas regras ligadas por classe — para conferir no playground sem abrir a impressão. */
+html.simular-impressao .nao-imprimir {
+  display: none !important;
+}
+html.simular-impressao .cv-visor {
+  height: auto !important;
+  overflow: visible !important;
+}
+html.simular-impressao .cv-escalado {
+  transform: none !important;
+  width: auto !important;
+  box-shadow: none !important;
+}
+html.simular-impressao body {
+  background: #fff !important;
+}

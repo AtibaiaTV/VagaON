@@ -31,6 +31,8 @@ export const PerfilExtraidoSchema = z.object({
   especialidades: z.array(z.string()),
   habilidades: z.array(z.string()),
   experiencias: z.array(ExperienciaSchema),
+  /** Graduações, cursos técnicos e cursos livres relevantes. */
+  formacao: z.array(z.object({ curso: z.string(), instituicao: z.string().nullable(), ano: z.string().nullable() })),
   idiomas: z.array(z.object({ idioma: z.string(), nivel: z.string() })),
   confianca: z.enum(["alta", "media", "baixa"]),
   /** O que não deu para determinar ou ficou ambíguo — mostrado à pessoa. */
@@ -47,6 +49,7 @@ Regras:
 - "resumoProfissional": até 400 caracteres, em primeira pessoa, tom profissional e direto, baseado no que o currículo diz. Se o currículo já tem um resumo, reescreva-o mais curto sem acrescentar fatos.
 - "habilidades": termos curtos e concretos do setor (ex.: "cozinha italiana", "coquetelaria clássica", "BPF", "Excel"). Até 12.
 - "experiencias": em ordem da mais recente para a mais antiga. Datas em AAAA-MM; "atual" = true quando não há data de fim. "descricao" curta (1–2 frases) ou null.
+- "formacao": graduações, cursos técnicos e cursos livres relevantes para o setor, do mais recente para o mais antigo, com instituição e ano de conclusão (AAAA) quando houver. Até 8. Ensino fundamental/médio só se for a única formação.
 - "telefone": só dígitos com DDD, se houver. "estado": sigla da UF.
 - "confianca": "baixa" quando o documento está ilegível/incompleto ou não parece um currículo.
 - "observacoes": liste em português o que ficou ambíguo (ex.: "não encontrei cidade", "datas da experiência na Pousada X não estavam claras"). Vazio se nada.
@@ -100,6 +103,14 @@ export async function extrairPerfilDeCurriculo(entrada: EntradaCurriculo) {
         dataInicio: /^\d{4}-\d{2}$/.test(e.dataInicio ?? "") ? e.dataInicio : null,
         dataFim: /^\d{4}-\d{2}$/.test(e.dataFim ?? "") ? e.dataFim : null,
       })),
+      formacao: d.formacao
+        .map((f) => ({
+          curso: f.curso.trim().slice(0, 120),
+          instituicao: f.instituicao?.trim().slice(0, 120) ?? "",
+          ano: /^\d{4}$/.test(f.ano ?? "") ? (f.ano as string) : "",
+        }))
+        .filter((f) => f.curso)
+        .slice(0, 8),
     },
   };
 }

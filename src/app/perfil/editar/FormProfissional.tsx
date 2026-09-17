@@ -21,10 +21,11 @@ import {
   descreverMesclagem,
   mesclarPerfilExtraido,
   type ExperienciaForm as Experiencia,
+  type FormacaoForm,
   type IdiomaForm,
   type RelatorioMesclagem,
 } from "@/lib/ia/mesclar-perfil";
-import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock, Flame, Languages, Undo2, AlertTriangle } from "lucide-react";
+import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock, Flame, Languages, Undo2, AlertTriangle, GraduationCap, Printer } from "lucide-react";
 
 interface Props {
   profileId: string;
@@ -45,6 +46,7 @@ interface Importacao {
     especialidades: string[];
     habilidades: string;
     experiencias: Experiencia[];
+    formacao: FormacaoForm[];
     idiomas: IdiomaForm[];
   };
 }
@@ -88,18 +90,26 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
   const [idiomas, setIdiomas] = useState<IdiomaForm[]>(
     ((dados?.idiomas as IdiomaForm[]) ?? []).map((i) => ({ idioma: i.idioma ?? "", nivel: i.nivel ?? "intermediario" }))
   );
+  const [formacao, setFormacao] = useState<FormacaoForm[]>(
+    ((dados?.formacao as FormacaoForm[]) ?? []).map((f) => ({ curso: f.curso ?? "", instituicao: f.instituicao ?? "", ano: f.ano ?? "" }))
+  );
+
+  function atualizarFormacao(index: number, campo: keyof FormacaoForm, valor: string) {
+    setFormacao((prev) => prev.map((f, i) => (i === index ? { ...f, [campo]: valor } : f)));
+  }
 
   /** Aplica a sugestão da IA sem sobrescrever o que já estava preenchido. */
   function aplicarPerfilExtraido(perfil: PerfilExtraido) {
-    const anterior = { pessoal: { ...pessoal }, especialidades, habilidades, experiencias, idiomas };
+    const anterior = { pessoal: { ...pessoal }, especialidades, habilidades, experiencias, formacao, idiomas };
     const { estado, relatorio } = mesclarPerfilExtraido(
-      { pessoal, especialidades, habilidades, experiencias, idiomas },
+      { pessoal, especialidades, habilidades, experiencias, formacao, idiomas },
       perfil
     );
     setPessoal(estado.pessoal);
     setEspecialidades(estado.especialidades);
     setHabilidades(estado.habilidades);
     setExperiencias(estado.experiencias);
+    setFormacao(estado.formacao);
     setIdiomas(estado.idiomas);
     setImportacao({ relatorio, observacoes: perfil.observacoes, confianca: perfil.confianca, anterior });
     setErro("");
@@ -113,6 +123,7 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
     setEspecialidades(a.especialidades);
     setHabilidades(a.habilidades);
     setExperiencias(a.experiencias);
+    setFormacao(a.formacao);
     setIdiomas(a.idiomas);
     setImportacao(null);
   }
@@ -196,6 +207,9 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
       especialidades,
       habilidades: habilidades.split(",").map((h) => h.trim()).filter(Boolean),
       experiencias,
+      formacao: formacao
+        .map((f) => ({ curso: f.curso.trim(), instituicao: f.instituicao.trim(), ano: f.ano.trim() }))
+        .filter((f) => f.curso),
       disponibilidade: {
         ...disponibilidade,
         dataDisponivel: disponibilidade.imediata ? null : disponibilidade.dataDisponivel,
@@ -660,6 +674,76 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar experiência
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-4 w-4 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">Formação e cursos</CardTitle>
+                </div>
+                <CardDescription>
+                  Graduação, curso técnico ou cursos livres (ex.: manipulação de alimentos, coquetelaria). Aparecem no seu
+                  currículo para impressão.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {formacao.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-2">Nenhum curso adicionado ainda.</p>
+                )}
+                {formacao.map((f, i) => (
+                  <div key={i} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_32px] gap-2 items-center border rounded-lg p-3 sm:border-0 sm:p-0">
+                    <Input
+                      value={f.curso}
+                      onChange={(e) => atualizarFormacao(i, "curso", e.target.value)}
+                      placeholder="Curso (ex.: Tecnólogo em Gastronomia)"
+                      aria-label="Curso"
+                    />
+                    <Input
+                      value={f.instituicao}
+                      onChange={(e) => atualizarFormacao(i, "instituicao", e.target.value)}
+                      placeholder="Instituição"
+                      aria-label="Instituição"
+                    />
+                    <Input
+                      value={f.ano}
+                      onChange={(e) => atualizarFormacao(i, "ano", e.target.value)}
+                      placeholder="Ano"
+                      aria-label="Ano de conclusão"
+                      maxLength={12}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormacao((l) => l.filter((_, j) => j !== i))}
+                      className="text-muted-foreground hover:text-destructive justify-self-end sm:justify-self-center"
+                      aria-label="Remover curso"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setFormacao((l) => [...l, { curso: "", instituicao: "", ano: "" }])}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar curso ou formação
+                </Button>
+                {dados && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5 pt-1">
+                    <Printer className="h-3.5 w-3.5" />
+                    Depois de salvar, imprima seu currículo em{" "}
+                    <Link href="/perfil/curriculo" className="text-primary font-semibold underline">
+                      Meu currículo
+                    </Link>
+                    .
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

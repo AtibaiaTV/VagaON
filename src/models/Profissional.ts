@@ -6,10 +6,18 @@ import {
   TURNO_VALUES,
 } from "@/constants/match";
 import { geocodificarCidade } from "@/constants/municipios";
+import { MODELO_PADRAO, MODELO_VALUES, type ModeloCurriculo } from "@/lib/curriculo";
 
 interface IIdioma {
   idioma: string;
   nivel: string;
+}
+
+interface IFormacao {
+  curso: string;
+  instituicao: string;
+  /** Ano de conclusão (texto, para aceitar "cursando"). */
+  ano: string;
 }
 
 interface IExperiencia {
@@ -42,12 +50,16 @@ export interface IProfissional extends Document {
     dataDisponivel: Date | null;
   };
   experiencias: IExperiencia[];
+  /** Graduações, cursos técnicos e cursos livres — aparece no currículo impresso. */
+  formacao: IFormacao[];
   habilidades: string[];
   linkedinUrl: string | null;
   curriculoUrl: string | null;
   completude: number;
   /** Vídeo curto de apresentação (Cloudinary). Mostrado às empresas, nunca pontuado. */
   videoApresentacao: { url: string; publicId: string; duracao: number; enviadoEm: Date } | null;
+  /** Modelo preferido do currículo para impressão (/perfil/curriculo). */
+  curriculoModelo: ModeloCurriculo;
 
   // ─── Sinais usados pelo motor de match ──────────────────────────────────────
   /** GeoJSON Point [lng, lat] — permite pré-filtro por raio com índice 2dsphere. */
@@ -85,6 +97,15 @@ const IdiomaSchema = new Schema<IIdioma>(
   {
     idioma: { type: String, required: true },
     nivel: { type: String, enum: NIVEL_IDIOMA_VALUES, default: "basico" },
+  },
+  { _id: false }
+);
+
+const FormacaoSchema = new Schema<IFormacao>(
+  {
+    curso: { type: String, required: true },
+    instituicao: { type: String, default: "" },
+    ano: { type: String, default: "" },
   },
   { _id: false }
 );
@@ -129,11 +150,13 @@ const ProfissionalSchema = new Schema<IProfissional>(
       dataDisponivel: { type: Date, default: null },
     },
     experiencias: [ExperienciaSchema],
+    formacao: { type: [FormacaoSchema], default: [] },
     habilidades: [{ type: String }],
     linkedinUrl: { type: String, default: null },
     curriculoUrl: { type: String, default: null },
     completude: { type: Number, default: 0, min: 0, max: 100 },
     videoApresentacao: { type: VideoSchema, default: null },
+    curriculoModelo: { type: String, enum: MODELO_VALUES, default: MODELO_PADRAO },
 
     // ─── Sinais usados pelo motor de match ────────────────────────────────────
     // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra
