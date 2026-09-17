@@ -38,6 +38,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={cn("font-sans", inter.variable)}>
       <body className={inter.className}>
+        {/* `beforeinstallprompt` dispara antes de o React montar: guarda o evento
+            para o banner de instalação (components/pwa) e segura o mini-aviso
+            padrão do Chrome, que o banner substitui. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__promptInstalacaoPWA=e;window.dispatchEvent(new Event('vagaon:instalavel'));});",
+          }}
+        />
         {children}
         <RegistrarSW />
       </body>

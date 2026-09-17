@@ -6,6 +6,7 @@ import Profissional, { IProfissional } from "@/models/Profissional";
 import User from "@/models/User";
 import PreferenciasNotificacao from "@/components/notificacoes/PreferenciasNotificacao";
 import CardReputacaoPropria from "@/components/avaliacoes/CardReputacaoPropria";
+import CardInstalarApp from "@/components/pwa/CardInstalarApp";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,8 @@ export default async function PerfilPage() {
       <CardHeader>
         <CardTitle className="text-base">Notificações</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        <CardInstalarApp />
         <PreferenciasNotificacao inicial={prefs} />
       </CardContent>
     </Card>
