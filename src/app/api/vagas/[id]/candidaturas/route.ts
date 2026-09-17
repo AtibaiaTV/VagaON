@@ -8,6 +8,7 @@ import Empresa from "@/models/Empresa";
 import User from "@/models/User";
 import { notifyRedesaCandidatura } from "@/lib/redesa-webhook";
 import { msgNovaCandidatura, notificar } from "@/lib/notificacoes";
+import { montarTriagem } from "@/lib/triagem";
 
 // GET — empresa lista candidatos da vaga
 export async function GET(
@@ -71,13 +72,15 @@ export async function POST(
       return NextResponse.json({ error: "Você já se candidatou a esta vaga." }, { status: 409 });
     }
 
-    const { mensagem } = await req.json().catch(() => ({ mensagem: null }));
+    const body = await req.json().catch(() => ({}));
+    const mensagem = typeof body?.mensagem === "string" ? body.mensagem.slice(0, 1000) : null;
 
     const candidatura = await Candidatura.create({
       vagaId: vaga._id,
       profissionalId: profissional._id,
       empresaId: vaga.empresaId,
-      mensagem: mensagem ?? null,
+      mensagem,
+      triagem: montarTriagem(vaga, body?.respostasTriagem),
       snapshotProfissional: {
         nomeCompleto: profissional.nomeCompleto,
         especialidades: profissional.especialidades,
