@@ -6,6 +6,7 @@ import CardProfissionalSwipe from "@/components/match/CardProfissionalSwipe";
 import CardVagaSwipe from "@/components/match/CardVagaSwipe";
 import MatchOverlay from "@/components/match/MatchOverlay";
 import SwipeDeck, { type Direcao } from "@/components/match/SwipeDeck";
+import TriagemSheet from "@/components/match/TriagemSheet";
 import type { FeedProfissionalItem, FeedVagaItem } from "@/lib/servicos/feed";
 
 const VAGAS: FeedVagaItem[] = [
@@ -188,9 +189,11 @@ const PROFISSIONAIS: FeedProfissionalItem[] = [
 export default function DeckPreview({ modo }: { modo: "profissional" | "empresa" }) {
   const [log, setLog] = useState<string[]>([]);
   const [match, setMatch] = useState<{ id: string; score: number; snapshot: MatchSnapshot } | null>(null);
+  const [triagem, setTriagem] = useState<FeedVagaItem | null>(null);
 
-  function registrar(rotulo: string, direcao: Direcao, dispararMatch: boolean, score: number) {
+  function registrar(rotulo: string, direcao: Direcao, dispararMatch: boolean, score: number, item?: FeedVagaItem) {
     setLog((l) => [`${direcao.toUpperCase()} → ${rotulo}`, ...l]);
+    if (item && direcao !== "pass" && item.vaga.perguntasTriagem.length > 0) setTriagem(item);
     if (dispararMatch && direcao !== "pass") {
       setMatch({
         id: "m1",
@@ -225,7 +228,7 @@ export default function DeckPreview({ modo }: { modo: "profissional" | "empresa"
             itens={VAGAS}
             chave={(i) => i.vaga.id}
             renderizar={(item, topo) => <CardVagaSwipe item={item} topo={topo} />}
-            aoDecidir={(item, d) => registrar(item.vaga.titulo, d, item.vaga.id === "v1", item.score.total)}
+            aoDecidir={(item, d) => registrar(item.vaga.titulo, d, item.vaga.id === "v1", item.score.total, item)}
             rotulos={{ like: "TENHO INTERESSE", pass: "PASSAR", super: "MUITO INTERESSE" }}
             vazio={<p className="text-muted-foreground">Fim do deck (mock).</p>}
           />
@@ -247,6 +250,20 @@ export default function DeckPreview({ modo }: { modo: "profissional" | "empresa"
       </main>
 
       {match && <MatchOverlay match={match} lado={modo} aoFechar={() => setMatch(null)} />}
+
+      {triagem && !match && (
+        <TriagemSheet
+          vagaTitulo={triagem.vaga.titulo}
+          empresaNome={triagem.vaga.empresa.nome}
+          perguntas={triagem.vaga.perguntasTriagem}
+          aoEnviar={async (respostas) => {
+            await new Promise((r) => setTimeout(r, 600));
+            setLog((l) => [`TRIAGEM → ${respostas.map((r) => r || "(vazio)").join(" | ")}`, ...l]);
+            setTriagem(null);
+          }}
+          aoPular={() => setTriagem(null)}
+        />
+      )}
     </div>
   );
 }

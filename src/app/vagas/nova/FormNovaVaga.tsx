@@ -19,6 +19,23 @@ import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 import CriarVagaIA from "@/components/ia/CriarVagaIA";
 
+// `items` faz o Select mostrar o rótulo do valor pré-selecionado (base-ui).
+const TIPOS_CONTRATO = [
+  { value: "clt", label: "CLT — Carteira assinada" },
+  { value: "temporario", label: "Temporário / Bico" },
+  { value: "sazonal", label: "Sazonal — Temporada / Evento" },
+];
+const TIPOS_SALARIO = [
+  { value: "a_combinar", label: "A combinar" },
+  { value: "fixo", label: "Valor fixo" },
+  { value: "faixa", label: "Faixa salarial" },
+];
+const PERIODOS = [
+  { value: "hora", label: "Hora" },
+  { value: "dia", label: "Dia" },
+  { value: "mes", label: "Mês" },
+];
+
 const FORM_INICIAL: FormVaga = {
   titulo: "",
   descricao: "",
@@ -174,12 +191,12 @@ export default function FormNovaVaga({ iaDisponivel = false }: { iaDisponivel?: 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label>Tipo de contrato *</Label>
-                  <Select value={form.tipo} onValueChange={(v) => handleSelect("tipo", v ?? "")}>
+                  <Select value={form.tipo} items={TIPOS_CONTRATO} onValueChange={(v) => handleSelect("tipo", v ?? "")}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="clt">CLT — Carteira assinada</SelectItem>
-                      <SelectItem value="temporario">Temporário / Bico</SelectItem>
-                      <SelectItem value="sazonal">Sazonal — Temporada / Evento</SelectItem>
+                      {TIPOS_CONTRATO.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -374,12 +391,12 @@ export default function FormNovaVaga({ iaDisponivel = false }: { iaDisponivel?: 
             <CardContent className="space-y-4">
               <div className="space-y-1">
                 <Label>Tipo de salário</Label>
-                <Select value={form.salarioTipo} onValueChange={(v) => handleSelect("salarioTipo", v ?? "")}>
+                <Select value={form.salarioTipo} items={TIPOS_SALARIO} onValueChange={(v) => handleSelect("salarioTipo", v ?? "")}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="a_combinar">A combinar</SelectItem>
-                    <SelectItem value="fixo">Valor fixo</SelectItem>
-                    <SelectItem value="faixa">Faixa salarial</SelectItem>
+                    {TIPOS_SALARIO.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -399,12 +416,12 @@ export default function FormNovaVaga({ iaDisponivel = false }: { iaDisponivel?: 
                   </div>
                   <div className="space-y-1">
                     <Label>Por</Label>
-                    <Select value={form.salarioPeriodo} onValueChange={(v) => handleSelect("salarioPeriodo", v ?? "")}>
+                    <Select value={form.salarioPeriodo} items={PERIODOS} onValueChange={(v) => handleSelect("salarioPeriodo", v ?? "")}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="hora">Hora</SelectItem>
-                        <SelectItem value="dia">Dia</SelectItem>
-                        <SelectItem value="mes">Mês</SelectItem>
+                        {PERIODOS.map((p) => (
+                          <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
