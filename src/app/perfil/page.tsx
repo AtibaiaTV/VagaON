@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/db";
 import Empresa, { IEmpresa } from "@/models/Empresa";
 import Profissional, { IProfissional } from "@/models/Profissional";
+import User from "@/models/User";
+import PreferenciasNotificacao from "@/components/notificacoes/PreferenciasNotificacao";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,23 @@ export default async function PerfilPage() {
   if (!session) redirect("/entrar");
 
   await connectDB();
+
+  const user = await User.findById(session.user.id).select("notificacoes").lean();
+  const prefs = {
+    email: user?.notificacoes?.email ?? true,
+    whatsapp: user?.notificacoes?.whatsapp ?? true,
+    push: user?.notificacoes?.push ?? true,
+  };
+  const cardNotificacoes = (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Notificações</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <PreferenciasNotificacao inicial={prefs} />
+      </CardContent>
+    </Card>
+  );
 
   if (session.user.role === "empresa") {
     const empresa = await Empresa.findOne({ userId: session.user.id }).lean<IEmpresa>();
@@ -95,6 +114,8 @@ export default async function PerfilPage() {
               </div>
             </CardContent>
           </Card>
+
+          {cardNotificacoes}
         </main>
 
         <Footer />
@@ -230,6 +251,8 @@ export default async function PerfilPage() {
               </CardContent>
             </Card>
           )}
+
+          {cardNotificacoes}
         </main>
 
         <Footer />

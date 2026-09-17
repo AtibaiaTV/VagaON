@@ -1,6 +1,7 @@
 import { isValidObjectId, type Types } from "mongoose";
 import { connectDB } from "@/lib/db";
 import { avaliarMatch, foiEliminado, paraProfissionalMatch, paraVagaMatch } from "@/lib/match";
+import { msgNovoMatch, notificar } from "@/lib/notificacoes";
 import { notifyRedesaCandidatura } from "@/lib/redesa-webhook";
 import Candidatura from "@/models/Candidatura";
 import Empresa, { type IEmpresa } from "@/models/Empresa";
@@ -10,10 +11,10 @@ import Profissional, { type IProfissional } from "@/models/Profissional";
 import Swipe, { type DirecaoSwipe } from "@/models/Swipe";
 import User from "@/models/User";
 import Vaga, { type IVaga } from "@/models/Vaga";
+import { LIMITE_LIKES_DIA } from "@/constants/match";
 import { ErroAtor, type Ator } from "./ator";
 
-/** Likes por dia por profissional. Segura spam e força escolha. */
-export const LIMITE_LIKES_DIA = 50;
+export { LIMITE_LIKES_DIA };
 
 const DIRECOES: DirecaoSwipe[] = ["like", "pass", "super"];
 
@@ -237,6 +238,19 @@ async function criarMatch({ vaga, profissional, empresa, score, explicacoes }: D
     { _id: match._id },
     { $set: { ultimaMensagem: { texto, autorTipo: "sistema", em: abertura.createdAt } } }
   );
+
+  // Os dois lados ficam sabendo na hora — é o que faz alguém voltar ao app.
+  const matchId = String(match._id);
+  await Promise.all([
+    notificar(
+      { tipo: "profissional", perfilId: profissional._id },
+      msgNovoMatch({ lado: "profissional", outroNome: empresa.nomeFantasia, vagaTitulo: vaga.titulo, matchId })
+    ),
+    notificar(
+      { tipo: "empresa", perfilId: empresa._id },
+      msgNovoMatch({ lado: "empresa", outroNome: profissional.nomeCompleto, vagaTitulo: vaga.titulo, matchId })
+    ),
+  ]);
 
   // Mesmo contrato do fluxo de candidatura manual — aguardado, pois na Vercel
   // a função encerra assim que a resposta sai.

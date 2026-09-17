@@ -8,6 +8,7 @@ import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import DeckEmpresa from "@/components/match/DeckEmpresa";
 import DeckProfissional from "@/components/match/DeckProfissional";
+import AtivarPush from "@/components/notificacoes/AtivarPush";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
 import Vaga from "@/models/Vaga";
@@ -117,12 +118,15 @@ export default async function DescobrirPage() {
               </p>
             </div>
           </div>
-          <Link href="/matches">
-            <Button size="sm" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white gap-1.5">
-              <MessageCircle className="h-4 w-4" />
-              Matches
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <AtivarPush />
+            <Link href="/matches">
+              <Button size="sm" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white gap-1.5">
+                <MessageCircle className="h-4 w-4" />
+                Matches
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 

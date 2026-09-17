@@ -3,6 +3,7 @@ import { Flame, MessageCircle } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
+import SinoNotificacoes from "@/components/notificacoes/SinoNotificacoes";
 
 export default async function Navbar() {
   const session = await auth();
@@ -43,9 +44,12 @@ export default async function Navbar() {
             </Link>
           )}
           {session ? (
-            <Link href="/painel">
-              <Button size="sm">Meu painel</Button>
-            </Link>
+            <>
+              <SinoNotificacoes />
+              <Link href="/painel">
+                <Button size="sm">Meu painel</Button>
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/entrar">

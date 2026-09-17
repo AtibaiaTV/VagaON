@@ -27,6 +27,7 @@ export default auth((req) => {
     "/profissionais",
     "/descobrir",
     "/matches",
+    "/notificacoes",
   ];
   const estaEmRotaProtegida = rotasProtegidas.some((rota) =>
     pathname.startsWith(rota)

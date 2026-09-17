@@ -7,6 +7,7 @@ import Profissional from "@/models/Profissional";
 import Empresa from "@/models/Empresa";
 import User from "@/models/User";
 import { notifyRedesaCandidatura } from "@/lib/redesa-webhook";
+import { msgNovaCandidatura, notificar } from "@/lib/notificacoes";
 
 // GET — empresa lista candidatos da vaga
 export async function GET(
@@ -106,6 +107,16 @@ export async function POST(
         mensagem: mensagem ?? undefined,
       });
     }
+
+    // A empresa fica sabendo na hora que chegou candidato.
+    await notificar(
+      { tipo: "empresa", perfilId: vaga.empresaId },
+      msgNovaCandidatura({
+        profissionalNome: profissional.nomeCompleto,
+        vagaTitulo: vaga.titulo,
+        vagaId: String(vaga._id),
+      })
+    );
 
     return NextResponse.json(candidatura, { status: 201 });
   } catch (err: unknown) {

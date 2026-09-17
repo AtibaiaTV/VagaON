@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Candidatura from "@/models/Candidatura";
 import Empresa from "@/models/Empresa";
+import Vaga from "@/models/Vaga";
+import { msgStatusCandidatura, notificar } from "@/lib/notificacoes";
 
 // PATCH — empresa atualiza status da candidatura
 export async function PATCH(
@@ -34,11 +36,23 @@ export async function PATCH(
       return NextResponse.json({ error: "Status inválido." }, { status: 400 });
     }
 
+    const statusAnterior = candidatura.status;
     const atualizada = await Candidatura.findByIdAndUpdate(
       params.id,
       { $set: { ...(status && { status }), ...(notaEmpresa !== undefined && { notaEmpresa }) } },
       { new: true }
     );
+
+    // O candidato fica sabendo da decisão — a Gupy chama isso de "feedback ao candidato".
+    if (status && status !== statusAnterior) {
+      const vaga = await Vaga.findById(candidatura.vagaId).select("titulo").lean();
+      const msg = msgStatusCandidatura({
+        status,
+        vagaTitulo: vaga?.titulo ?? "sua vaga",
+        empresaNome: empresa.nomeFantasia,
+      });
+      if (msg) await notificar({ tipo: "profissional", perfilId: candidatura.profissionalId }, msg);
+    }
 
     return NextResponse.json(atualizada);
   } catch {
