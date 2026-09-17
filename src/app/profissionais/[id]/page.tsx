@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star } from "lucide-react";
+import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
 import { resumoReputacaoPublico } from "@/lib/reputacao";
@@ -35,6 +35,7 @@ interface IProfissionalLean {
   experiencias: IExperiencia[];
   habilidades: string[];
   reputacao?: unknown;
+  videoApresentacao?: { url: string; duracao: number } | null;
 }
 
 const TIPOS_LABEL: Record<string, string> = {
@@ -141,6 +142,27 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
 
       {/* Conteúdo */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-5">
+
+        {/* Vídeo de apresentação */}
+        {prof.videoApresentacao?.url && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Video className="h-4 w-4 text-primary" />
+                Vídeo de apresentação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <video
+                src={prof.videoApresentacao.url}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full max-h-80 rounded-xl bg-black"
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Resumo */}
         {prof.resumoProfissional && (

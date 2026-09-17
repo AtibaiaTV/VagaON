@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/db";
+import { iaConfigurada } from "@/lib/ia/cliente";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
 import FormEmpresa from "./FormEmpresa";
@@ -28,6 +29,7 @@ export default async function PerfilEditarPage() {
       <FormProfissional
         profileId={session.user.profileId ?? ""}
         dados={profissional ? JSON.parse(JSON.stringify(profissional)) : null}
+        iaDisponivel={iaConfigurada()}
       />
     );
   }

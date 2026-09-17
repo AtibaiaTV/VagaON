@@ -46,6 +46,8 @@ export interface IProfissional extends Document {
   linkedinUrl: string | null;
   curriculoUrl: string | null;
   completude: number;
+  /** Vídeo curto de apresentação (Cloudinary). Mostrado às empresas, nunca pontuado. */
+  videoApresentacao: { url: string; publicId: string; duracao: number; enviadoEm: Date } | null;
 
   // ─── Sinais usados pelo motor de match ──────────────────────────────────────
   /** GeoJSON Point [lng, lat] — permite pré-filtro por raio com índice 2dsphere. */
@@ -97,6 +99,16 @@ const ExperienciaSchema = new Schema<IExperiencia>({
   descricao: { type: String, default: "" },
 });
 
+const VideoSchema = new Schema(
+  {
+    url: { type: String, required: true },
+    publicId: { type: String, required: true },
+    duracao: { type: Number, default: 0, min: 0 },
+    enviadoEm: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const ProfissionalSchema = new Schema<IProfissional>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
@@ -121,6 +133,7 @@ const ProfissionalSchema = new Schema<IProfissional>(
     linkedinUrl: { type: String, default: null },
     curriculoUrl: { type: String, default: null },
     completude: { type: Number, default: 0, min: 0, max: 100 },
+    videoApresentacao: { type: VideoSchema, default: null },
 
     // ─── Sinais usados pelo motor de match ────────────────────────────────────
     // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra

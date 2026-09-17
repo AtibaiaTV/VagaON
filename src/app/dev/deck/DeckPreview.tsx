@@ -38,6 +38,7 @@ const VAGAS: FeedVagaItem[] = [
       anosExperienciaMin: 5,
       posicoes: 1,
       afirmativa: ["primeiro_emprego"],
+      perguntasTriagem: ["Você tem disponibilidade para o turno da noite (16h–1h)?", "Já liderou uma brigada? Conte em uma frase."],
       empresa: {
         id: "e1",
         nome: "Trattoria Nonna Rosa",
@@ -77,6 +78,7 @@ const VAGAS: FeedVagaItem[] = [
       anosExperienciaMin: 6,
       posicoes: 1,
       afirmativa: [],
+      perguntasTriagem: [],
       empresa: { id: "e2", nome: "Hotel Villa Verde", logo: null, setor: "hotel", verificada: false, reputacao: null },
       criadaEm: new Date().toISOString(),
     },
@@ -109,6 +111,7 @@ const VAGAS: FeedVagaItem[] = [
       anosExperienciaMin: 2,
       posicoes: 4,
       afirmativa: [],
+      perguntasTriagem: [],
       empresa: { id: "e3", nome: "Buffet Solar", logo: null, setor: "buffet", verificada: true, reputacao: null },
       criadaEm: new Date().toISOString(),
     },
@@ -145,6 +148,7 @@ const PROFISSIONAIS: FeedProfissionalItem[] = [
       completude: 95,
       oculto: false,
       reputacao: { media: 4.8, total: 5, recomendacoes: 5, pontosFortes: ["Pontualidade", "Trabalho em equipe"], confiavel: true },
+      video: { url: "https://res.cloudinary.com/demo/video/upload/dog.mp4", duracao: 27 },
     },
   },
   {
@@ -176,6 +180,7 @@ const PROFISSIONAIS: FeedProfissionalItem[] = [
       completude: 70,
       oculto: true,
       reputacao: null,
+      video: null,
     },
   },
 ];

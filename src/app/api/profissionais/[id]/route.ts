@@ -1,10 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import { notifyRedesaTalento } from "@/lib/redesa-webhook";
 import { calcularCompletude } from "@/lib/completude";
+import { PASTA_VIDEOS } from "@/constants/upload";
+
+/**
+ * Só aceita vídeo que veio do nosso Cloudinary, na pasta de vídeos — o
+ * cliente manda a URL, mas não pode apontar para qualquer lugar.
+ */
+function validarVideo(v: unknown): { url: string; publicId: string; duracao: number; enviadoEm: Date } | null | undefined {
+  if (v === null) return null;
+  if (!v || typeof v !== "object") return undefined;
+  const { url, publicId, duracao } = v as Record<string, unknown>;
+  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  if (!cloud || typeof url !== "string" || typeof publicId !== "string") return undefined;
+  if (!url.startsWith(`https://res.cloudinary.com/${cloud}/video/upload/`)) return undefined;
+  if (!publicId.startsWith(`${PASTA_VIDEOS}/`) || publicId.length > 200) return undefined;
+  const seg = Number(duracao);
+  return { url, publicId, duracao: Number.isFinite(seg) ? Math.max(0, Math.min(600, Math.round(seg))) : 0, enviadoEm: new Date() };
+}
+
+async function apagarVideo(publicId: string) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloudName || !apiKey || !apiSecret) return;
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
+  await cloudinary.uploader.destroy(publicId, { resource_type: "video" }).catch((err) => {
+    console.error("[profissionais] falha ao apagar vídeo antigo:", err);
+  });
+}
 
 export async function GET(
   _req: NextRequest,
@@ -65,6 +94,18 @@ export async function PUT(
       atualizacao["match.ativo"] = body.matchAtivo;
     }
 
+    // Vídeo de apresentação: valida a origem e apaga o anterior se trocou/removeu.
+    let videoAntigoParaApagar: string | null = null;
+    if (body.videoApresentacao !== undefined) {
+      const video = validarVideo(body.videoApresentacao);
+      if (video === undefined) {
+        return NextResponse.json({ error: "Vídeo inválido." }, { status: 400 });
+      }
+      const atualId = profissional.videoApresentacao?.publicId ?? null;
+      if (atualId && atualId !== video?.publicId) videoAntigoParaApagar = atualId;
+      atualizacao.videoApresentacao = video;
+    }
+
     // Recalcula completude
     const dadosAtuais = { ...profissional.toObject(), ...atualizacao };
     atualizacao.completude = calcularCompletude(dadosAtuais);
@@ -74,6 +115,7 @@ export async function PUT(
       { $set: atualizacao },
       { new: true }
     );
+    if (videoAntigoParaApagar) await apagarVideo(videoAntigoParaApagar);
 
     // Notifica o banco de talentos da Redesa com os dados atualizados —
     // mesmo vagaonCandidatoId do cadastro inicial, para que a Redesa

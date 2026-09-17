@@ -54,6 +54,8 @@ export interface CardVaga {
   anosExperienciaMin: number;
   posicoes: number;
   afirmativa: string[];
+  /** Perguntas curtas que a empresa faz a quem se candidata (até 3). */
+  perguntasTriagem: string[];
   empresa: {
     id: string;
     nome: string;
@@ -96,6 +98,7 @@ export function paraCardVaga(v: Doc): CardVaga {
     anosExperienciaMin: v.anosExperienciaMin ?? 0,
     posicoes: v.posicoes ?? 1,
     afirmativa: v.afirmativa ?? [],
+    perguntasTriagem: Array.isArray(v.perguntasTriagem) ? v.perguntasTriagem : [],
     empresa: {
       id: String(emp._id ?? v.empresaId ?? ""),
       nome: emp.nomeFantasia ?? "",
@@ -131,6 +134,8 @@ export interface CardProfissional {
   oculto: boolean;
   /** Como as empresas avaliaram (null com < 3 avaliações). */
   reputacao: ReputacaoPublica | null;
+  /** Vídeo de apresentação — some junto com a foto no modo às cegas. */
+  video: { url: string; duracao: number } | null;
 }
 
 export function paraCardProfissional(p: Doc, opcoes: { oculto?: boolean } = {}): CardProfissional {
@@ -149,6 +154,7 @@ export function paraCardProfissional(p: Doc, opcoes: { oculto?: boolean } = {}):
     foto: oculto ? null : (p.fotoPerfil ?? null),
     oculto,
     reputacao: resumoReputacaoPublico(p.reputacao),
+    video: !oculto && p.videoApresentacao?.url ? { url: p.videoApresentacao.url, duracao: p.videoApresentacao.duracao ?? 0 } : null,
     cidade: p.cidade ?? "",
     estado: p.estado ?? "",
     especialidades: p.especialidades ?? [],

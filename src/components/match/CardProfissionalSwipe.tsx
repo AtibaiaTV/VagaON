@@ -1,9 +1,11 @@
 "use client";
 
-import { Briefcase, Heart, MapPin, Plane, Zap, Languages, EyeOff, UserRound } from "lucide-react";
+import { useState } from "react";
+import { Briefcase, Heart, MapPin, Plane, Zap, Languages, EyeOff, UserRound, PlayCircle } from "lucide-react";
 import { TIPO_CONTRATO_LABEL } from "@/constants/match";
 import type { FeedProfissionalItem } from "@/lib/servicos/feed";
 import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
+import { formatarDuracao } from "@/components/perfil/VideoApresentacao";
 import ScoreBadge from "./ScoreBadge";
 
 function iniciais(nome: string) {
@@ -18,6 +20,7 @@ function iniciais(nome: string) {
 /** Face do card de profissional no deck da empresa. */
 export default function CardProfissionalSwipe({ item, topo }: { item: FeedProfissionalItem; topo: boolean }) {
   const { profissional: p, score, jaCurtiu } = item;
+  const [videoAberto, setVideoAberto] = useState(false);
 
   return (
     <article className="h-full w-full rounded-3xl overflow-hidden bg-white shadow-xl border border-border/40 flex flex-col">
@@ -68,6 +71,32 @@ export default function CardProfissionalSwipe({ item, topo }: { item: FeedProfis
 
       <div className={`flex-1 px-5 py-4 space-y-4 ${topo ? "overflow-y-auto scrollbar-hide" : "overflow-hidden"}`}>
         <ScoreBadge score={score} />
+
+        {p.video && (
+          // Interagir com o player não pode virar arrasto do card.
+          <div onPointerDown={(e) => e.stopPropagation()}>
+            {videoAberto ? (
+              <video
+                src={p.video.url}
+                controls
+                autoPlay
+                playsInline
+                preload="metadata"
+                className="w-full max-h-56 rounded-xl bg-black"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setVideoAberto(true)}
+                className="w-full flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2.5 text-left hover:bg-primary/10 transition-colors"
+              >
+                <PlayCircle className="h-6 w-6 text-primary shrink-0" />
+                <span className="text-sm font-semibold text-primary">Ver vídeo de apresentação</span>
+                <span className="ml-auto text-xs text-muted-foreground">{formatarDuracao(p.video.duracao)}</span>
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-1.5">
           {p.especialidadesLabels.map((e) => (

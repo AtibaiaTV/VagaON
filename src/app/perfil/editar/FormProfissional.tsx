@@ -11,40 +11,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 import BrandBand from "@/components/shared/BrandBand";
+import ImportarCurriculo from "@/components/ia/ImportarCurriculo";
+import VideoApresentacao, { type VideoPerfil } from "@/components/perfil/VideoApresentacao";
 import { ESTADOS } from "@/constants/estados";
-import { ESCALAS, RAIO_PADRAO_KM, TURNOS } from "@/constants/match";
+import { ESCALAS, NIVEIS_IDIOMA, RAIO_PADRAO_KM, TURNOS } from "@/constants/match";
 import { AMPLITUDE_ESPECIALIDADES } from "@/lib/match/pesos";
-import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock, Flame } from "lucide-react";
-
-interface Experiencia {
-  _id?: string;
-  cargo: string;
-  empresa: string;
-  cidade: string;
-  estado: string;
-  dataInicio: string;
-  dataFim: string;
-  descricao: string;
-}
+import type { PerfilExtraido } from "@/lib/ia/curriculo";
+import {
+  descreverMesclagem,
+  mesclarPerfilExtraido,
+  type ExperienciaForm as Experiencia,
+  type IdiomaForm,
+  type RelatorioMesclagem,
+} from "@/lib/ia/mesclar-perfil";
+import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock, Flame, Languages, Undo2, AlertTriangle } from "lucide-react";
 
 interface Props {
   profileId: string;
   dados: Record<string, unknown> | null;
+  /** ANTHROPIC_API_KEY configurada no servidor — mostra o painel "Preencher com IA". */
+  iaDisponivel?: boolean;
 }
 
 const ETAPAS = ["Dados pessoais", "Especialidades", "Experiências", "Disponibilidade"];
 
-export default function FormProfissional({ profileId, dados }: Props) {
+interface Importacao {
+  relatorio: RelatorioMesclagem;
+  observacoes: string[];
+  confianca: PerfilExtraido["confianca"];
+  /** Estado anterior, para "Desfazer". */
+  anterior: {
+    pessoal: Record<string, unknown>;
+    especialidades: string[];
+    habilidades: string;
+    experiencias: Experiencia[];
+    idiomas: IdiomaForm[];
+  };
+}
+
+export default function FormProfissional({ profileId, dados, iaDisponivel = false }: Props) {
   const router = useRouter();
   const [etapa, setEtapa] = useState(0);
   const [salvando, setSalvando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
+  const [importacao, setImportacao] = useState<Importacao | null>(null);
 
   const disponibilidadeDados = dados?.disponibilidade as Record<string, unknown> | undefined;
 
   const [fotoPerfil, setFotoPerfil] = useState<string>((dados?.fotoPerfil as string) ?? "");
   const [uploadandoFoto, setUploadandoFoto] = useState(false);
+  const [video, setVideo] = useState<VideoPerfil | null>((dados?.videoApresentacao as VideoPerfil | null) ?? null);
 
   const [pessoal, setPessoal] = useState({
     nomeCompleto: (dados?.nomeCompleto as string) ?? "",
@@ -68,6 +85,37 @@ export default function FormProfissional({ profileId, dados }: Props) {
   const [experiencias, setExperiencias] = useState<Experiencia[]>(
     (dados?.experiencias as Experiencia[]) ?? []
   );
+  const [idiomas, setIdiomas] = useState<IdiomaForm[]>(
+    ((dados?.idiomas as IdiomaForm[]) ?? []).map((i) => ({ idioma: i.idioma ?? "", nivel: i.nivel ?? "intermediario" }))
+  );
+
+  /** Aplica a sugestão da IA sem sobrescrever o que já estava preenchido. */
+  function aplicarPerfilExtraido(perfil: PerfilExtraido) {
+    const anterior = { pessoal: { ...pessoal }, especialidades, habilidades, experiencias, idiomas };
+    const { estado, relatorio } = mesclarPerfilExtraido(
+      { pessoal, especialidades, habilidades, experiencias, idiomas },
+      perfil
+    );
+    setPessoal(estado.pessoal);
+    setEspecialidades(estado.especialidades);
+    setHabilidades(estado.habilidades);
+    setExperiencias(estado.experiencias);
+    setIdiomas(estado.idiomas);
+    setImportacao({ relatorio, observacoes: perfil.observacoes, confianca: perfil.confianca, anterior });
+    setErro("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function desfazerImportacao() {
+    if (!importacao) return;
+    const a = importacao.anterior;
+    setPessoal(a.pessoal as typeof pessoal);
+    setEspecialidades(a.especialidades);
+    setHabilidades(a.habilidades);
+    setExperiencias(a.experiencias);
+    setIdiomas(a.idiomas);
+    setImportacao(null);
+  }
 
   const [disponibilidade, setDisponibilidade] = useState({
     tipo: (disponibilidadeDados?.tipo as string[]) ?? [],
@@ -143,6 +191,8 @@ export default function FormProfissional({ profileId, dados }: Props) {
     const payload = {
       ...pessoal,
       fotoPerfil,
+      videoApresentacao: video,
+      idiomas: idiomas.filter((i) => i.idioma.trim()).map((i) => ({ idioma: i.idioma.trim(), nivel: i.nivel })),
       especialidades,
       habilidades: habilidades.split(",").map((h) => h.trim()).filter(Boolean),
       experiencias,
@@ -237,6 +287,56 @@ export default function FormProfissional({ profileId, dados }: Props) {
           </div>
         )}
 
+        {importacao && (
+          <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 space-y-2">
+            <div className="flex items-start justify-between gap-3">
+              <p className="flex items-start gap-2">
+                <Sparkles className="h-4 w-4 mt-0.5 shrink-0 text-green-700" />
+                <span>
+                  <span className="font-semibold">Currículo lido.</span> {descreverMesclagem(importacao.relatorio)}{" "}
+                  Passe pelas {ETAPAS.length} etapas, confira tudo e salve.
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={desfazerImportacao}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-green-800 hover:text-green-950 shrink-0"
+              >
+                <Undo2 className="h-3.5 w-3.5" /> Desfazer
+              </button>
+            </div>
+            {importacao.relatorio.mantidos.length > 0 && (
+              <p className="text-xs text-green-800/80 pl-6">
+                Mantivemos o que você já tinha em: {importacao.relatorio.mantidos.join(", ")}.
+              </p>
+            )}
+            {(importacao.confianca === "baixa" || importacao.relatorio.experienciasSemData > 0 || importacao.observacoes.length > 0) && (
+              <ul className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 space-y-0.5 ml-6">
+                {importacao.confianca === "baixa" && (
+                  <li className="flex items-start gap-1.5">
+                    <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                    O documento estava difícil de ler — confira cada campo com atenção.
+                  </li>
+                )}
+                {importacao.relatorio.experienciasSemData > 0 && (
+                  <li>
+                    {importacao.relatorio.experienciasSemData} experiência(s) vieram sem data de início — complete na etapa 3.
+                  </li>
+                )}
+                {importacao.observacoes.map((o, i) => (
+                  <li key={i}>{o}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {etapa === 0 && iaDisponivel && (
+          <div className="mb-4">
+            <ImportarCurriculo aoExtrair={aplicarPerfilExtraido} recolhido={Boolean(dados?.resumoProfissional) && experiencias.length > 0} />
+          </div>
+        )}
+
         {/* Etapa 1: Dados pessoais */}
         {etapa === 0 && (
           <Card>
@@ -307,6 +407,8 @@ export default function FormProfissional({ profileId, dados }: Props) {
                   )}
                 </div>
               </div>
+
+              <VideoApresentacao video={video} onChange={setVideo} onErro={setErro} />
 
               <div className="space-y-1">
                 <Label htmlFor="nomeCompleto">Nome completo *</Label>
@@ -729,6 +831,56 @@ export default function FormProfissional({ profileId, dados }: Props) {
                         {e.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1.5">
+                    <Languages className="h-3.5 w-3.5 text-primary" /> Idiomas
+                  </Label>
+                  <p className="text-xs text-muted-foreground -mt-0.5">
+                    Vagas em hotéis e eventos costumam pedir inglês ou espanhol — contam no match.
+                  </p>
+                  <div className="space-y-2">
+                    {idiomas.map((i, idx) => (
+                      <div key={idx} className="grid grid-cols-[1fr_150px_32px] gap-2 items-center">
+                        <Input
+                          value={i.idioma}
+                          onChange={(e) => setIdiomas((l) => l.map((x, j) => (j === idx ? { ...x, idioma: e.target.value } : x)))}
+                          placeholder="Ex: Inglês"
+                          aria-label="Idioma"
+                        />
+                        <Select
+                          value={i.nivel}
+                          items={NIVEIS_IDIOMA}
+                          onValueChange={(v) => setIdiomas((l) => l.map((x, j) => (j === idx ? { ...x, nivel: v ?? "intermediario" } : x)))}
+                        >
+                          <SelectTrigger aria-label="Nível"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {NIVEIS_IDIOMA.map((n) => (
+                              <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <button
+                          type="button"
+                          onClick={() => setIdiomas((l) => l.filter((_, j) => j !== idx))}
+                          className="text-muted-foreground hover:text-destructive justify-self-center"
+                          aria-label="Remover idioma"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIdiomas((l) => [...l, { idioma: "", nivel: "intermediario" }])}
+                      className="gap-1.5"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Adicionar idioma
+                    </Button>
                   </div>
                 </div>
               </div>
