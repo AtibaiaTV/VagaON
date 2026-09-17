@@ -1,4 +1,16 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import {
+  ESCALA_VALUES,
+  NIVEL_IDIOMA_VALUES,
+  RAIO_PADRAO_KM,
+  TURNO_VALUES,
+} from "@/constants/match";
+import { geocodificarCidade } from "@/constants/municipios";
+
+interface IIdioma {
+  idioma: string;
+  nivel: string;
+}
 
 interface IExperiencia {
   _id?: mongoose.Types.ObjectId;
@@ -34,9 +46,37 @@ export interface IProfissional extends Document {
   linkedinUrl: string | null;
   curriculoUrl: string | null;
   completude: number;
+
+  // ─── Sinais usados pelo motor de match ──────────────────────────────────────
+  /** GeoJSON Point [lng, lat] — permite pré-filtro por raio com índice 2dsphere. */
+  localizacao: { type: "Point"; coordinates: [number, number] } | null;
+  /** Distância máxima que aceita percorrer até o trabalho, em km. */
+  raioKm: number;
+  pretensaoSalarial: {
+    min: number | null;
+    periodo: "hora" | "dia" | "mes";
+  };
+  turnos: string[];
+  escalas: string[];
+  idiomas: IIdioma[];
+  /** Derivado de `experiencias` — mantido em campo próprio para pontuar sem recalcular. */
+  anosExperiencia: number;
+  match: {
+    ativo: boolean;
+    ultimaAtividade: Date | null;
+  };
+
   createdAt: Date;
   updatedAt: Date;
 }
+
+const IdiomaSchema = new Schema<IIdioma>(
+  {
+    idioma: { type: String, required: true },
+    nivel: { type: String, enum: NIVEL_IDIOMA_VALUES, default: "basico" },
+  },
+  { _id: false }
+);
 
 const ExperienciaSchema = new Schema<IExperiencia>({
   cargo: { type: String, required: true },
@@ -72,12 +112,115 @@ const ProfissionalSchema = new Schema<IProfissional>(
     linkedinUrl: { type: String, default: null },
     curriculoUrl: { type: String, default: null },
     completude: { type: Number, default: 0, min: 0, max: 100 },
+
+    // ─── Sinais usados pelo motor de match ────────────────────────────────────
+    // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra
+    // o índice 2dsphere. O pre-save abaixo preenche o objeto inteiro ou null.
+    localizacao: {
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number], default: undefined }, // [lng, lat]
+    },
+    raioKm: { type: Number, default: RAIO_PADRAO_KM, min: 1, max: 500 },
+    pretensaoSalarial: {
+      min: { type: Number, default: null },
+      periodo: { type: String, enum: ["hora", "dia", "mes"], default: "mes" },
+    },
+    turnos: [{ type: String, enum: TURNO_VALUES }],
+    escalas: [{ type: String, enum: ESCALA_VALUES }],
+    idiomas: { type: [IdiomaSchema], default: [] },
+    anosExperiencia: { type: Number, default: 0, min: 0 },
+    match: {
+      ativo: { type: Boolean, default: true },
+      ultimaAtividade: { type: Date, default: null },
+    },
   },
   { timestamps: true }
 );
 
 ProfissionalSchema.index({ estado: 1, especialidades: 1 });
 ProfissionalSchema.index({ "disponibilidade.tipo": 1 });
+// Pré-filtro geográfico do feed.
+ProfissionalSchema.index({ localizacao: "2dsphere" });
+// Deck da empresa: candidatos ativos de uma especialidade.
+ProfissionalSchema.index({ "match.ativo": 1, especialidades: 1 });
+
+/** Soma os meses de todas as experiências, sem contar sobreposições em dobro. */
+export function calcularAnosExperiencia(experiencias: IExperiencia[]): number {
+  if (!experiencias?.length) return 0;
+
+  const periodos = experiencias
+    .filter((e) => e.dataInicio)
+    .map((e) => ({
+      inicio: new Date(e.dataInicio).getTime(),
+      fim: (e.dataFim ? new Date(e.dataFim) : new Date()).getTime(),
+    }))
+    .filter((p) => p.fim > p.inicio)
+    .sort((a, b) => a.inicio - b.inicio);
+
+  if (!periodos.length) return 0;
+
+  // Mescla intervalos sobrepostos (dois empregos ao mesmo tempo contam uma vez).
+  const mesclados: { inicio: number; fim: number }[] = [periodos[0]];
+  for (const p of periodos.slice(1)) {
+    const ultimo = mesclados[mesclados.length - 1];
+    if (p.inicio <= ultimo.fim) ultimo.fim = Math.max(ultimo.fim, p.fim);
+    else mesclados.push({ ...p });
+  }
+
+  const ms = mesclados.reduce((acc, p) => acc + (p.fim - p.inicio), 0);
+  return Math.round((ms / (1000 * 60 * 60 * 24 * 365.25)) * 10) / 10;
+}
+
+// Mantém geo e anos de experiência sincronizados sem exigir nada das rotas.
+// (Mongoose 9: middleware é async, sem callback `next`.)
+ProfissionalSchema.pre("save", async function () {
+  if (this.isModified("cidade") || this.isModified("estado") || !this.localizacao?.coordinates) {
+    const coords = geocodificarCidade(this.cidade, this.estado);
+    this.localizacao = coords
+      ? { type: "Point", coordinates: [coords.lng, coords.lat] }
+      : null;
+  }
+  if (this.isModified("experiencias")) {
+    this.anosExperiencia = calcularAnosExperiencia(this.experiencias);
+  }
+});
+
+// As rotas de edição usam findByIdAndUpdate, que não passa pelo pre-save.
+// Este hook cobre esse caminho: se cidade/estado/experiencias mudaram no
+// update, recalcula os campos derivados e injeta no $set.
+ProfissionalSchema.pre("findOneAndUpdate", async function () {
+  const update = this.getUpdate() as Record<string, unknown> | null;
+  if (!update || Array.isArray(update)) return;
+
+  const set = (update.$set ?? update) as Record<string, unknown>;
+  const mudouLocal = "cidade" in set || "estado" in set;
+  const mudouExp = "experiencias" in set;
+  if (!mudouLocal && !mudouExp) return;
+
+  // Precisa dos dois campos para geocodificar; busca o que não veio no update.
+  const atual = mudouLocal && !("cidade" in set && "estado" in set)
+    ? await this.model.findOne(this.getQuery()).select("cidade estado").lean<{ cidade: string; estado: string }>()
+    : null;
+
+  const derivados: Record<string, unknown> = {};
+
+  if (mudouLocal) {
+    const cidade = (set.cidade as string | undefined) ?? atual?.cidade;
+    const estado = (set.estado as string | undefined) ?? atual?.estado;
+    const coords = geocodificarCidade(cidade, estado);
+    derivados.localizacao = coords
+      ? { type: "Point", coordinates: [coords.lng, coords.lat] }
+      : null;
+  }
+
+  if (mudouExp) {
+    derivados.anosExperiencia = calcularAnosExperiencia(
+      (set.experiencias as IExperiencia[]) ?? []
+    );
+  }
+
+  this.set(derivados);
+});
 
 const Profissional: Model<IProfissional> =
   mongoose.models.Profissional ??

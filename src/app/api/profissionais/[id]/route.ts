@@ -61,6 +61,8 @@ export async function PUT(
       "especialidades", "resumoProfissional", "habilidades",
       "disponibilidade", "experiencias",
       "linkedinUrl", "curriculoUrl",
+      // Preferências do match
+      "raioKm", "pretensaoSalarial", "turnos", "escalas", "idiomas",
     ];
 
     const atualizacao: Record<string, unknown> = {};
@@ -68,6 +70,10 @@ export async function PUT(
       if (body[campo] !== undefined) {
         atualizacao[campo] = body[campo];
       }
+    }
+    // Liga/desliga a presença no deck das empresas sem expor o resto de `match`.
+    if (typeof body.matchAtivo === "boolean") {
+      atualizacao["match.ativo"] = body.matchAtivo;
     }
 
     // Recalcula completude

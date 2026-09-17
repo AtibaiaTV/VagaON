@@ -4,7 +4,8 @@ import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
 import Vaga from "@/models/Vaga";
 import Candidatura from "@/models/Candidatura";
-import { Users, Building2, ChefHat, Briefcase, ClipboardList, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { Users, Building2, ChefHat, Briefcase, ClipboardList, TrendingUp, FlaskConical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface StatCardProps {
@@ -66,9 +67,18 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Visão geral da plataforma VagaON.</p>
+        </div>
+        <Link
+          href="/admin/match-lab"
+          className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 transition-colors shrink-0"
+        >
+          <FlaskConical className="h-4 w-4" />
+          Match Lab
+        </Link>
       </div>
 
       {/* Cards de estatísticas */}

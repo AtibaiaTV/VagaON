@@ -81,7 +81,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { titulo, descricao, requisitos, tipo, especialidade, salario, periodo, cidade, estado, remoto } = body;
+    const {
+      titulo, descricao, requisitos, tipo, especialidade, salario, periodo, cidade, estado, remoto,
+      // Sinais do match (todos opcionais)
+      especialidadesAceitas, anosExperienciaMin, habilidadesDesejadas, turno, escala, idiomasDesejados, posicoes,
+    } = body;
 
     if (!titulo || !descricao || !tipo || !especialidade || !cidade || !estado) {
       return NextResponse.json({ error: "Preencha todos os campos obrigatórios." }, { status: 400 });
@@ -101,6 +105,13 @@ export async function POST(req: NextRequest) {
       remoto: remoto ?? false,
       status: "ativa",
       aprovadaPorAdmin: true,
+      especialidadesAceitas: Array.isArray(especialidadesAceitas) ? especialidadesAceitas : [],
+      anosExperienciaMin: Number(anosExperienciaMin) || 0,
+      habilidadesDesejadas: Array.isArray(habilidadesDesejadas) ? habilidadesDesejadas : [],
+      turno: turno || null,
+      escala: escala || null,
+      idiomasDesejados: Array.isArray(idiomasDesejados) ? idiomasDesejados : [],
+      posicoes: Math.max(1, Number(posicoes) || 1),
     });
 
     return NextResponse.json(vaga, { status: 201 });

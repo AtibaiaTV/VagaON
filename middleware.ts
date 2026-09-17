@@ -19,8 +19,15 @@ export default auth((req) => {
     }
   }
 
-  // Páginas autenticadas genéricas (painel, perfil, candidaturas, profissionais)
-  const rotasProtegidas = ["/painel", "/perfil", "/candidaturas", "/profissionais"];
+  // Páginas autenticadas genéricas (painel, perfil, candidaturas, profissionais, match)
+  const rotasProtegidas = [
+    "/painel",
+    "/perfil",
+    "/candidaturas",
+    "/profissionais",
+    "/descobrir",
+    "/matches",
+  ];
   const estaEmRotaProtegida = rotasProtegidas.some((rota) =>
     pathname.startsWith(rota)
   );

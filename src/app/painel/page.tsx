@@ -4,7 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -63,6 +63,37 @@ export default async function PainelPage() {
 
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {role !== "admin" && (
+            <>
+              <Link href="/descobrir">
+                <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary hover:shadow-md transition-all cursor-pointer h-full">
+                  <CardHeader>
+                    <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mb-2">
+                      <Flame className="h-5 w-5 text-white" />
+                    </div>
+                    <CardTitle className="text-base">Descobrir</CardTitle>
+                    <CardDescription>
+                      {role === "empresa"
+                        ? "Deslize pelos candidatos mais compatíveis com cada vaga."
+                        : "Deslize pelas vagas ranqueadas para o seu perfil."}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <Link href="/matches">
+                <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer h-full">
+                  <CardHeader>
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
+                      <MessageCircle className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-base">Matches</CardTitle>
+                    <CardDescription>Converse com quem também demonstrou interesse.</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            </>
+          )}
+
           {role === "profissional" && (
             <>
               <Link href="/perfil/editar">
