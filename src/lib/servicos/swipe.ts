@@ -12,6 +12,7 @@ import Swipe, { type DirecaoSwipe } from "@/models/Swipe";
 import User from "@/models/User";
 import Vaga, { type IVaga } from "@/models/Vaga";
 import { LIMITE_LIKES_DIA } from "@/constants/match";
+import { montarTriagem } from "@/lib/triagem";
 import type { Ator } from "./ator";
 import { ErroAtor } from "./erros";
 
@@ -169,11 +170,27 @@ async function criarMatch({ vaga, profissional, empresa, score, explicacoes }: D
   });
   let candidaturaNova = false;
 
+  // Respostas de triagem dadas no deck viajam no swipe até aqui.
+  const swipeProfissional = await Swipe.findOne({
+    vagaId: vaga._id,
+    profissionalId: profissional._id,
+    autorTipo: "profissional",
+  })
+    .select("respostasTriagem")
+    .lean();
+  const triagem = montarTriagem(vaga, swipeProfissional?.respostasTriagem);
+
   if (candidatura) {
+    let mudou = false;
     if (candidatura.status === "enviada" || candidatura.status === "visualizada") {
       candidatura.status = "em_analise";
-      await candidatura.save();
+      mudou = true;
     }
+    if (!candidatura.triagem && triagem) {
+      candidatura.triagem = triagem;
+      mudou = true;
+    }
+    if (mudou) await candidatura.save();
   } else {
     try {
       candidatura = await Candidatura.create({
@@ -182,6 +199,7 @@ async function criarMatch({ vaga, profissional, empresa, score, explicacoes }: D
         empresaId: empresa._id,
         status: "em_analise",
         mensagem: `Match VagaON — aderência de ${score}%`,
+        triagem,
         snapshotProfissional: {
           nomeCompleto: profissional.nomeCompleto,
           especialidades: profissional.especialidades,

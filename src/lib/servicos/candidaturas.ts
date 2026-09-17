@@ -14,6 +14,7 @@ import {
   aplicarStatusMatch,
   type StatusCandidatura,
 } from "./status";
+import { triagemParaKanban, type TriagemKanban } from "./triagem";
 
 /**
  * Funil de candidatos de uma vaga (Kanban da empresa).
@@ -43,6 +44,10 @@ export interface CandidatoKanban {
   matchId: string | null;
   /** true quando o modo às cegas escondeu nome e foto. */
   oculto: boolean;
+  /** Respostas às perguntas da vaga + leitura da IA (null se não respondeu). */
+  triagem: TriagemKanban | null;
+  /** Vídeo de apresentação — escondido junto com a foto no modo às cegas. */
+  video: { url: string; duracao: number } | null;
 }
 
 export async function candidatosDaVaga(
@@ -101,6 +106,8 @@ export async function candidatosDaVaga(
       score,
       matchId: matchPorProfissional.get(String(c.profissionalId)) ?? null,
       oculto,
+      triagem: triagemParaKanban(c.triagem),
+      video: !oculto && p?.videoApresentacao?.url ? { url: p.videoApresentacao.url, duracao: p.videoApresentacao.duracao ?? 0 } : null,
     };
   });
 

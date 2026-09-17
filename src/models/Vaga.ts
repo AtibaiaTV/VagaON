@@ -43,6 +43,8 @@ export interface IVaga extends Document {
   posicoes: number;
   /** Vaga afirmativa para estes grupos (ver AFIRMATIVAS). Vazio = aberta a todos. */
   afirmativa: string[];
+  /** Até 3 perguntas curtas feitas a quem se candidata (respostas ficam na candidatura). */
+  perguntasTriagem: string[];
   /** GeoJSON Point [lng, lat]. */
   localizacao: { type: "Point"; coordinates: [number, number] } | null;
   match: {
@@ -109,6 +111,7 @@ const VagaSchema = new Schema<IVaga>(
     idiomasDesejados: [{ type: String }],
     posicoes: { type: Number, default: 1, min: 1 },
     afirmativa: [{ type: String, enum: AFIRMATIVA_VALUES }],
+    perguntasTriagem: [{ type: String, maxlength: 200 }],
     // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra
     // o índice 2dsphere. O pre-save abaixo preenche o objeto inteiro ou null.
     localizacao: {

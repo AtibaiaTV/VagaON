@@ -9,6 +9,7 @@ import type { IMatch } from "@/models/Match";
 import CardVagaSwipe from "./CardVagaSwipe";
 import MatchOverlay from "./MatchOverlay";
 import SwipeDeck, { type Direcao } from "./SwipeDeck";
+import TriagemSheet from "./TriagemSheet";
 
 type MatchAberto = { id: string; score: number; snapshot: IMatch["snapshot"] };
 
@@ -18,8 +19,11 @@ export default function DeckProfissional() {
   const [carregando, setCarregando] = useState(true);
   const [restantes, setRestantes] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [sucesso, setSucesso] = useState<string | null>(null);
   const [travado, setTravado] = useState(false);
   const [match, setMatch] = useState<MatchAberto | null>(null);
+  /** Vaga curtida que tem perguntas de triagem — abre a folha de respostas. */
+  const [triagem, setTriagem] = useState<FeedVagaItem | null>(null);
 
   const buscando = useRef(false);
   const vistos = useRef(new Set<string>());
@@ -68,7 +72,24 @@ export default function DeckProfissional() {
       return;
     }
     if (data.match) setMatch(data.match);
+    if (res.ok && direcao !== "pass" && item.vaga.perguntasTriagem.length > 0) setTriagem(item);
   }, []);
+
+  const enviarTriagem = useCallback(
+    async (respostas: string[]) => {
+      if (!triagem) return;
+      const res = await fetch("/api/match/triagem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vagaId: triagem.vaga.id, respostas }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Não foi possível enviar as respostas.");
+      setTriagem(null);
+      setSucesso(`Respostas enviadas para ${triagem.vaga.empresa.nome}.`);
+    },
+    [triagem]
+  );
 
   const aoFicarNoFim = useCallback(
     (sobrando: number) => {
@@ -92,6 +113,14 @@ export default function DeckProfissional() {
         <div className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm text-amber-800 flex items-center justify-between gap-3">
           <span>{aviso}</span>
           <button type="button" className="text-xs font-semibold underline" onClick={() => setAviso(null)}>
+            fechar
+          </button>
+        </div>
+      )}
+      {sucesso && (
+        <div className="mb-3 rounded-xl bg-green-50 border border-green-200 px-4 py-2.5 text-sm text-green-800 flex items-center justify-between gap-3">
+          <span>{sucesso}</span>
+          <button type="button" className="text-xs font-semibold underline" onClick={() => setSucesso(null)}>
             fechar
           </button>
         </div>
@@ -132,6 +161,17 @@ export default function DeckProfissional() {
       />
 
       {match && <MatchOverlay match={match} lado="profissional" aoFechar={() => setMatch(null)} />}
+
+      {/* Depois da celebração do match (se houver), as perguntas da empresa. */}
+      {triagem && !match && (
+        <TriagemSheet
+          vagaTitulo={triagem.vaga.titulo}
+          empresaNome={triagem.vaga.empresa.nome}
+          perguntas={triagem.vaga.perguntasTriagem}
+          aoEnviar={enviarTriagem}
+          aoPular={() => setTriagem(null)}
+        />
+      )}
     </>
   );
 }

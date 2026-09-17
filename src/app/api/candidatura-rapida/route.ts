@@ -7,6 +7,7 @@ import { calcularCompletude } from "@/lib/completude";
 import { connectDB } from "@/lib/db";
 import { msgNovaCandidatura, notificar } from "@/lib/notificacoes";
 import { notifyRedesaCandidatura, notifyRedesaTalento } from "@/lib/redesa-webhook";
+import { montarTriagem } from "@/lib/triagem";
 import Candidatura from "@/models/Candidatura";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
       empresaId: vaga.empresaId,
       status: "enviada",
       mensagem: "Candidatura rápida pelo site",
+      triagem: montarTriagem(vaga, body.respostasTriagem),
       snapshotProfissional: {
         nomeCompleto: nome,
         especialidades: [especialidadeFinal],

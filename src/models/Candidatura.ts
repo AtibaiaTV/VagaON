@@ -1,5 +1,25 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+/** Leitura das respostas feita pela IA — apoio à empresa, nunca decisão. */
+export interface ITriagemIA {
+  resumo: string;
+  pontosFortes: string[];
+  ressalvas: string[];
+  /** 1 a 5. */
+  nota: number;
+  recomendaEntrevista: boolean;
+  modelo: string;
+  geradoEm: Date;
+}
+
+/** Perguntas da vaga no momento da resposta + o que o candidato respondeu. */
+export interface ITriagem {
+  perguntas: string[];
+  respostas: string[];
+  respondidaEm: Date;
+  ia: ITriagemIA | null;
+}
+
 export interface ICandidatura extends Document {
   vagaId: mongoose.Types.ObjectId;
   profissionalId: mongoose.Types.ObjectId;
@@ -14,9 +34,33 @@ export interface ICandidatura extends Document {
     estado: string;
     fotoPerfil: string | null;
   };
+  triagem: ITriagem | null;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const TriagemIASchema = new Schema<ITriagemIA>(
+  {
+    resumo: { type: String, default: "" },
+    pontosFortes: { type: [String], default: [] },
+    ressalvas: { type: [String], default: [] },
+    nota: { type: Number, min: 1, max: 5, default: 3 },
+    recomendaEntrevista: { type: Boolean, default: false },
+    modelo: { type: String, default: "" },
+    geradoEm: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
+const TriagemSchema = new Schema<ITriagem>(
+  {
+    perguntas: { type: [String], default: [] },
+    respostas: { type: [String], default: [] },
+    respondidaEm: { type: Date, default: Date.now },
+    ia: { type: TriagemIASchema, default: null },
+  },
+  { _id: false }
+);
 
 const CandidaturaSchema = new Schema<ICandidatura>(
   {
@@ -41,6 +85,7 @@ const CandidaturaSchema = new Schema<ICandidatura>(
       estado: { type: String, default: "" },
       fotoPerfil: { type: String, default: null },
     },
+    triagem: { type: TriagemSchema, default: null },
   },
   { timestamps: true }
 );

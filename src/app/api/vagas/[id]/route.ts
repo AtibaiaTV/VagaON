@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
+import { sanitizarPerguntas } from "@/lib/triagem";
 
 export async function GET(
   req: NextRequest,
@@ -58,6 +59,7 @@ export async function PUT(
     for (const c of campos) {
       if (body[c] !== undefined) atualizacao[c] = body[c];
     }
+    if (body.perguntasTriagem !== undefined) atualizacao.perguntasTriagem = sanitizarPerguntas(body.perguntasTriagem);
 
     const atualizada = await Vaga.findByIdAndUpdate(params.id, { $set: atualizacao }, { new: true });
     return NextResponse.json(atualizada);

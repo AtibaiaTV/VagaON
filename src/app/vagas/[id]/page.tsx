@@ -14,6 +14,7 @@ import BotaoCandidatar from "./BotaoCandidatar";
 import CandidaturaRapida from "./CandidaturaRapida";
 import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
 import { candidatosDaVaga, type CandidatoKanban } from "@/lib/servicos/candidaturas";
+import { iaConfigurada } from "@/lib/ia/cliente";
 import Empresa from "@/models/Empresa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -104,6 +105,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   }
 
   const especialidadeLabel = ESPECIALIDADES.find((e) => e.value === vagaObj.especialidade)?.label ?? vagaObj.especialidade;
+  const perguntasTriagem: string[] = Array.isArray(vagaObj.perguntasTriagem) ? vagaObj.perguntasTriagem : [];
 
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
@@ -195,7 +197,12 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
           {/* Ação — candidatar */}
           <div className="px-8 py-5 border-b bg-[#f9fdf9]">
             {session?.user.role === "profissional" && (
-              <BotaoCandidatar vagaId={params.id} jaCandidatou={jaCandidatou} vagaAtiva={vagaObj.status === "ativa"} />
+              <BotaoCandidatar
+                vagaId={params.id}
+                jaCandidatou={jaCandidatou}
+                vagaAtiva={vagaObj.status === "ativa"}
+                perguntas={perguntasTriagem}
+              />
             )}
             {!session &&
               (vagaObj.status === "ativa" ? (
@@ -205,6 +212,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                   cidade={vagaObj.cidade}
                   estado={vagaObj.estado}
                   especialidade={vagaObj.especialidade}
+                  perguntas={perguntasTriagem}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">Esta vaga não está mais disponível.</p>
@@ -310,7 +318,12 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                 .
               </p>
             ) : (
-              <KanbanCandidatos candidatos={candidatos} modoCego={modoCego} />
+              <KanbanCandidatos candidatos={candidatos} modoCego={modoCego} iaDisponivel={iaConfigurada()} />
+            )}
+            {isDonoEmpresa && perguntasTriagem.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Perguntas de triagem desta vaga: {perguntasTriagem.map((p, i) => `${i + 1}) ${p}`).join("  ")}
+              </p>
             )}
           </section>
         )}

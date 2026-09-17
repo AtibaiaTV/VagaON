@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
 import { ESPECIALIDADES } from "@/constants/especialidades";
+import { sanitizarPerguntas } from "@/lib/triagem";
 
 const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
   gastronomia: ["cozinha", "bar", "salao"],
@@ -85,6 +86,7 @@ export async function POST(req: NextRequest) {
       titulo, descricao, requisitos, tipo, especialidade, salario, periodo, cidade, estado, remoto,
       // Sinais do match (todos opcionais)
       especialidadesAceitas, anosExperienciaMin, habilidadesDesejadas, turno, escala, idiomasDesejados, posicoes, afirmativa,
+      perguntasTriagem,
     } = body;
 
     if (!titulo || !descricao || !tipo || !especialidade || !cidade || !estado) {
@@ -113,6 +115,7 @@ export async function POST(req: NextRequest) {
       idiomasDesejados: Array.isArray(idiomasDesejados) ? idiomasDesejados : [],
       posicoes: Math.max(1, Number(posicoes) || 1),
       afirmativa: Array.isArray(afirmativa) ? afirmativa : [],
+      perguntasTriagem: sanitizarPerguntas(perguntasTriagem),
     });
 
     return NextResponse.json(vaga, { status: 201 });

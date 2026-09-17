@@ -21,6 +21,12 @@ export interface ISwipe extends Document {
   direcao: DirecaoSwipe;
   /** Score no momento do swipe, para análise posterior (o perfil pode mudar). */
   score: number;
+  /**
+   * Respostas às perguntas de triagem da vaga, dadas logo depois do like.
+   * Única exceção ao "nunca se edita um swipe": ficam aqui até o match, quando
+   * são copiadas para a candidatura.
+   */
+  respostasTriagem: string[];
   createdAt: Date;
 }
 
@@ -32,6 +38,7 @@ const SwipeSchema = new Schema<ISwipe>(
     autorTipo: { type: String, enum: ["profissional", "empresa"], required: true },
     direcao: { type: String, enum: ["like", "pass", "super"], required: true },
     score: { type: Number, default: 0, min: 0, max: 100 },
+    respostasTriagem: { type: [String], default: [] },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
