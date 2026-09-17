@@ -1,7 +1,7 @@
 "use client";
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ESPECIALIDADES_AGRUPADAS } from "@/constants/especialidades";
+import { ESPECIALIDADES, ESPECIALIDADES_AGRUPADAS } from "@/constants/especialidades";
 
 interface Props {
   value: string;
@@ -9,10 +9,14 @@ interface Props {
   placeholder?: string;
 }
 
+// `items` deixa o Select.Value exibir o rótulo mesmo antes de a lista abrir
+// (sem isso, um valor pré-selecionado aparece como "garcom").
+const ITENS = ESPECIALIDADES.map((e) => ({ value: e.value, label: e.label }));
+
 /** Select agrupado por categoria — para selecionar UMA especialidade (vagas) */
 export default function EspecialidadeSelect({ value, onChange, placeholder = "Selecione a função" }: Props) {
   return (
-    <Select value={value} onValueChange={(v) => onChange(v ?? "")}>
+    <Select value={value} onValueChange={(v) => onChange(v ?? "")} items={ITENS}>
       <SelectTrigger>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

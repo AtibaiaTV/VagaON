@@ -10,6 +10,7 @@ import Link from "next/link";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink } from "lucide-react";
 import BotaoCandidatar from "./BotaoCandidatar";
+import CandidaturaRapida from "./CandidaturaRapida";
 import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
 import { candidatosDaVaga, type CandidatoKanban } from "@/lib/servicos/candidaturas";
 import Empresa from "@/models/Empresa";
@@ -189,23 +190,18 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
             {session?.user.role === "profissional" && (
               <BotaoCandidatar vagaId={params.id} jaCandidatou={jaCandidatou} vagaAtiva={vagaObj.status === "ativa"} />
             )}
-            {!session && (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <p className="text-sm text-muted-foreground">Faça login para se candidatar a esta vaga.</p>
-                <div className="flex gap-2">
-                  <Link href="/entrar">
-                    <button className="text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-5 py-2 rounded-lg transition-colors">
-                      Entrar
-                    </button>
-                  </Link>
-                  <Link href="/cadastro">
-                    <button className="text-sm font-semibold text-primary border border-primary/30 hover:bg-primary/5 px-5 py-2 rounded-lg transition-colors">
-                      Cadastrar
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            )}
+            {!session &&
+              (vagaObj.status === "ativa" ? (
+                <CandidaturaRapida
+                  vagaId={params.id}
+                  vagaTitulo={vagaObj.titulo}
+                  cidade={vagaObj.cidade}
+                  estado={vagaObj.estado}
+                  especialidade={vagaObj.especialidade}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">Esta vaga não está mais disponível.</p>
+              ))}
           </div>
 
           {/* Corpo do card — 2 colunas */}
