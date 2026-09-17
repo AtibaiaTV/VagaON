@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
+import { resumoReputacaoPublico } from "@/lib/reputacao";
 
 interface IExperiencia {
   cargo: string;
@@ -32,6 +34,7 @@ interface IProfissionalLean {
   disponibilidade: { tipo: string[]; imediata: boolean; dataDisponivel: string | null };
   experiencias: IExperiencia[];
   habilidades: string[];
+  reputacao?: unknown;
 }
 
 const TIPOS_LABEL: Record<string, string> = {
@@ -96,6 +99,9 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
             {/* Info */}
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-white">{prof.nomeCompleto}</h1>
+              <div className="mt-1">
+                <ReputacaoBadge rep={resumoReputacaoPublico(prof.reputacao)} claro />
+              </div>
 
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {(prof.especialidades ?? []).map((e) => (

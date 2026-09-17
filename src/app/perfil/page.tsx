@@ -5,6 +5,7 @@ import Empresa, { IEmpresa } from "@/models/Empresa";
 import Profissional, { IProfissional } from "@/models/Profissional";
 import User from "@/models/User";
 import PreferenciasNotificacao from "@/components/notificacoes/PreferenciasNotificacao";
+import CardReputacaoPropria from "@/components/avaliacoes/CardReputacaoPropria";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +116,7 @@ export default async function PerfilPage() {
             </CardContent>
           </Card>
 
+          <CardReputacaoPropria reputacao={empresa.reputacao} lado="empresa" />
           {cardNotificacoes}
         </main>
 
@@ -252,6 +254,7 @@ export default async function PerfilPage() {
             </Card>
           )}
 
+          <CardReputacaoPropria reputacao={prof.reputacao} lado="profissional" />
           {cardNotificacoes}
         </main>
 

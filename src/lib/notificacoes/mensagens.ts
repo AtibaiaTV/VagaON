@@ -146,6 +146,37 @@ export function msgLembreteEntrevista(p: {
   };
 }
 
+export function msgConviteAvaliacao(p: {
+  outroNome: string;
+  vagaTitulo: string;
+  matchId: string;
+}): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Como foi trabalhar com " + p.outroNome + "?",
+    corpo: `Avalie a experiência em "${p.vagaTitulo}". Leva 1 minuto e só é publicada quando os dois lados avaliam — ou em 14 dias.`,
+    url: `/avaliacoes?match=${p.matchId}`,
+  };
+}
+
+export function msgAvaliacaoPublicada(p: { outroNome: string; vagaTitulo: string }): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Você recebeu uma avaliação",
+    corpo: `${p.outroNome} avaliou a experiência em "${p.vagaTitulo}". Veja os critérios e, se quiser, responda.`,
+    url: "/avaliacoes",
+  };
+}
+
+export function msgDisputaAvaliacao(p: { quem: string; vagaTitulo: string }): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: "Avaliação contestada",
+    corpo: `${p.quem} contestou uma avaliação sobre "${p.vagaTitulo}". Revise em Admin → Avaliações.`,
+    url: "/admin/avaliacoes",
+  };
+}
+
 export function msgNovaCandidatura(p: {
   profissionalNome: string;
   vagaTitulo: string;

@@ -12,7 +12,8 @@ import Swipe, { type DirecaoSwipe } from "@/models/Swipe";
 import User from "@/models/User";
 import Vaga, { type IVaga } from "@/models/Vaga";
 import { LIMITE_LIKES_DIA } from "@/constants/match";
-import { ErroAtor, type Ator } from "./ator";
+import type { Ator } from "./ator";
+import { ErroAtor } from "./erros";
 
 export { LIMITE_LIKES_DIA };
 

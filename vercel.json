@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/lembretes-entrevista",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/avaliacoes",
+      "schedule": "30 12 * * *"
     }
   ]
 }

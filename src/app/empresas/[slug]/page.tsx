@@ -10,6 +10,8 @@ import { SETORES } from "@/constants/setores";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import VagaCard from "@/components/shared/VagaCard";
+import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
+import { resumoReputacaoPublico } from "@/lib/reputacao";
 import { Button } from "@/components/ui/button";
 import Empresa from "@/models/Empresa";
 import Vaga from "@/models/Vaga";
@@ -108,6 +110,9 @@ export default async function EmpresaPublicaPage({ params }: { params: { slug: s
                   <Globe className="h-4 w-4" />Site
                 </a>
               )}
+            </div>
+            <div className="mt-2">
+              <ReputacaoBadge rep={resumoReputacaoPublico(empresa.reputacao)} claro compacto />
             </div>
           </div>
           {ehDona && (

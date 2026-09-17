@@ -7,7 +7,8 @@ import Mensagem from "@/models/Mensagem";
 import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Vaga from "@/models/Vaga";
-import { ErroAtor, type Ator } from "./ator";
+import type { Ator } from "./ator";
+import { ErroAtor } from "./erros";
 import { aplicarStatusMatch, registrarMensagemSistema, sincronizarCandidaturaComMatch } from "./status";
 import {
   paraCardProfissional,
@@ -139,7 +140,7 @@ export async function obterMatch(ator: Ator, matchId: string): Promise<MatchDeta
   const match = await carregarMatchDoAtor(ator, matchId);
 
   const [vaga, profissional, empresa] = await Promise.all([
-    Vaga.findById(match.vagaId).populate("empresaId", "nomeFantasia logo setor verificada").lean(),
+    Vaga.findById(match.vagaId).populate("empresaId", "nomeFantasia logo setor verificada reputacao").lean(),
     Profissional.findById(match.profissionalId).lean(),
     Empresa.findById(match.empresaId).lean(),
   ]);

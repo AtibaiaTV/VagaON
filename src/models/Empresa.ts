@@ -25,6 +25,15 @@ export interface IEmpresa extends Document {
     /** Modo às cegas: esconde foto e nome dos candidatos até a entrevista/match. */
     modoCego: boolean;
   };
+  /** Agregado das avaliações publicadas recebidas de profissionais. */
+  reputacao: {
+    media: number | null;
+    total: number;
+    recomendacoes: number;
+    porCriterio: Map<string, number>;
+    pontosFortes: string[];
+    atualizadoEm: Date | null;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +64,14 @@ const EmpresaSchema = new Schema<IEmpresa>(
     documentos: [{ type: String }],
     match: {
       modoCego: { type: Boolean, default: false },
+    },
+    reputacao: {
+      media: { type: Number, default: null },
+      total: { type: Number, default: 0 },
+      recomendacoes: { type: Number, default: 0 },
+      porCriterio: { type: Map, of: Number, default: {} },
+      pontosFortes: { type: [String], default: [] },
+      atualizadoEm: { type: Date, default: null },
     },
   },
   { timestamps: true }

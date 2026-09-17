@@ -65,6 +65,15 @@ export interface IProfissional extends Document {
     ativo: boolean;
     ultimaAtividade: Date | null;
   };
+  /** Agregado das avaliações publicadas recebidas de empresas. Recalculado a cada publicação. */
+  reputacao: {
+    media: number | null;
+    total: number;
+    recomendacoes: number;
+    porCriterio: Map<string, number>;
+    pontosFortes: string[];
+    atualizadoEm: Date | null;
+  };
 
   createdAt: Date;
   updatedAt: Date;
@@ -132,6 +141,14 @@ const ProfissionalSchema = new Schema<IProfissional>(
     match: {
       ativo: { type: Boolean, default: true },
       ultimaAtividade: { type: Date, default: null },
+    },
+    reputacao: {
+      media: { type: Number, default: null },
+      total: { type: Number, default: 0 },
+      recomendacoes: { type: Number, default: 0 },
+      porCriterio: { type: Map, of: Number, default: {} },
+      pontosFortes: { type: [String], default: [] },
+      atualizadoEm: { type: Date, default: null },
     },
   },
   { timestamps: true }
