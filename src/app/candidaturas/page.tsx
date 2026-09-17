@@ -12,12 +12,13 @@ import Footer from "@/components/layout/Footer";
 
 const STATUS_LABEL: Record<string, string> = {
   enviada: "Enviada", visualizada: "Visualizada",
-  em_analise: "Em análise", aprovada: "Aprovada", recusada: "Recusada",
+  em_analise: "Em análise", entrevista: "Entrevista", aprovada: "Aprovada", recusada: "Recusada",
 };
 const STATUS_COR: Record<string, string> = {
   enviada: "bg-blue-100 text-blue-700",
   visualizada: "bg-gray-100 text-gray-700",
   em_analise: "bg-yellow-100 text-yellow-700",
+  entrevista: "bg-violet-100 text-violet-700",
   aprovada: "bg-green-100 text-green-700",
   recusada: "bg-red-100 text-red-700",
 };

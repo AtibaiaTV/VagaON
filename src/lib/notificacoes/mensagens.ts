@@ -63,7 +63,7 @@ export function msgStatusMatch(p: {
 }
 
 export function msgStatusCandidatura(p: {
-  status: "visualizada" | "em_analise" | "aprovada" | "recusada";
+  status: "enviada" | "visualizada" | "em_analise" | "entrevista" | "aprovada" | "recusada";
   vagaTitulo: string;
   empresaNome: string;
 }): MensagemNotificacao | null {
@@ -71,6 +71,10 @@ export function msgStatusCandidatura(p: {
     em_analise: {
       titulo: "Sua candidatura está em análise",
       corpo: `${p.empresaNome} está analisando seu perfil para a vaga "${p.vagaTitulo}".`,
+    },
+    entrevista: {
+      titulo: "Você foi chamado(a) para entrevista! 🎉",
+      corpo: `${p.empresaNome} quer entrevistar você para "${p.vagaTitulo}". Combine os detalhes no chat ou aguarde o contato.`,
     },
     aprovada: {
       titulo: "Candidatura aprovada! 🎉",

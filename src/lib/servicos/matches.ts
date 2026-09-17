@@ -8,6 +8,7 @@ import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor, type Ator } from "./ator";
+import { aplicarStatusMatch, registrarMensagemSistema, sincronizarCandidaturaComMatch } from "./status";
 import {
   paraCardProfissional,
   paraCardVaga,
@@ -161,17 +162,9 @@ export async function atualizarStatusMatch(
   }
   if (match.status === "encerrado") throw new ErroAtor(409, "Match já encerrado.");
 
-  match.status = status;
-  if (status === "encerrado") match.encerradoPor = ator.tipo;
-  await match.save();
-
-  const aviso =
-    status === "encerrado"
-      ? `${ator.tipo === "empresa" ? "A empresa" : "O profissional"} encerrou esta conversa.`
-      : status === "entrevista"
-        ? "A empresa marcou este match como em entrevista."
-        : "A empresa marcou este match como contratado. Parabéns!";
-  await registrarMensagemSistema(match, aviso);
+  await aplicarStatusMatch(match, status, ator.tipo);
+  // Chat → Kanban: a candidatura ligada acompanha.
+  await sincronizarCandidaturaComMatch(match, status);
 
   if (status === "entrevista" || status === "contratado" || status === "encerrado") {
     await notificar(
@@ -189,21 +182,7 @@ export async function atualizarStatusMatch(
   return resumir(match, ator.tipo);
 }
 
-async function registrarMensagemSistema(match: IMatch, texto: string) {
-  const msg = await Mensagem.create({
-    matchId: match._id,
-    autorTipo: "sistema",
-    autorUserId: null,
-    texto,
-  });
-  await Match.updateOne(
-    { _id: match._id },
-    {
-      $set: { ultimaMensagem: { texto, autorTipo: "sistema", em: msg.createdAt } },
-      $inc: { "naoLidas.profissional": 1, "naoLidas.empresa": 1 },
-    }
-  );
-}
+export { registrarMensagemSistema };
 
 export interface MensagemDTO {
   id: string;

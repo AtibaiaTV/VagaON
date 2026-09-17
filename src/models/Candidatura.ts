@@ -4,7 +4,7 @@ export interface ICandidatura extends Document {
   vagaId: mongoose.Types.ObjectId;
   profissionalId: mongoose.Types.ObjectId;
   empresaId: mongoose.Types.ObjectId;
-  status: "enviada" | "visualizada" | "em_analise" | "aprovada" | "recusada";
+  status: "enviada" | "visualizada" | "em_analise" | "entrevista" | "aprovada" | "recusada";
   mensagem: string | null;
   notaEmpresa: string | null;
   snapshotProfissional: {
@@ -29,7 +29,7 @@ const CandidaturaSchema = new Schema<ICandidatura>(
     empresaId: { type: Schema.Types.ObjectId, ref: "Empresa", required: true },
     status: {
       type: String,
-      enum: ["enviada", "visualizada", "em_analise", "aprovada", "recusada"],
+      enum: ["enviada", "visualizada", "em_analise", "entrevista", "aprovada", "recusada"],
       default: "enviada",
     },
     mensagem: { type: String, default: null },
