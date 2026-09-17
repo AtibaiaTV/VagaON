@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { RefreshCw, Users, Plus } from "lucide-react";
+import { RefreshCw, Users, Plus, EyeOff, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { FeedProfissionalItem } from "@/lib/servicos/feed";
@@ -22,13 +22,15 @@ export interface VagaResumo {
 type MatchAberto = { id: string; score: number; snapshot: IMatch["snapshot"] };
 
 /** Deck da empresa: escolhe a vaga e desliza candidatos ranqueados para ela. */
-export default function DeckEmpresa({ vagas }: { vagas: VagaResumo[] }) {
+export default function DeckEmpresa({ vagas, modoCegoInicial = false }: { vagas: VagaResumo[]; modoCegoInicial?: boolean }) {
   const [vagaId, setVagaId] = useState(vagas[0]?.id ?? "");
   const [itens, setItens] = useState<FeedProfissionalItem[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [restantes, setRestantes] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
   const [match, setMatch] = useState<MatchAberto | null>(null);
+  const [modoCego, setModoCego] = useState(modoCegoInicial);
+  const [salvandoModo, setSalvandoModo] = useState(false);
 
   const buscando = useRef(false);
   const vistos = useRef(new Set<string>());
@@ -93,10 +95,44 @@ export default function DeckEmpresa({ vagas }: { vagas: VagaResumo[] }) {
 
   const vagaAtual = vagas.find((v) => v.id === vagaId);
 
+  async function alternarModoCego() {
+    const novo = !modoCego;
+    setSalvandoModo(true);
+    const r = await fetch("/api/match/preferencias", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modoCego: novo }),
+    }).catch(() => null);
+    setSalvandoModo(false);
+    if (!r?.ok) {
+      setAviso("Não foi possível alterar o modo às cegas.");
+      return;
+    }
+    setModoCego(novo);
+    // Os cards já carregados mostram (ou escondem) nome e foto — recarrega.
+    carregar(true);
+  }
+
   return (
     <>
       <div className="mb-4">
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Candidatos para a vaga</label>
+        <div className="flex items-center justify-between gap-3">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Candidatos para a vaga</label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={modoCego}
+            onClick={alternarModoCego}
+            disabled={salvandoModo}
+            title="Esconde foto e nome até o match: você decide pelo perfil, não pelo rosto."
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-60 ${
+              modoCego ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-border text-muted-foreground hover:border-violet-300"
+            }`}
+          >
+            {modoCego ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            Modo às cegas
+          </button>
+        </div>
         <Select value={vagaId} onValueChange={(v) => v && setVagaId(v)}>
           <SelectTrigger className="mt-1 bg-white">
             <SelectValue placeholder="Escolha uma vaga" />

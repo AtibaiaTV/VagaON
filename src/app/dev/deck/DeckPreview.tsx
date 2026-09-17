@@ -133,6 +133,7 @@ const PROFISSIONAIS: FeedProfissionalItem[] = [
       escalas: ["6x1", "5x2"],
       ultimosCargos: ["Sous Chef", "Chef de Partie", "Cozinheiro de Linha"],
       completude: 95,
+      oculto: false,
     },
   },
   {
@@ -162,6 +163,7 @@ const PROFISSIONAIS: FeedProfissionalItem[] = [
       escalas: ["6x1"],
       ultimosCargos: ["Cozinheiro de Linha", "Auxiliar de Cozinha"],
       completude: 70,
+      oculto: true,
     },
   },
 ];

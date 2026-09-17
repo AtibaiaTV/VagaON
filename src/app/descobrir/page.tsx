@@ -73,7 +73,7 @@ export default async function DescobrirPage() {
         <DeckProfissional />
       );
   } else {
-    const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id").lean();
+    const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id match").lean();
     const vagas = empresa
       ? await Vaga.find({ empresaId: empresa._id, status: "ativa", "match.ativo": { $ne: false } })
           .select("titulo cidade especialidade match.totalLikesRecebidos")
@@ -92,6 +92,7 @@ export default async function DescobrirPage() {
         />
       ) : (
         <DeckEmpresa
+          modoCegoInicial={empresa?.match?.modoCego === true}
           vagas={vagas.map((v) => ({
             id: String(v._id),
             titulo: v.titulo,
