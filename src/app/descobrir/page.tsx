@@ -58,11 +58,12 @@ export default async function DescobrirPage() {
       .select("especialidades cidade estado")
       .lean();
 
+    // Sem cidade o match geográfico vira "mesma UF" — em SP isso não diz nada.
     conteudo =
-      !perfil || !perfil.especialidades?.length || !perfil.estado ? (
+      !perfil || !perfil.especialidades?.length || !perfil.estado || !perfil.cidade?.trim() ? (
         <Chamada
           titulo="Complete seu perfil para começar"
-          texto="Precisamos saber sua especialidade e onde você está para calcular quais vagas combinam com você."
+          texto="Precisamos saber sua especialidade e a sua cidade para calcular quais vagas combinam com você."
           href="/perfil/editar"
           botao="Completar perfil"
           icone={<UserRoundPen className="h-8 w-8 text-primary" />}

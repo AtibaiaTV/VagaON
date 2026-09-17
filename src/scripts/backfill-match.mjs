@@ -77,11 +77,23 @@ try {
     .find({}, { projection: { cidade: 1, estado: 1, experiencias: 1, raioKm: 1, match: 1 } })
     .toArray();
 
+  // Cidades sem coordenadas, para saber o que falta em municipios.ts.
+  const semMapa = new Map();
+  function registrarSemMapa(cidade, estado, tipo) {
+    const chave = `${(estado || "?").toUpperCase()}:${JSON.stringify(cidade ?? "")}`;
+    const e = semMapa.get(chave) ?? { profissionais: 0, vagas: 0 };
+    e[tipo]++;
+    semMapa.set(chave, e);
+  }
+
   let opsP = [];
   let semGeoP = 0;
   for (const p of profissionais) {
     const localizacao = pontoDe(p.cidade, p.estado);
-    if (!localizacao) semGeoP++;
+    if (!localizacao) {
+      semGeoP++;
+      registrarSemMapa(p.cidade, p.estado, "profissionais");
+    }
     opsP.push({
       updateOne: {
         filter: { _id: p._id },
@@ -107,7 +119,10 @@ try {
   let semGeoV = 0;
   for (const v of vagas) {
     const localizacao = pontoDe(v.cidade, v.estado);
-    if (!localizacao) semGeoV++;
+    if (!localizacao) {
+      semGeoV++;
+      registrarSemMapa(v.cidade, v.estado, "vagas");
+    }
     opsV.push({
       updateOne: {
         filter: { _id: v._id },
@@ -118,6 +133,16 @@ try {
 
   console.log(`Profissionais: ${profissionais.length} (${semGeoP} sem cidade mapeada → só UF)`);
   console.log(`Vagas:         ${vagas.length} (${semGeoV} sem cidade mapeada → só UF)`);
+
+  if (semMapa.size) {
+    console.log("\nCidades sem coordenadas (adicione em src/constants/municipios.ts):");
+    const linhas = [...semMapa].sort(
+      (a, b) => b[1].profissionais + b[1].vagas - (a[1].profissionais + a[1].vagas)
+    );
+    for (const [chave, e] of linhas) {
+      console.log(`  ${chave.padEnd(36)} profissionais=${e.profissionais} vagas=${e.vagas}`);
+    }
+  }
 
   if (DRY) {
     console.log("--dry: nada gravado.");

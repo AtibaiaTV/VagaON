@@ -117,6 +117,99 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "SP:indaiatuba": { lat: -23.09, lng: -47.22 },
   "SP:taubate": { lat: -23.03, lng: -45.56 },
 
+  // ─── SP: região de Atibaia / Bragança / Jundiaí / Campinas ─────────────────
+  "SP:jarinu": { lat: -23.1, lng: -46.73 },
+  "SP:bom jesus dos perdoes": { lat: -23.13, lng: -46.47 },
+  "SP:nazare paulista": { lat: -23.18, lng: -46.4 },
+  "SP:piracaia": { lat: -23.05, lng: -46.36 },
+  "SP:joanopolis": { lat: -22.93, lng: -46.28 },
+  "SP:vargem": { lat: -22.89, lng: -46.41 },
+  "SP:pinhalzinho": { lat: -22.78, lng: -46.59 },
+  "SP:tuiuti": { lat: -22.82, lng: -46.69 },
+  "SP:morungaba": { lat: -22.88, lng: -46.79 },
+  "SP:itatiba": { lat: -23.0, lng: -46.84 },
+  "SP:mairipora": { lat: -23.32, lng: -46.59 },
+  "SP:franco da rocha": { lat: -23.33, lng: -46.73 },
+  "SP:francisco morato": { lat: -23.28, lng: -46.75 },
+  "SP:caieiras": { lat: -23.36, lng: -46.74 },
+  "SP:cajamar": { lat: -23.36, lng: -46.88 },
+  "SP:campo limpo paulista": { lat: -23.21, lng: -46.78 },
+  "SP:varzea paulista": { lat: -23.21, lng: -46.83 },
+  "SP:louveira": { lat: -23.09, lng: -46.95 },
+  "SP:vinhedo": { lat: -23.03, lng: -46.98 },
+  "SP:valinhos": { lat: -22.97, lng: -46.99 },
+  "SP:itupeva": { lat: -23.15, lng: -47.06 },
+  "SP:cabreuva": { lat: -23.31, lng: -47.13 },
+  "SP:jaguariuna": { lat: -22.7, lng: -46.98 },
+  "SP:pedreira": { lat: -22.74, lng: -46.9 },
+  "SP:amparo": { lat: -22.7, lng: -46.77 },
+  "SP:socorro": { lat: -22.59, lng: -46.53 },
+  "SP:lindoia": { lat: -22.52, lng: -46.65 },
+  "SP:monte alegre do sul": { lat: -22.68, lng: -46.68 },
+  "SP:paulinia": { lat: -22.76, lng: -47.15 },
+  "SP:hortolandia": { lat: -22.86, lng: -47.22 },
+  "SP:sumare": { lat: -22.82, lng: -47.27 },
+  "SP:cosmopolis": { lat: -22.65, lng: -47.2 },
+  "SP:mogi mirim": { lat: -22.43, lng: -46.96 },
+  "SP:mogi guacu": { lat: -22.37, lng: -46.94 },
+
+  // ─── SP: Grande São Paulo e interior ───────────────────────────────────────
+  "SP:embu das artes": { lat: -23.65, lng: -46.85 },
+  "SP:itapecerica da serra": { lat: -23.72, lng: -46.85 },
+  "SP:taboao da serra": { lat: -23.63, lng: -46.79 },
+  "SP:carapicuiba": { lat: -23.52, lng: -46.84 },
+  "SP:jandira": { lat: -23.53, lng: -46.9 },
+  "SP:itapevi": { lat: -23.55, lng: -46.93 },
+  "SP:santana de parnaiba": { lat: -23.44, lng: -46.92 },
+  "SP:maua": { lat: -23.67, lng: -46.46 },
+  "SP:ribeirao pires": { lat: -23.71, lng: -46.41 },
+  "SP:suzano": { lat: -23.54, lng: -46.31 },
+  "SP:poa": { lat: -23.53, lng: -46.34 },
+  "SP:itaquaquecetuba": { lat: -23.49, lng: -46.35 },
+  "SP:aruja": { lat: -23.4, lng: -46.32 },
+  "SP:guararema": { lat: -23.41, lng: -46.04 },
+  "SP:jacarei": { lat: -23.31, lng: -45.97 },
+  "SP:cacapava": { lat: -23.1, lng: -45.71 },
+  "SP:pindamonhangaba": { lat: -22.92, lng: -45.46 },
+  "SP:guaratingueta": { lat: -22.82, lng: -45.19 },
+  "SP:lorena": { lat: -22.73, lng: -45.12 },
+  "SP:aparecida": { lat: -22.85, lng: -45.23 },
+  "SP:cunha": { lat: -23.07, lng: -44.96 },
+  "SP:sao luiz do paraitinga": { lat: -23.22, lng: -45.31 },
+  "SP:santo antonio do pinhal": { lat: -22.83, lng: -45.66 },
+  "SP:sao bento do sapucai": { lat: -22.69, lng: -45.73 },
+  "SP:itu": { lat: -23.26, lng: -47.3 },
+  "SP:salto": { lat: -23.2, lng: -47.29 },
+  "SP:porto feliz": { lat: -23.21, lng: -47.52 },
+  "SP:boituva": { lat: -23.28, lng: -47.67 },
+  "SP:tatui": { lat: -23.35, lng: -47.85 },
+  "SP:votorantim": { lat: -23.55, lng: -47.44 },
+  "SP:itapetininga": { lat: -23.59, lng: -48.05 },
+  "SP:sao roque": { lat: -23.53, lng: -47.14 },
+  "SP:mairinque": { lat: -23.55, lng: -47.18 },
+  "SP:ibiuna": { lat: -23.66, lng: -47.22 },
+  "SP:piedade": { lat: -23.71, lng: -47.43 },
+  "SP:jau": { lat: -22.3, lng: -48.56 },
+  "SP:araraquara": { lat: -21.79, lng: -48.18 },
+  "SP:sao carlos": { lat: -22.02, lng: -47.89 },
+  "SP:brotas": { lat: -22.28, lng: -48.13 },
+  "SP:botucatu": { lat: -22.89, lng: -48.44 },
+  "SP:avare": { lat: -23.1, lng: -48.93 },
+  "SP:marilia": { lat: -22.21, lng: -49.95 },
+  "SP:presidente prudente": { lat: -22.12, lng: -51.39 },
+  "SP:franca": { lat: -20.54, lng: -47.4 },
+  "SP:barretos": { lat: -20.55, lng: -48.57 },
+  "SP:assis": { lat: -22.66, lng: -50.41 },
+  "SP:ourinhos": { lat: -22.98, lng: -49.87 },
+  "SP:lins": { lat: -21.68, lng: -49.75 },
+  "SP:cubatao": { lat: -23.89, lng: -46.42 },
+  "SP:mongagua": { lat: -24.09, lng: -46.63 },
+  "SP:itanhaem": { lat: -24.18, lng: -46.79 },
+  "SP:peruibe": { lat: -24.32, lng: -47.0 },
+  "SP:registro": { lat: -24.49, lng: -47.84 },
+  "SP:ilha comprida": { lat: -24.73, lng: -47.55 },
+  "SP:cananeia": { lat: -25.01, lng: -47.93 },
+
   // ─── Rio de Janeiro ────────────────────────────────────────────────────────
   "RJ:niteroi": { lat: -22.88, lng: -43.1 },
   "RJ:duque de caxias": { lat: -22.79, lng: -43.31 },
@@ -136,6 +229,31 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "RJ:resende": { lat: -22.47, lng: -44.45 },
   "RJ:itatiaia": { lat: -22.5, lng: -44.56 },
   "RJ:volta redonda": { lat: -22.52, lng: -44.1 },
+  "RJ:barra mansa": { lat: -22.54, lng: -44.17 },
+  "RJ:barra do pirai": { lat: -22.47, lng: -43.83 },
+  "RJ:pirai": { lat: -22.63, lng: -43.9 },
+  "RJ:belford roxo": { lat: -22.76, lng: -43.4 },
+  "RJ:nilopolis": { lat: -22.81, lng: -43.41 },
+  "RJ:sao joao de meriti": { lat: -22.8, lng: -43.37 },
+  "RJ:mesquita": { lat: -22.78, lng: -43.43 },
+  "RJ:queimados": { lat: -22.71, lng: -43.55 },
+  "RJ:mage": { lat: -22.65, lng: -43.04 },
+  "RJ:guapimirim": { lat: -22.54, lng: -42.98 },
+  "RJ:itaborai": { lat: -22.74, lng: -42.86 },
+  "RJ:rio bonito": { lat: -22.72, lng: -42.62 },
+  "RJ:mangaratiba": { lat: -22.96, lng: -44.04 },
+  "RJ:conceicao de jacarei": { lat: -22.99, lng: -44.06 }, // distrito de Mangaratiba
+  "RJ:saquarema": { lat: -22.92, lng: -42.51 },
+  "RJ:araruama": { lat: -22.87, lng: -42.34 },
+  "RJ:iguaba grande": { lat: -22.84, lng: -42.23 },
+  "RJ:sao pedro da aldeia": { lat: -22.84, lng: -42.1 },
+  "RJ:rio das ostras": { lat: -22.53, lng: -41.95 },
+  "RJ:casimiro de abreu": { lat: -22.48, lng: -42.2 },
+  "RJ:miguel pereira": { lat: -22.45, lng: -43.47 },
+  "RJ:vassouras": { lat: -22.4, lng: -43.66 },
+  "RJ:valenca": { lat: -22.25, lng: -43.7 },
+  "RJ:tres rios": { lat: -22.12, lng: -43.21 },
+  "RJ:itaperuna": { lat: -21.2, lng: -41.89 },
 
   // ─── Minas Gerais ──────────────────────────────────────────────────────────
   "MG:uberlandia": { lat: -18.92, lng: -48.28 },
@@ -155,6 +273,24 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "MG:camanducaia": { lat: -22.76, lng: -46.14 },
   "MG:tres coracoes": { lat: -21.69, lng: -45.25 },
   "MG:ipatinga": { lat: -19.47, lng: -42.54 },
+  // Sul de Minas (divisa com Atibaia/Bragança) e Circuito das Águas
+  "MG:extrema": { lat: -22.85, lng: -46.32 },
+  "MG:itapeva": { lat: -22.77, lng: -46.22 },
+  "MG:toledo": { lat: -22.74, lng: -46.37 },
+  "MG:cambui": { lat: -22.61, lng: -46.06 },
+  "MG:pouso alegre": { lat: -22.23, lng: -45.94 },
+  "MG:itajuba": { lat: -22.42, lng: -45.45 },
+  "MG:goncalves": { lat: -22.66, lng: -45.86 },
+  "MG:sapucai mirim": { lat: -22.74, lng: -45.74 },
+  "MG:monte siao": { lat: -22.43, lng: -46.57 },
+  "MG:jacutinga": { lat: -22.29, lng: -46.61 },
+  "MG:ouro fino": { lat: -22.28, lng: -46.37 },
+  "MG:andradas": { lat: -22.07, lng: -46.57 },
+  "MG:varginha": { lat: -21.55, lng: -45.43 },
+  "MG:lavras": { lat: -21.25, lng: -45.0 },
+  "MG:caxambu": { lat: -21.98, lng: -44.93 },
+  "MG:sao lourenco": { lat: -22.12, lng: -45.05 },
+  "MG:passa quatro": { lat: -22.39, lng: -44.97 },
 
   // ─── Bahia ─────────────────────────────────────────────────────────────────
   "BA:feira de santana": { lat: -12.27, lng: -38.97 },
@@ -189,6 +325,17 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "RN:parnamirim": { lat: -5.92, lng: -35.26 },
   "RN:tibau do sul": { lat: -6.19, lng: -35.08 },
   "RN:mossoro": { lat: -5.19, lng: -37.34 },
+  "RN:goianinha": { lat: -6.27, lng: -35.21 },
+  "RN:sao goncalo do amarante": { lat: -5.79, lng: -35.33 },
+  "RN:macaiba": { lat: -5.86, lng: -35.35 },
+  "RN:nisia floresta": { lat: -6.09, lng: -35.2 },
+  "RN:extremoz": { lat: -5.71, lng: -35.31 },
+  "RN:ceara mirim": { lat: -5.63, lng: -35.43 },
+  "RN:maxaranguape": { lat: -5.51, lng: -35.26 },
+  "RN:touros": { lat: -5.2, lng: -35.46 },
+  "RN:sao miguel do gostoso": { lat: -5.12, lng: -35.63 },
+  "RN:baia formosa": { lat: -6.37, lng: -35.01 },
+  "RN:caico": { lat: -6.46, lng: -37.1 },
   "PB:campina grande": { lat: -7.23, lng: -35.88 },
   "PB:conde": { lat: -7.26, lng: -34.91 },
   "AL:maragogi": { lat: -9.01, lng: -35.22 },
@@ -249,6 +396,30 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "RS:santa maria": { lat: -29.68, lng: -53.81 },
   "RS:torres": { lat: -29.34, lng: -49.73 },
   "RS:capao da canoa": { lat: -29.75, lng: -50.01 },
+  "RS:esteio": { lat: -29.86, lng: -51.18 },
+  "RS:sapucaia do sul": { lat: -29.83, lng: -51.15 },
+  "RS:cachoeirinha": { lat: -29.95, lng: -51.09 },
+  "RS:alvorada": { lat: -30.0, lng: -51.08 },
+  "RS:viamao": { lat: -30.08, lng: -51.02 },
+  "RS:guaiba": { lat: -30.11, lng: -51.33 },
+  "RS:nova petropolis": { lat: -29.38, lng: -51.11 },
+  "RS:farroupilha": { lat: -29.22, lng: -51.34 },
+  "RS:flores da cunha": { lat: -29.03, lng: -51.18 },
+  "RS:carlos barbosa": { lat: -29.3, lng: -51.5 },
+  "RS:cambara do sul": { lat: -29.05, lng: -50.14 },
+  "RS:sao francisco de paula": { lat: -29.45, lng: -50.58 },
+  "RS:tres coroas": { lat: -29.52, lng: -50.78 },
+  "RS:taquara": { lat: -29.65, lng: -50.78 },
+  "RS:tramandai": { lat: -29.98, lng: -50.13 },
+  "RS:osorio": { lat: -29.89, lng: -50.27 },
+  "RS:xangri la": { lat: -29.79, lng: -50.05 },
+  "RS:rio grande": { lat: -32.03, lng: -52.1 },
+  "RS:passo fundo": { lat: -28.26, lng: -52.41 },
+  "RS:erechim": { lat: -27.63, lng: -52.27 },
+  "RS:santa cruz do sul": { lat: -29.72, lng: -52.43 },
+  "RS:lajeado": { lat: -29.47, lng: -51.96 },
+  "RS:bage": { lat: -31.33, lng: -54.11 },
+  "RS:uruguaiana": { lat: -29.75, lng: -57.09 },
 
   // ─── Centro-Oeste ──────────────────────────────────────────────────────────
   "GO:aparecida de goiania": { lat: -16.82, lng: -49.24 },
@@ -257,6 +428,31 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "GO:pirenopolis": { lat: -15.85, lng: -48.96 },
   "GO:rio verde": { lat: -17.79, lng: -50.92 },
   "GO:alto paraiso de goias": { lat: -14.13, lng: -47.51 },
+  "GO:formosa": { lat: -15.54, lng: -47.33 },
+  "GO:trindade": { lat: -16.65, lng: -49.49 },
+  "GO:senador canedo": { lat: -16.71, lng: -49.09 },
+  "GO:luziania": { lat: -16.25, lng: -47.95 },
+  "GO:valparaiso de goias": { lat: -16.06, lng: -47.98 },
+  "GO:aguas lindas de goias": { lat: -15.75, lng: -48.28 },
+  "GO:planaltina": { lat: -15.45, lng: -47.61 },
+  "GO:catalao": { lat: -18.17, lng: -47.94 },
+  "GO:itumbiara": { lat: -18.42, lng: -49.22 },
+  "GO:jatai": { lat: -17.88, lng: -51.72 },
+  "GO:goianesia": { lat: -15.32, lng: -49.12 },
+  "GO:cavalcante": { lat: -13.8, lng: -47.46 },
+  // DF: regiões administrativas que as pessoas escrevem como "cidade"
+  "DF:taguatinga": { lat: -15.83, lng: -48.06 },
+  "DF:ceilandia": { lat: -15.82, lng: -48.11 },
+  "DF:aguas claras": { lat: -15.84, lng: -48.03 },
+  "DF:guara": { lat: -15.83, lng: -47.98 },
+  "DF:samambaia": { lat: -15.88, lng: -48.09 },
+  "DF:gama": { lat: -16.02, lng: -48.06 },
+  "DF:sobradinho": { lat: -15.65, lng: -47.79 },
+  "DF:planaltina": { lat: -15.62, lng: -47.65 },
+  "DF:lago sul": { lat: -15.85, lng: -47.87 },
+  "DF:lago norte": { lat: -15.73, lng: -47.85 },
+  "DF:asa sul": { lat: -15.82, lng: -47.9 },
+  "DF:asa norte": { lat: -15.76, lng: -47.88 },
   "MT:varzea grande": { lat: -15.65, lng: -56.13 },
   "MT:rondonopolis": { lat: -16.47, lng: -54.64 },
   "MT:chapada dos guimaraes": { lat: -15.46, lng: -55.75 },
@@ -287,20 +483,44 @@ export function normalizarCidade(cidade: string): string {
     .trim();
 }
 
+/** Índice cidade-normalizada → UFs em que ela existe na tabela (para inferir a UF). */
+let indicePorCidade: Map<string, string[]> | null = null;
+function ufsDaCidade(cidadeNormalizada: string): string[] {
+  if (!indicePorCidade) {
+    indicePorCidade = new Map();
+    for (const chave of Object.keys(MUNICIPIOS)) {
+      const [uf, cidade] = chave.split(":");
+      const lista = indicePorCidade.get(cidade) ?? [];
+      lista.push(uf);
+      indicePorCidade.set(cidade, lista);
+    }
+  }
+  return indicePorCidade.get(cidadeNormalizada) ?? [];
+}
+
 /**
  * Coordenadas reais da cidade, ou null se ela não está mapeada.
  *
  * Não cai no centroide da UF de propósito: um centroide vira uma distância
  * falsa e precisa (Jarinu "a 260 km" de São Paulo, quando fica a 60). Sem
  * coordenadas, o motor usa "mesma UF" e não elimina ninguém por distância.
+ *
+ * Sem UF, resolve mesmo assim quando o nome existe em uma única UF da tabela
+ * ("Caxias do Sul" → RS); nome ambíguo continua null.
  */
 export function geocodificarCidade(
   cidade: string | null | undefined,
   estado: string | null | undefined
 ): Coordenadas | null {
+  if (!cidade) return null;
+  const nome = normalizarCidade(cidade);
+  if (!nome) return null;
+
   const uf = (estado ?? "").trim().toUpperCase();
-  if (!uf || !cidade) return null;
-  return MUNICIPIOS[`${uf}:${normalizarCidade(cidade)}`] ?? null;
+  if (uf) return MUNICIPIOS[`${uf}:${nome}`] ?? null;
+
+  const ufs = ufsDaCidade(nome);
+  return ufs.length === 1 ? MUNICIPIOS[`${ufs[0]}:${nome}`] : null;
 }
 
 /** Centro aproximado da UF — só para centralizar mapas, nunca para pontuar. */
