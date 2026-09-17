@@ -4,7 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle } from "lucide-react";
+import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PainelMetricas, { type Tile } from "@/components/painel/PainelMetricas";
@@ -141,6 +141,19 @@ export default async function PainelPage() {
                     </div>
                     <CardTitle className="text-base">Matches</CardTitle>
                     <CardDescription>Converse com quem também demonstrou interesse.</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <Link href="/avaliacoes">
+                <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer h-full">
+                  <CardHeader>
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center mb-2">
+                      <Star className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <CardTitle className="text-base">Avaliações</CardTitle>
+                    <CardDescription>
+                      {role === "empresa" ? "Avalie quem contratou e construa a reputação da sua empresa." : "Avalie onde trabalhou e construa sua reputação."}
+                    </CardDescription>
                   </CardHeader>
                 </Card>
               </Link>

@@ -5,6 +5,7 @@ import { Briefcase, BadgeCheck, Building2, Clock, MapPin, Wallet, CalendarClock,
 import { formatarSalario } from "@/components/shared/VagaCard";
 import { ESCALAS, TIPO_CONTRATO_LABEL, TURNOS, labelAfirmativa } from "@/constants/match";
 import type { FeedVagaItem } from "@/lib/servicos/feed";
+import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
 import ScoreBadge from "./ScoreBadge";
 
 const TIPO_COR: Record<string, string> = {
@@ -49,6 +50,7 @@ export default function CardVagaSwipe({ item, topo }: { item: FeedVagaItem; topo
                 {vaga.remoto ? "Remoto" : `${vaga.cidade}, ${vaga.estado}`}
                 {score.distanciaKm !== null && !vaga.remoto && ` · ${score.distanciaKm} km`}
               </p>
+              <ReputacaoBadge rep={vaga.empresa.reputacao} compacto claro />
             </div>
           </div>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border text-white shrink-0 whitespace-nowrap ${TIPO_COR[vaga.tipo] ?? "bg-white/15 border-white/20"}`}>

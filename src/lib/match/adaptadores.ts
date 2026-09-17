@@ -1,3 +1,4 @@
+import { MINIMO_PUBLICO } from "@/constants/avaliacao";
 import { RAIO_PADRAO_KM } from "@/constants/match";
 import { geocodificarCidade } from "@/constants/municipios";
 import { paraCoords } from "./geo";
@@ -21,6 +22,12 @@ function id(v: unknown): string {
 /** Coordenadas reais ou null — nunca centroide (ver municipios.ts). */
 function coordsDe(doc: Doc): { lat: number; lng: number } | null {
   return paraCoords(doc.localizacao) ?? geocodificarCidade(doc.cidade, doc.estado);
+}
+
+/** Reputação só conta com o mínimo público de avaliações. */
+function reputacaoDe(rep: Doc | null | undefined): { media: number; total: number } | null {
+  if (!rep || typeof rep.media !== "number" || !rep.total || rep.total < MINIMO_PUBLICO) return null;
+  return { media: rep.media, total: rep.total };
 }
 
 export function paraProfissionalMatch(entrada: unknown): ProfissionalMatch {
@@ -49,6 +56,7 @@ export function paraProfissionalMatch(entrada: unknown): ProfissionalMatch {
     escalas: doc.escalas ?? [],
     completude: doc.completude ?? 0,
     ultimaAtividade: doc.match?.ultimaAtividade ?? doc.updatedAt ?? null,
+    reputacao: reputacaoDe(doc.reputacao),
   };
 }
 
@@ -85,5 +93,6 @@ export function paraVagaMatch(entrada: unknown, empresaVerificada = false): Vaga
     turno: doc.turno ?? null,
     escala: doc.escala ?? null,
     empresaVerificada: empresa ? Boolean(empresa.verificada) : empresaVerificada,
+    empresaReputacao: reputacaoDe(empresa?.reputacao),
   };
 }

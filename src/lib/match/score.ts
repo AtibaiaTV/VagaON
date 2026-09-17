@@ -291,6 +291,10 @@ function calcularMultiplicador(p: ProfissionalMatch, v: VagaMatch): number {
     m += MULTIPLICADOR.atividadeRecente * frescor;
   }
 
+  // Reputação dos dois lados, simétrica: (média − 3) / 2 vai de −1 a +1.
+  if (p.reputacao) m += MULTIPLICADOR.reputacao * ((p.reputacao.media - 3) / 2);
+  if (v.empresaReputacao) m += MULTIPLICADOR.reputacao * ((v.empresaReputacao.media - 3) / 2);
+
   return limitar(m, MULTIPLICADOR.min, MULTIPLICADOR.max);
 }
 

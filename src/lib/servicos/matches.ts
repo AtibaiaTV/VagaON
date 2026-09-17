@@ -140,7 +140,7 @@ export async function obterMatch(ator: Ator, matchId: string): Promise<MatchDeta
   const match = await carregarMatchDoAtor(ator, matchId);
 
   const [vaga, profissional, empresa] = await Promise.all([
-    Vaga.findById(match.vagaId).populate("empresaId", "nomeFantasia logo setor verificada").lean(),
+    Vaga.findById(match.vagaId).populate("empresaId", "nomeFantasia logo setor verificada reputacao").lean(),
     Profissional.findById(match.profissionalId).lean(),
     Empresa.findById(match.empresaId).lean(),
   ]);

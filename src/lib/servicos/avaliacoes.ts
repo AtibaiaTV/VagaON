@@ -2,7 +2,6 @@ import { isValidObjectId, Types } from "mongoose";
 import {
   JANELA_DUPLO_CEGO_DIAS,
   MAX_TEXTO,
-  MEDIA_SELO_CONFIAVEL,
   MINIMO_PUBLICO,
   NOTA_MAX,
   NOTA_MIN,
@@ -109,26 +108,7 @@ function paraDTO(a: IAvaliacao, m: IMatch): AvaliacaoDTO {
 
 // ─── Reputação agregada ───────────────────────────────────────────────────────
 
-export interface ReputacaoPublica {
-  media: number;
-  total: number;
-  recomendacoes: number;
-  pontosFortes: string[];
-  confiavel: boolean;
-}
-
-/** O que outras pessoas veem. null enquanto não há avaliações suficientes. */
-export function resumoReputacaoPublico(rep: unknown): ReputacaoPublica | null {
-  const r = rep as { media?: number | null; total?: number; recomendacoes?: number; pontosFortes?: string[] } | null | undefined;
-  if (!r || !r.total || r.total < MINIMO_PUBLICO || r.media == null) return null;
-  return {
-    media: r.media,
-    total: r.total,
-    recomendacoes: r.recomendacoes ?? 0,
-    pontosFortes: (r.pontosFortes ?? []).map(labelCriterio),
-    confiavel: r.media >= MEDIA_SELO_CONFIAVEL,
-  };
-}
+export { resumoReputacaoPublico, type ReputacaoPublica } from "@/lib/reputacao";
 
 export async function recomputarReputacao(lado: Lado, id: Types.ObjectId | string): Promise<void> {
   await connectDB();

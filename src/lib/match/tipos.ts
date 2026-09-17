@@ -25,6 +25,8 @@ export interface ProfissionalMatch {
   escalas: string[];
   completude: number;
   ultimaAtividade: Date | string | null;
+  /** Reputação pública (null com poucas avaliações). Só ordena; nunca elimina. */
+  reputacao: { media: number; total: number } | null;
 }
 
 /** Projeção mínima de uma vaga para pontuar. */
@@ -50,6 +52,8 @@ export interface VagaMatch {
   turno: string | null;
   escala: string | null;
   empresaVerificada: boolean;
+  /** Como os profissionais avaliam a empresa (null com poucas avaliações). */
+  empresaReputacao: { media: number; total: number } | null;
 }
 
 export type DimensaoId =

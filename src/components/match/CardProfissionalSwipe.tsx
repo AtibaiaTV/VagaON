@@ -3,6 +3,7 @@
 import { Briefcase, Heart, MapPin, Plane, Zap, Languages, EyeOff, UserRound } from "lucide-react";
 import { TIPO_CONTRATO_LABEL } from "@/constants/match";
 import type { FeedProfissionalItem } from "@/lib/servicos/feed";
+import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
 import ScoreBadge from "./ScoreBadge";
 
 function iniciais(nome: string) {
@@ -59,6 +60,9 @@ export default function CardProfissionalSwipe({ item, topo }: { item: FeedProfis
             {p.cidade}, {p.estado}
             {score.distanciaKm !== null && ` · ${score.distanciaKm} km da vaga`}
           </p>
+          <div className="mt-1">
+            <ReputacaoBadge rep={p.reputacao} compacto claro />
+          </div>
         </div>
       </header>
 

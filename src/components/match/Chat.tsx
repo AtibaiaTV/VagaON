@@ -318,6 +318,11 @@ export default function Chat({ matchId, lado }: { matchId: string; lado: "profis
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Marcar como contratado
                   </button>
                 )}
+                {match.status === "contratado" && (
+                  <Link href={`/avaliacoes?match=${matchId}`} className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-500" /> Avaliar a experiência
+                  </Link>
+                )}
                 <button type="button" onClick={() => mudarStatus("encerrado")} className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-red-600">
                   <XCircle className="h-4 w-4" /> Encerrar conversa
                 </button>

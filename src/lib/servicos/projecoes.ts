@@ -1,6 +1,7 @@
 import { labelEspecialidade } from "@/constants/especialidades";
 import type { ResultadoMatch } from "@/lib/match";
 import { faixaDoScore } from "@/lib/match";
+import { resumoReputacaoPublico, type ReputacaoPublica } from "@/lib/reputacao";
 
 /**
  * O que cada lado pode ver do outro ANTES do match.
@@ -59,6 +60,8 @@ export interface CardVaga {
     logo: string | null;
     setor: string;
     verificada: boolean;
+    /** Como os profissionais avaliaram a empresa (null com < 3 avaliações). */
+    reputacao: ReputacaoPublica | null;
   };
   criadaEm: string | null;
 }
@@ -99,6 +102,7 @@ export function paraCardVaga(v: Doc): CardVaga {
       logo: emp.logo ?? null,
       setor: emp.setor ?? "outros",
       verificada: Boolean(emp.verificada),
+      reputacao: resumoReputacaoPublico(emp.reputacao),
     },
     criadaEm: v.createdAt ? new Date(v.createdAt).toISOString() : null,
   };
@@ -125,6 +129,8 @@ export interface CardProfissional {
   completude: number;
   /** Modo às cegas da empresa: nome e foto escondidos até o match. */
   oculto: boolean;
+  /** Como as empresas avaliaram (null com < 3 avaliações). */
+  reputacao: ReputacaoPublica | null;
 }
 
 export function paraCardProfissional(p: Doc, opcoes: { oculto?: boolean } = {}): CardProfissional {
@@ -142,6 +148,7 @@ export function paraCardProfissional(p: Doc, opcoes: { oculto?: boolean } = {}):
     nome: oculto ? "Candidato(a)" : (p.nomeCompleto ?? ""),
     foto: oculto ? null : (p.fotoPerfil ?? null),
     oculto,
+    reputacao: resumoReputacaoPublico(p.reputacao),
     cidade: p.cidade ?? "",
     estado: p.estado ?? "",
     especialidades: p.especialidades ?? [],

@@ -102,6 +102,12 @@ export const MULTIPLICADOR = {
   atividadeRecente: 0.02,
   /** Dias sem atividade a partir dos quais o bônus zera. */
   diasAtividade: 30,
+  /**
+   * Reputação (avaliações pós-contratação), ±0.03: média 5 soma, média 1
+   * desconta, média 3 é neutra. Só com o mínimo público de avaliações e
+   * só na ordenação — uma nota baixa nunca elimina ninguém do feed.
+   */
+  reputacao: 0.03,
 } as const;
 
 /**

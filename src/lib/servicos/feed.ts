@@ -114,7 +114,7 @@ export async function feedParaProfissional(
   const docs = await Vaga.find(filtro)
     .sort({ createdAt: -1 })
     .limit(LOTE_CANDIDATOS)
-    .populate("empresaId", "nomeFantasia logo setor verificada")
+    .populate("empresaId", "nomeFantasia logo setor verificada reputacao")
     .lean();
 
   const perfil = paraProfissionalMatch(p);
