@@ -1,0 +1,25 @@
+{
+  "name": "VagaON — Match de vagas em gastronomia, hotelaria e eventos",
+  "short_name": "VagaON",
+  "description": "Deslize por vagas e candidatos ranqueados por aderência. Profissionais e empresas do setor se encontram aqui.",
+  "id": "/",
+  "start_url": "/descobrir",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f7f5",
+  "theme_color": "#1a5c38",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Descobrir", "short_name": "Descobrir", "url": "/descobrir", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Matches", "short_name": "Matches", "url": "/matches", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

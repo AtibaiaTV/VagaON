@@ -10,8 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ESTADOS } from "@/constants/estados";
-import { ArrowLeft, Briefcase } from "lucide-react";
+import { ESCALAS, TURNOS } from "@/constants/match";
+import { ArrowLeft, Briefcase, Flame } from "lucide-react";
 import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
+import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 
 export default function NovaVagaPage() {
   const router = useRouter();
@@ -30,7 +32,14 @@ export default function NovaVagaPage() {
     salarioPeriodo: "mes",
     periodoInicio: "",
     periodoFim: "",
+    // Perfil do candidato ideal — alimenta o motor de match
+    anosExperienciaMin: "",
+    habilidadesDesejadas: "",
+    turno: "",
+    escala: "",
+    posicoes: "1",
   });
+  const [especialidadesAceitas, setEspecialidadesAceitas] = useState<string[]>([]);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -67,6 +76,12 @@ export default function NovaVagaPage() {
         dataInicio: form.periodoInicio || null,
         dataFim: form.periodoFim || null,
       },
+      especialidadesAceitas: especialidadesAceitas.filter((e) => e !== form.especialidade),
+      anosExperienciaMin: form.anosExperienciaMin ? parseInt(form.anosExperienciaMin) : 0,
+      habilidadesDesejadas: form.habilidadesDesejadas.split(",").map((h) => h.trim()).filter(Boolean),
+      turno: form.turno || null,
+      escala: form.escala || null,
+      posicoes: form.posicoes ? parseInt(form.posicoes) : 1,
     };
 
     const res = await fetch("/api/vagas", {
@@ -146,6 +161,72 @@ export default function NovaVagaPage() {
                 <Label htmlFor="requisitos">Requisitos</Label>
                 <Textarea id="requisitos" name="requisitos" value={form.requisitos} onChange={handleChange}
                   placeholder="Experiência mínima, habilidades necessárias, diferenciais..." rows={3} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Perfil do candidato ideal — o que o Descobrir usa para ranquear */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Flame className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">Candidato ideal</CardTitle>
+              </div>
+              <CardDescription>
+                Quanto mais você preencher, melhor o ranking de candidatos no Descobrir. Tudo aqui é opcional.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="anosExperienciaMin">Experiência mínima (anos)</Label>
+                  <Input id="anosExperienciaMin" name="anosExperienciaMin" type="number" min={0} max={40}
+                    value={form.anosExperienciaMin} onChange={handleChange} placeholder="0" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="posicoes">Nº de posições</Label>
+                  <Input id="posicoes" name="posicoes" type="number" min={1} max={100}
+                    value={form.posicoes} onChange={handleChange} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="habilidadesDesejadas">Habilidades desejadas (separadas por vírgula)</Label>
+                <Input id="habilidadesDesejadas" name="habilidadesDesejadas" value={form.habilidadesDesejadas}
+                  onChange={handleChange} placeholder="Ex: cozinha italiana, gestão de equipe, ficha técnica" />
+                <p className="text-xs text-muted-foreground">
+                  Diferente dos requisitos em texto, estas são comparadas uma a uma com o perfil do candidato.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label>Turno</Label>
+                  <Select value={form.turno} onValueChange={(v) => handleSelect("turno", v ?? "")}>
+                    <SelectTrigger><SelectValue placeholder="Qualquer" /></SelectTrigger>
+                    <SelectContent>
+                      {TURNOS.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label>Escala</Label>
+                  <Select value={form.escala} onValueChange={(v) => handleSelect("escala", v ?? "")}>
+                    <SelectTrigger><SelectValue placeholder="Qualquer" /></SelectTrigger>
+                    <SelectContent>
+                      {ESCALAS.map((e) => (
+                        <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label>Também aceita profissionais de</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Especialidades além da principal que servem para esta vaga (ex.: aceitar Cozinheiro de Linha para vaga de Chef de Partie).
+                </p>
+                <EspecialidadesMultiSelect selecionadas={especialidadesAceitas} onChange={setEspecialidadesAceitas} />
               </div>
             </CardContent>
           </Card>

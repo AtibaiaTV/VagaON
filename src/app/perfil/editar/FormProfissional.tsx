@@ -12,7 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 import BrandBand from "@/components/shared/BrandBand";
 import { ESTADOS } from "@/constants/estados";
-import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock } from "lucide-react";
+import { ESCALAS, RAIO_PADRAO_KM, TURNOS } from "@/constants/match";
+import { AMPLITUDE_ESPECIALIDADES } from "@/lib/match/pesos";
+import { ChefHat, ArrowLeft, ArrowRight, CheckCircle, Plus, Trash2, Camera, Upload, Loader2, X, User, Sparkles, Briefcase, CalendarClock, Flame } from "lucide-react";
 
 interface Experiencia {
   _id?: string;
@@ -73,6 +75,23 @@ export default function FormProfissional({ profileId, dados }: Props) {
     dataDisponivel: (disponibilidadeDados?.dataDisponivel as string) ?? "",
   });
 
+  // Preferências que alimentam o motor de match (Descobrir).
+  const pretensaoDados = dados?.pretensaoSalarial as Record<string, unknown> | undefined;
+  const [preferencias, setPreferencias] = useState({
+    raioKm: (dados?.raioKm as number) ?? RAIO_PADRAO_KM,
+    pretensaoMin: pretensaoDados?.min ? String(pretensaoDados.min) : "",
+    pretensaoPeriodo: (pretensaoDados?.periodo as string) ?? "mes",
+    turnos: (dados?.turnos as string[]) ?? [],
+    escalas: (dados?.escalas as string[]) ?? [],
+  });
+
+  function alternarLista(campo: "turnos" | "escalas", valor: string) {
+    setPreferencias((p) => ({
+      ...p,
+      [campo]: p[campo].includes(valor) ? p[campo].filter((v) => v !== valor) : [...p[campo], valor],
+    }));
+  }
+
   async function handleFotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -131,6 +150,13 @@ export default function FormProfissional({ profileId, dados }: Props) {
         ...disponibilidade,
         dataDisponivel: disponibilidade.imediata ? null : disponibilidade.dataDisponivel,
       },
+      raioKm: preferencias.raioKm,
+      pretensaoSalarial: {
+        min: preferencias.pretensaoMin ? parseFloat(preferencias.pretensaoMin) : null,
+        periodo: preferencias.pretensaoPeriodo,
+      },
+      turnos: preferencias.turnos,
+      escalas: preferencias.escalas,
     };
 
     const res = await fetch(`/api/profissionais/${profileId}`, {
@@ -389,13 +415,22 @@ export default function FormProfissional({ profileId, dados }: Props) {
                 </div>
                 <CardTitle className="text-base">Especialidades</CardTitle>
               </div>
-              <CardDescription>Selecione todas as funções que você desempenha.</CardDescription>
+              <CardDescription>
+                Selecione as funções que você realmente desempenha. Até {AMPLITUDE_ESPECIALIDADES.limite} contam
+                integralmente no Descobrir — acima disso, o cargo pesa menos no match.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <EspecialidadesMultiSelect
                 selecionadas={especialidades}
                 onChange={setEspecialidades}
               />
+              {especialidades.length > AMPLITUDE_ESPECIALIDADES.limite && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 -mt-2">
+                  {especialidades.length} especialidades selecionadas. Focar nas principais melhora sua posição
+                  no ranking das empresas.
+                </p>
+              )}
               <div className="space-y-1">
                 <Label htmlFor="habilidades">Habilidades extras (separadas por vírgula)</Label>
                 <Input
@@ -599,6 +634,103 @@ export default function FormProfissional({ profileId, dados }: Props) {
                     className="mt-2 max-w-xs"
                   />
                 )}
+              </div>
+
+              {/* Preferências do match */}
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-5">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-semibold">Preferências para o Descobrir</p>
+                </div>
+                <p className="text-xs text-muted-foreground -mt-3">
+                  Usamos isso para ranquear as vagas que aparecem para você. Nada aqui é obrigatório, mas quanto mais
+                  preencher, melhores os matches.
+                </p>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="raioKm">Distância máxima até o trabalho</Label>
+                    <span className="text-sm font-semibold text-primary">{preferencias.raioKm} km</span>
+                  </div>
+                  <input
+                    id="raioKm"
+                    type="range"
+                    min={5}
+                    max={200}
+                    step={5}
+                    value={preferencias.raioKm}
+                    onChange={(e) => setPreferencias((p) => ({ ...p, raioKm: Number(e.target.value) }))}
+                    className="w-full accent-[#2DB87A]"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {pessoal.dispostoViajar ? "Como você aceita viajar, consideramos até 3× esse raio." : "Marque \"disposto a viajar\" na primeira etapa para ampliar."}
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="pretensaoMin">Pretensão salarial mínima</Label>
+                  <div className="grid grid-cols-[1fr_140px] gap-2">
+                    <Input
+                      id="pretensaoMin"
+                      type="number"
+                      min={0}
+                      value={preferencias.pretensaoMin}
+                      onChange={(e) => setPreferencias((p) => ({ ...p, pretensaoMin: e.target.value }))}
+                      placeholder="Ex: 3500"
+                    />
+                    <Select
+                      value={preferencias.pretensaoPeriodo}
+                      onValueChange={(v) => setPreferencias((p) => ({ ...p, pretensaoPeriodo: v ?? "mes" }))}
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hora">por hora</SelectItem>
+                        <SelectItem value="dia">por dia</SelectItem>
+                        <SelectItem value="mes">por mês</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Turnos que você aceita</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {TURNOS.map((t) => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => alternarLista("turnos", t.value)}
+                        className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                          preferencias.turnos.includes(t.value)
+                            ? "bg-[#1a5c38] text-white border-[#1a5c38]"
+                            : "bg-white border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Escalas que você aceita</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ESCALAS.map((e) => (
+                      <button
+                        key={e.value}
+                        type="button"
+                        onClick={() => alternarLista("escalas", e.value)}
+                        className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                          preferencias.escalas.includes(e.value)
+                            ? "bg-[#1a5c38] text-white border-[#1a5c38]"
+                            : "bg-white border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {e.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
