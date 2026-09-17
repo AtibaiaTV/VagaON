@@ -71,6 +71,8 @@ export async function aplicarStatusMatch(
 
   match.status = status;
   if (status === "encerrado") match.encerradoPor = autor;
+  // Abre o prazo da avaliação mútua.
+  if (status === "contratado" && !match.contratadoEm) match.contratadoEm = new Date();
   await match.save();
 
   const texto = TEXTO_SISTEMA[status]?.(autor);

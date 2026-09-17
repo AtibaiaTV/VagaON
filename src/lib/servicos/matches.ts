@@ -7,7 +7,8 @@ import Mensagem from "@/models/Mensagem";
 import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Vaga from "@/models/Vaga";
-import { ErroAtor, type Ator } from "./ator";
+import type { Ator } from "./ator";
+import { ErroAtor } from "./erros";
 import { aplicarStatusMatch, registrarMensagemSistema, sincronizarCandidaturaComMatch } from "./status";
 import {
   paraCardProfissional,

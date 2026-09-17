@@ -12,6 +12,7 @@ import {
 import Match, { type IMatch } from "@/models/Match";
 import type { Ator } from "./ator";
 import { ErroAtor } from "./erros";
+// (ator.ts só como tipo: a cadeia de serviços não puxa next-auth e roda em scripts.)
 import { carregarMatchDoAtor, resumirEntrevista, type EntrevistaDTO } from "./matches";
 import { aplicarStatusMatch, registrarMensagemSistema, sincronizarCandidaturaComMatch } from "./status";
 
