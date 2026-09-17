@@ -90,6 +90,62 @@ export function msgStatusCandidatura(p: {
   return { categoria: "candidatura", titulo: t.titulo, corpo: t.corpo, url: "/candidaturas" };
 }
 
+export function msgEntrevistaProposta(p: {
+  empresaNome: string;
+  vagaTitulo: string;
+  quantidade: number;
+  matchId: string;
+}): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Horários de entrevista propostos",
+    corpo: `${p.empresaNome} propôs ${p.quantidade === 1 ? "um horário" : `${p.quantidade} horários`} de entrevista para "${p.vagaTitulo}". Escolha o melhor para você.`,
+    url: `/matches/${p.matchId}`,
+  };
+}
+
+export function msgEntrevistaConfirmada(p: {
+  outroNome: string;
+  vagaTitulo: string;
+  quando: string;
+  matchId: string;
+}): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Entrevista confirmada ✅",
+    corpo: `${p.outroNome} confirmou a entrevista para "${p.vagaTitulo}": ${p.quando}.`,
+    url: `/matches/${p.matchId}`,
+  };
+}
+
+export function msgEntrevistaCancelada(p: {
+  outroNome: string;
+  vagaTitulo: string;
+  matchId: string;
+}): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Entrevista cancelada",
+    corpo: `${p.outroNome} cancelou a entrevista de "${p.vagaTitulo}". Combinem um novo horário no chat.`,
+    url: `/matches/${p.matchId}`,
+  };
+}
+
+export function msgLembreteEntrevista(p: {
+  outroNome: string;
+  vagaTitulo: string;
+  quando: string;
+  local: string | null;
+  matchId: string;
+}): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Lembrete: entrevista em breve",
+    corpo: `Entrevista com ${p.outroNome} para "${p.vagaTitulo}": ${p.quando}${p.local ? ` · ${p.local}` : ""}.`,
+    url: `/matches/${p.matchId}`,
+  };
+}
+
 export function msgNovaCandidatura(p: {
   profissionalNome: string;
   vagaTitulo: string;

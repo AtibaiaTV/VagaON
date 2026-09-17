@@ -39,7 +39,7 @@ function nomeDoAtor(match: IMatch, ator: Ator): string {
 }
 
 /** Carrega o match e garante que o ator é uma das partes. */
-async function carregarMatchDoAtor(ator: Ator, matchId: string): Promise<IMatch> {
+export async function carregarMatchDoAtor(ator: Ator, matchId: string): Promise<IMatch> {
   if (!isValidObjectId(matchId)) throw new ErroAtor(400, "Match inválido.");
 
   const match = await Match.findById(matchId);
@@ -54,6 +54,24 @@ async function carregarMatchDoAtor(ator: Ator, matchId: string): Promise<IMatch>
   return match;
 }
 
+export interface EntrevistaDTO {
+  propostas: string[];
+  escolhida: string | null;
+  local: string | null;
+  observacao: string | null;
+}
+
+export function resumirEntrevista(m: IMatch): EntrevistaDTO | null {
+  const e = m.entrevista;
+  if (!e) return null;
+  return {
+    propostas: (e.propostas ?? []).map((d) => new Date(d).toISOString()),
+    escolhida: e.escolhida ? new Date(e.escolhida).toISOString() : null,
+    local: e.local ?? null,
+    observacao: e.observacao ?? null,
+  };
+}
+
 export interface MatchResumo {
   id: string;
   status: StatusMatch;
@@ -65,11 +83,12 @@ export interface MatchResumo {
   vagaId: string;
   profissionalId: string;
   empresaId: string;
+  entrevista: EntrevistaDTO | null;
   criadoEm: string;
   atualizadoEm: string;
 }
 
-function resumir(m: IMatch, lado: "profissional" | "empresa"): MatchResumo {
+export function resumir(m: IMatch, lado: "profissional" | "empresa"): MatchResumo {
   return {
     id: String(m._id),
     status: m.status,
@@ -81,6 +100,7 @@ function resumir(m: IMatch, lado: "profissional" | "empresa"): MatchResumo {
     vagaId: String(m.vagaId),
     profissionalId: String(m.profissionalId),
     empresaId: String(m.empresaId),
+    entrevista: resumirEntrevista(m),
     criadoEm: m.createdAt.toISOString(),
     atualizadoEm: m.updatedAt.toISOString(),
   };
@@ -203,7 +223,7 @@ export async function listarMensagens(
   ator: Ator,
   matchId: string,
   depois?: Date | null
-): Promise<{ mensagens: MensagemDTO[]; agora: string; status: StatusMatch }> {
+): Promise<{ mensagens: MensagemDTO[]; agora: string; status: StatusMatch; entrevista: EntrevistaDTO | null }> {
   await connectDB();
   const match = await carregarMatchDoAtor(ator, matchId);
 
@@ -222,6 +242,7 @@ export async function listarMensagens(
 
   return {
     status: match.status,
+    entrevista: resumirEntrevista(match),
     agora: new Date().toISOString(),
     mensagens: docs.map((m) => ({
       id: String(m._id),
