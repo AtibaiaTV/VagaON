@@ -1,12 +1,14 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
+import { caminhoEmpresa, jsonLd, montarJobPosting } from "@/lib/seo";
 import Vaga from "@/models/Vaga";
 import Candidatura from "@/models/Candidatura";
 import Profissional from "@/models/Profissional";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle } from "lucide-react";
+import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink } from "lucide-react";
 import BotaoCandidatar from "./BotaoCandidatar";
 import ListaCandidatos from "./ListaCandidatos";
 import Navbar from "@/components/layout/Navbar";
@@ -19,6 +21,26 @@ const TIPO_LABEL: Record<string, string> = {
 interface EmpresaPopulada {
   _id: string; nomeFantasia: string; cidade: string;
   estado: string; setor: string; descricao: string; anoFundacao?: number;
+  slug?: string | null; logo?: string | null; verificada?: boolean;
+}
+
+const CAMPOS_EMPRESA = "nomeFantasia cidade estado setor descricao anoFundacao slug logo verificada website";
+
+// Título e descrição próprios: sem isso a vaga aparece no Google com o título genérico do site.
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  await connectDB();
+  const vaga = await Vaga.findById(params.id).select("titulo descricao cidade estado status").populate("empresaId", "nomeFantasia").lean() as any;
+  if (!vaga) return { title: "Vaga não encontrada — VagaON" };
+
+  const empresaNome = vaga.empresaId?.nomeFantasia ?? "";
+  const description = `${vaga.titulo}${empresaNome ? ` na ${empresaNome}` : ""} — ${vaga.cidade}, ${vaga.estado}. ${String(vaga.descricao ?? "").replace(/\s+/g, " ").slice(0, 120)}`;
+
+  return {
+    title: `${vaga.titulo}${empresaNome ? ` — ${empresaNome}` : ""} | VagaON`,
+    description,
+    robots: vaga.status === "ativa" ? undefined : { index: false },
+    openGraph: { title: vaga.titulo, description, type: "website" },
+  };
 }
 
 export default async function DetalheVagaPage({ params }: { params: { id: string } }) {
@@ -26,7 +48,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   await connectDB();
 
   const vaga = await Vaga.findById(params.id)
-    .populate("empresaId", "nomeFantasia cidade estado setor descricao anoFundacao")
+    .populate("empresaId", CAMPOS_EMPRESA)
     .lean() as any;
 
   if (!vaga) notFound();
@@ -70,6 +92,11 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
       <Navbar />
+
+      {/* Google for Jobs: só vaga ativa entra no índice. */}
+      {vagaObj.status === "ativa" && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(montarJobPosting(vaga, empresa)) }} />
+      )}
 
       <main className="max-w-4xl mx-auto px-4 py-8">
 
@@ -209,11 +236,19 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
               </h2>
 
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Building2 className="h-6 w-6 text-primary" strokeWidth={1.5} />
+                <div className="w-12 h-12 rounded-xl bg-primary/10 overflow-hidden flex items-center justify-center shrink-0">
+                  {empresa.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={empresa.logo} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 className="h-6 w-6 text-primary" strokeWidth={1.5} />
+                  )}
                 </div>
                 <div>
-                  <p className="font-bold text-sm">{empresa.nomeFantasia}</p>
+                  <p className="font-bold text-sm flex items-center gap-1">
+                    {empresa.nomeFantasia}
+                    {empresa.verificada && <BadgeCheck className="h-4 w-4 text-primary" />}
+                  </p>
                   {empresa.anoFundacao && (
                     <p className="text-xs text-muted-foreground">Início em {empresa.anoFundacao}</p>
                   )}
@@ -228,8 +263,16 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
               </div>
 
               {empresa.descricao && (
-                <p className="text-sm text-muted-foreground mt-4 leading-relaxed">{empresa.descricao}</p>
+                <p className="text-sm text-muted-foreground mt-4 leading-relaxed line-clamp-6">{empresa.descricao}</p>
               )}
+
+              <Link
+                href={caminhoEmpresa(empresa)}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+              >
+                Ver perfil e outras vagas
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
         </div>
