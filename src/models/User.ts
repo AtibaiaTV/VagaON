@@ -49,6 +49,9 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
+// Listagem do admin ordena por data de cadastro; sem índice o sort é em memória.
+UserSchema.index({ createdAt: -1 });
+
 const User: Model<IUser> =
   mongoose.models.User ?? mongoose.model<IUser>("User", UserSchema);
 
