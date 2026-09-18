@@ -6,6 +6,7 @@ import Vaga from "@/models/Vaga";
 import { ErroAtor } from "@/lib/servicos/erros";
 import { garantirContaRedesa } from "@/lib/servicos/sso-redesa";
 import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
+import { inferirEspecialidade } from "@/lib/especialidade-inferida";
 
 // GET /api/redesa/vagas — lista vagas do estabelecimento Redesa
 export async function GET(req: NextRequest) {
@@ -45,9 +46,11 @@ export async function POST(req: NextRequest) {
     const { empresa } = await garantirContaRedesa(payload);
 
     const body = await req.json();
-    // status e aprovadaPorAdmin sempre forçados — vagas da Redesa são confiáveis
+    // status e aprovadaPorAdmin sempre forçados — vagas da Redesa são confiáveis.
+    // A RedeSA manda a função em texto livre ("Gastronomia"); o motor precisa do value da tabela.
     const vaga = await Vaga.create({
       ...body,
+      especialidade: inferirEspecialidade(String(body?.titulo ?? ""), body?.especialidade, body?.especialidade),
       empresaId: empresa._id,
       status: "ativa",
       aprovadaPorAdmin: true,

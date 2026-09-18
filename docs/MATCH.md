@@ -90,3 +90,21 @@ telefone, e-mail, data de nascimento, CEP, currículo ou LinkedIn. Contato só e
 - **Candidatura rápida** (`POST /api/candidatura-rapida`): visitante sem conta cria usuário + perfil mínimo + candidatura e entra logado. Honeypot `site`; e-mail existente → 409 `existente`.
 - **Modo às cegas** (`Empresa.match.modoCego`): esconde nome e foto no deck e nas três primeiras colunas do funil. `PATCH /api/match/preferencias`.
 - **Vagas afirmativas** (`Vaga.afirmativa[]`, `AFIRMATIVAS` em `constants/match.ts`): selo na vaga e no card do deck.
+
+## Especialidade fora da tabela (vagas importadas)
+
+O motor pré-filtra vagas por `especialidade` dentro da tabela
+(`src/constants/especialidades.ts`). Vaga com a função em texto livre
+("Alimentação e Gastronomia", vinda de CSV ou da RedeSA) **nunca aparece no
+Descobrir** nem ganha página por função. Por isso:
+
+- `src/lib/especialidade-inferida.ts` — `inferirEspecialidade(titulo, textoLivre, atual)`
+  descobre o value pelo título (regras de palavra-chave, da mais específica
+  para a mais genérica) e, como reserva, pela "área" em texto livre; sem
+  acerto, `"outro"`.
+- Entra em: importação CSV do admin, `POST/PUT /api/redesa/vagas`. O
+  formulário (`POST /api/vagas`) recusa value fora da tabela.
+- Base existente: `node --experimental-strip-types src/scripts/normalizar-especialidades.mjs --dry`
+  (depois sem `--dry`). Guarda o texto original em `especialidadeOriginal`.
+  Em 2026-09-18 eram 42 de 60 vagas; 40 mapeadas, 2 ficaram "outro"
+  (Estagiário, Jovem Aprendiz).

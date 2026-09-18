@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { MongoClient, ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
+import { inferirEspecialidade } from "@/lib/especialidade-inferida";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -208,7 +209,8 @@ export async function POST(req: Request) {
           descricao:     r.descricaoVaga || "",
           requisitos:    r.requisitos    || "",
           tipo:          mapTipo(r.tipoContrato),
-          especialidade: r.especialidade || "outro",
+          // O CSV traz a "área" em texto livre; o motor precisa do value da tabela.
+          especialidade: inferirEspecialidade(titulo, r.especialidade, r.especialidade),
           salario:       parseSalario(r.remuneracao),
           periodo:       { dataInicio: null, dataFim: null },
           cidade:        r.cidade  || "Atibaia",

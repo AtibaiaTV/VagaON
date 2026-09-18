@@ -10,6 +10,7 @@ import { ErroAtor } from "@/lib/servicos/erros";
 import { verificarLimiteVagas } from "@/lib/servicos/planos";
 import { expiracaoInicial } from "@/lib/servicos/vagas";
 import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
+import { especialidadeValida } from "@/lib/especialidade-inferida";
 
 const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
   gastronomia: ["cozinha", "bar", "salao"],
@@ -104,6 +105,11 @@ export async function POST(req: NextRequest) {
 
     if (!titulo || !descricao || !tipo || !especialidade || !cidade || !estado) {
       return NextResponse.json({ error: "Preencha todos os campos obrigatórios." }, { status: 400 });
+    }
+    // O formulário manda o value da tabela; qualquer outra coisa é recusada,
+    // porque especialidade fora da tabela some do Descobrir.
+    if (!especialidadeValida(especialidade)) {
+      return NextResponse.json({ error: "Escolha a função da vaga na lista." }, { status: 400 });
     }
 
     const vaga = await Vaga.create({
