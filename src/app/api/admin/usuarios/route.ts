@@ -12,13 +12,20 @@ export async function GET() {
 
     await connectDB();
 
+    // Só o que a tela usa. Sem projeção e sem índice, o sort em memória do
+    // Mongo estourava os 32 MB (era o "Erro interno" do /admin/usuarios).
+    // allowDiskUse cobre o caso de a coleção crescer antes do índice existir.
     const usuarios = await User.find()
+      .select("name email role status createdAt profileId origemCadastro")
       .sort({ createdAt: -1 })
-      .select("-password")
+      .allowDiskUse(true)
       .lean();
 
     return NextResponse.json(usuarios);
-  } catch {
-    return NextResponse.json({ error: "Erro interno." }, { status: 500 });
+  } catch (err) {
+    // Rota só de admin: a mensagem real ajuda a diagnosticar e não vaza para usuário comum.
+    console.error("[admin/usuarios]", err);
+    const detalhe = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Erro interno: ${detalhe}` }, { status: 500 });
   }
 }

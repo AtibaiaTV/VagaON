@@ -9,7 +9,11 @@ import { notifyRedesaTalento } from "@/lib/redesa-webhook";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nome, email, senha, role, nomeFantasia, foto } = body;
+    // `foto` era aceita aqui como data URL e ia parar em User.image: 54 contas
+    // com ~1 MB cada, 70 MB na coleção, e a listagem do admin estourando o
+    // sort do Mongo. Foto de perfil é do Profissional, via Cloudinary
+    // (/api/upload); User.image não é lido em lugar nenhum.
+    const { nome, email, senha, role, nomeFantasia } = body;
 
     if (!nome || !email || !senha || !role) {
       return NextResponse.json(
@@ -47,7 +51,7 @@ export async function POST(req: NextRequest) {
       password: senhaHash,
       role,
       status: "ativo",
-      image: foto || null,
+      image: null,
     });
 
     // Cria o perfil vinculado ao usuário
