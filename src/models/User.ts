@@ -17,6 +17,19 @@ export interface IUser extends Document {
   };
   /** De onde veio o cadastro (QR do cartaz, link do Instagram…) — `?origem=` na entrada rápida. */
   origemCadastro: string | null;
+  /** Confirmação do número de WhatsApp por código (ver servicos/whatsapp-verificacao.ts). */
+  whatsapp: {
+    /** Número confirmado (55+DDD+número) e quando. null = nunca confirmou. */
+    numeroVerificado: string | null;
+    verificadoEm: Date | null;
+    codigoHash: string | null;
+    codigoExpiraEm: Date | null;
+    tentativas: number;
+    enviadoEm: Date | null;
+    /** Envios no dia (limite anti-abuso); `enviosDia` é a data (AAAA-MM-DD) do contador. */
+    envios: number;
+    enviosDia: string | null;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,6 +58,16 @@ const UserSchema = new Schema<IUser>(
       push: { type: Boolean, default: true },
     },
     origemCadastro: { type: String, default: null },
+    whatsapp: {
+      numeroVerificado: { type: String, default: null },
+      verificadoEm: { type: Date, default: null },
+      codigoHash: { type: String, default: null },
+      codigoExpiraEm: { type: Date, default: null },
+      tentativas: { type: Number, default: 0 },
+      enviadoEm: { type: Date, default: null },
+      envios: { type: Number, default: 0 },
+      enviosDia: { type: String, default: null },
+    },
   },
   { timestamps: true }
 );

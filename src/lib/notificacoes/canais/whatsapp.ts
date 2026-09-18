@@ -138,6 +138,30 @@ export async function enviarWhatsApp(
 }
 
 /**
+ * Código de confirmação do número. Vai pelo mesmo template utilitário
+ * (funciona hoje); um template de categoria "Autenticação" da Meta, com
+ * botão de copiar, é melhor e pode substituir depois sem mudar o resto.
+ */
+export async function enviarCodigoWhatsApp(
+  telefone: string,
+  nome: string,
+  codigo: string,
+  userId?: string | null
+): Promise<ResultadoEnvio> {
+  return enviarWhatsApp(
+    telefone,
+    nome,
+    {
+      categoria: "sistema",
+      titulo: "Confirme seu WhatsApp",
+      corpo: `Seu código de confirmação no VagaON é ${codigo}. Vale 10 minutos. Se não foi você, ignore esta mensagem.`,
+      url: "/painel",
+    },
+    userId
+  );
+}
+
+/**
  * Texto livre. Só chega se o usuário falou com o número nas últimas 24 h
  * (janela de atendimento da Meta); fora dela a API recusa. Usado pelo
  * webhook para responder a quem escreveu.

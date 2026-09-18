@@ -131,7 +131,8 @@ export default function AdminDiagnosticoPage() {
       ))}
 
       <p className="text-xs text-muted-foreground">
-        Lista completa, com exemplos de valor, em <code>docs/VARIAVEIS.md</code> e <code>.env.example</code>.
+        Lista completa, com exemplos de valor, em <code>docs/VARIAVEIS.md</code> e <code>.env.example</code>. Para
+        conferir o WhatsApp de ponta a ponta, use <a href="/admin/whatsapp" className="underline">Admin → WhatsApp → Testar envio</a>.
       </p>
     </div>
   );
