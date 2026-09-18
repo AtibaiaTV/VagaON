@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowDownLeft, ArrowUpRight, Loader2, RefreshCw, Send } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, KeyRound, Loader2, RefreshCw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,6 +60,27 @@ export default function AdminWhatsAppPage() {
   const [telefoneTeste, setTelefoneTeste] = useState("");
   const [testando, setTestando] = useState(false);
   const [resultadoTeste, setResultadoTeste] = useState<{ ok: boolean; texto: string } | null>(null);
+  const [pin, setPin] = useState("");
+  const [registrando, setRegistrando] = useState(false);
+  const [resultadoRegistro, setResultadoRegistro] = useState<{ ok: boolean; texto: string } | null>(null);
+
+  async function registrar(e: React.FormEvent) {
+    e.preventDefault();
+    setRegistrando(true);
+    setResultadoRegistro(null);
+    const r = await fetch("/api/admin/whatsapp/registrar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin }),
+    });
+    const d = await r.json().catch(() => ({}));
+    setRegistrando(false);
+    setResultadoRegistro(
+      d.ok
+        ? { ok: true, texto: "Número registrado na Cloud API. Agora o envio de template deve funcionar." }
+        : { ok: false, texto: `${d.status ?? ""} ${d.detalhe || d.error || "Falhou sem detalhe."}`.trim() }
+    );
+  }
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -142,6 +163,33 @@ export default function AdminWhatsAppPage() {
             {resultadoTeste && (
               <p className={`mt-2 text-sm ${resultadoTeste.ok ? "text-emerald-700" : "text-red-700"}`}>{resultadoTeste.texto}</p>
             )}
+
+            {/* Registro do número na Cloud API: passo único, exigido depois de
+                adicionar o número na conta. Sem ele: "(#133010) Account not registered". */}
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-sm font-semibold">Registrar número na API</p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Só na primeira vez, ou se o envio responder <code>#133010 Account not registered</code>. O PIN de 6
+                dígitos vira a verificação em duas etapas do número: anote.
+              </p>
+              <form onSubmit={registrar} className="flex flex-wrap gap-2">
+                <Input
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="PIN de 6 dígitos"
+                  inputMode="numeric"
+                  className="w-40 bg-white"
+                  required
+                />
+                <Button type="submit" variant="outline" disabled={registrando || pin.length !== 6 || !dados?.configurado} className="gap-2">
+                  {registrando ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+                  Registrar
+                </Button>
+              </form>
+              {resultadoRegistro && (
+                <p className={`mt-2 text-sm break-all ${resultadoRegistro.ok ? "text-emerald-700" : "text-red-700"}`}>{resultadoRegistro.texto}</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
