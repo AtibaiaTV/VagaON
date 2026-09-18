@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 import BrandBand from "@/components/shared/BrandBand";
 import DefinirSenha from "@/components/perfil/DefinirSenha";
+import { paraInputDate } from "@/lib/idade";
 import ImportarCurriculo from "@/components/ia/ImportarCurriculo";
 import VideoApresentacao, { type VideoPerfil } from "@/components/perfil/VideoApresentacao";
 import { ESTADOS } from "@/constants/estados";
@@ -73,6 +74,7 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
   const [pessoal, setPessoal] = useState({
     nomeCompleto: (dados?.nomeCompleto as string) ?? "",
     telefone: (dados?.telefone as string) ?? "",
+    dataNascimento: paraInputDate(dados?.dataNascimento),
     cidade: (dados?.cidade as string) ?? "",
     estado: (dados?.estado as string) ?? "",
     cep: (dados?.cep as string) ?? "",
@@ -237,6 +239,8 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
 
     const payload = {
       ...pessoal,
+      // "" não vira Date; null limpa o campo.
+      dataNascimento: pessoal.dataNascimento || null,
       fotoPerfil,
       videoApresentacao: video,
       idiomas: idiomas.filter((i) => i.idioma.trim()).map((i) => ({ idioma: i.idioma.trim(), nivel: i.nivel })),
@@ -481,14 +485,27 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                   required
                 />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="telefone">Telefone / WhatsApp</Label>
-                <Input
-                  id="telefone"
-                  value={pessoal.telefone}
-                  onChange={(e) => setPessoal((p) => ({ ...p, telefone: e.target.value }))}
-                  placeholder="(11) 99999-9999"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="telefone">Telefone / WhatsApp</Label>
+                  <Input
+                    id="telefone"
+                    value={pessoal.telefone}
+                    onChange={(e) => setPessoal((p) => ({ ...p, telefone: e.target.value }))}
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="dataNascimento">Data de nascimento</Label>
+                  <Input
+                    id="dataNascimento"
+                    type="date"
+                    value={pessoal.dataNascimento}
+                    onChange={(e) => setPessoal((p) => ({ ...p, dataNascimento: e.target.value }))}
+                    max={new Date().toISOString().slice(0, 10)}
+                  />
+                  <p className="text-[11px] text-muted-foreground">Aparece no currículo como data e idade.</p>
+                </div>
               </div>
               {/* Endereço: CEP preenche rua, bairro, cidade e UF. Cidade e UF são o que a empresa filtra. */}
               <div className="grid grid-cols-[1fr_auto] gap-4 items-end">

@@ -9,10 +9,11 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText } from "lucide-react";
+import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText, Cake } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
 import FotoAmpliavel from "@/components/perfil/FotoAmpliavel";
+import { idadeDe, nascimentoComIdade } from "@/lib/idade";
 import { resumoReputacaoPublico } from "@/lib/reputacao";
 
 interface IExperiencia {
@@ -47,6 +48,7 @@ interface IProfissionalLean {
   reputacao?: unknown;
   videoApresentacao?: { url: string; duracao: number } | null;
   createdAt?: string;
+  dataNascimento?: string | null;
 }
 
 const TIPOS_LABEL: Record<string, string> = {
@@ -82,7 +84,7 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
 
   // Empresa recebe só o bairro do endereço; admin recebe o endereço completo.
   const rawProf = await Profissional.findById(params.id)
-    .select(ehAdmin ? "-cpf -dataNascimento" : "-cpf -dataNascimento -cep -logradouro -numero -complemento")
+    .select(ehAdmin ? "-cpf" : "-cpf -cep -logradouro -numero -complemento")
     .lean();
 
   if (!rawProf) notFound();
@@ -90,6 +92,8 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
   const prof = JSON.parse(JSON.stringify(rawProf)) as IProfissionalLean;
 
   const disponTipos = prof.disponibilidade?.tipo ?? [];
+  // Idade vai para empresa e admin; a data em si só para o admin (cartão abaixo).
+  const idade = idadeDe(prof.dataNascimento);
 
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
@@ -169,6 +173,12 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                     Cadastro em {new Date(prof.createdAt).toLocaleDateString("pt-BR")}
                   </span>
                 )}
+                {idade !== null && (
+                  <span className="flex items-center gap-1">
+                    <Cake className="h-3.5 w-3.5" />
+                    {idade} anos
+                  </span>
+                )}
               </div>
 
               <div className="mt-4">
@@ -194,12 +204,17 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                Endereço <span className="text-xs font-normal text-muted-foreground">(visível só para o admin)</span>
+                Dados pessoais <span className="text-xs font-normal text-muted-foreground">(visível só para o admin)</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-1.5">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Nascimento: </span>
+                {prof.dataNascimento ? nascimentoComIdade(prof.dataNascimento) : "não informado"}
+              </p>
               {prof.logradouro || prof.numero || prof.complemento || prof.bairro || prof.cep ? (
                 <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">Endereço: </span>
                   {[
                     [prof.logradouro, prof.numero].filter(Boolean).join(", "),
                     prof.complemento,
@@ -210,7 +225,8 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Não informado. O cadastro só passou a pedir endereço agora; a pessoa preenche em Perfil → Editar.
+                  <span className="font-medium text-foreground">Endereço: </span>
+                  não informado. O cadastro só passou a pedir endereço e nascimento agora; a pessoa preenche em Perfil → Editar.
                 </p>
               )}
             </CardContent>

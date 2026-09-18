@@ -1,5 +1,6 @@
 import { labelEspecialidade } from "@/constants/especialidades";
 import { NIVEIS_IDIOMA, TIPO_CONTRATO_LABEL } from "@/constants/match";
+import { nascimentoComIdade } from "@/lib/idade";
 
 /**
  * Currículo para impressão: três modelos visuais sobre os mesmos dados do
@@ -182,6 +183,8 @@ export interface DadosCurriculo {
   foto: string | null;
   telefone: string;
   email: string;
+  /** "12/03/1994 · 32 anos". Vazio sem data. */
+  nascimento: string;
   local: string;
   /** Sem protocolo, para caber na lateral. */
   linkedin: string | null;
@@ -261,6 +264,7 @@ export function montarDadosCurriculo(p: Doc, email: string | null): DadosCurricu
     foto: texto(p.fotoPerfil) || null,
     telefone: texto(p.telefone),
     email: texto(email),
+    nascimento: nascimentoComIdade(p.dataNascimento),
     // Bairro + cidade/UF: o que um currículo mostra hoje; rua e número não vão para um PDF que circula no WhatsApp.
     local: [texto(p.bairro), [texto(p.cidade), texto(p.estado)].filter(Boolean).join(", ")].filter(Boolean).join(" · "),
     linkedin: linkedinBruto ? linkedinBruto.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") : null,
