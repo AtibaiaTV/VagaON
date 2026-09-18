@@ -5,6 +5,8 @@ import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { sanitizarPerguntas } from "@/lib/triagem";
+import { ErroAtor } from "@/lib/servicos/erros";
+import { verificarLimiteVagas } from "@/lib/servicos/planos";
 
 const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
   gastronomia: ["cozinha", "bar", "salao"],
@@ -79,6 +81,14 @@ export async function POST(req: NextRequest) {
     const empresa = await Empresa.findOne({ userId: session.user.id });
     if (!empresa) {
       return NextResponse.json({ error: "Perfil de empresa não encontrado." }, { status: 404 });
+    }
+
+    // Limite de vagas ativas do plano (no-op com planos desligados).
+    try {
+      await verificarLimiteVagas(empresa);
+    } catch (err) {
+      if (err instanceof ErroAtor) return NextResponse.json({ error: err.message, upgrade: true }, { status: err.status });
+      throw err;
     }
 
     const body = await req.json();

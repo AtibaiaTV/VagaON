@@ -15,6 +15,7 @@ import { LIMITE_LIKES_DIA } from "@/constants/match";
 import { montarTriagem } from "@/lib/triagem";
 import type { Ator } from "./ator";
 import { ErroAtor } from "./erros";
+import { verificarLimiteSwipesEmpresa } from "./planos";
 
 export { LIMITE_LIKES_DIA };
 
@@ -91,6 +92,8 @@ export async function registrarSwipe(ator: Ator, entrada: EntradaSwipe): Promise
     const alvo = await Profissional.findById(entrada.profissionalId);
     if (!alvo) throw new ErroAtor(404, "Profissional não encontrado.");
     profissional = alvo;
+    // Plano Grátis: poucas decisões por dia no deck (no-op com planos desligados).
+    await verificarLimiteSwipesEmpresa(empresa);
   }
 
   // Score no momento da decisão — fica gravado para análise, mesmo que o perfil mude.

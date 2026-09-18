@@ -1,7 +1,11 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/db";
+import { MENSAGENS_LIMITE } from "@/lib/planos";
+import { acessoDaEmpresa } from "@/lib/servicos/planos";
+import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
+import Paywall from "@/components/planos/Paywall";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +40,20 @@ export default async function ProfissionaisPage() {
   if (!session || session.user.role !== "empresa") redirect("/painel");
 
   await connectDB();
+
+  // Banco de currículos é recurso do plano Pro (no-op com planos desligados).
+  const empresa = await Empresa.findOne({ userId: session.user.id }).select("assinatura").lean();
+  if (!acessoDaEmpresa(empresa).limites.bancoCurriculos) {
+    return (
+      <div className="min-h-screen bg-[#f4f7f5]">
+        <Navbar />
+        <main className="max-w-5xl mx-auto px-4 py-8">
+          <Paywall titulo="Banco de currículos é do plano Pro" mensagem={MENSAGENS_LIMITE.bancoCurriculos} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const raw = await Profissional.find({})
     .select("-cpf -experiencias -habilidades -dataNascimento -cep")
