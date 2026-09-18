@@ -4,6 +4,7 @@ import { urlAbsoluta } from "@/lib/notificacoes/tipos";
 import { caminhoEmpresa } from "@/lib/seo";
 import Empresa from "@/models/Empresa";
 import Vaga from "@/models/Vaga";
+import { cidadesComVagas } from "@/lib/servicos/paginas-vagas";
 
 /**
  * /sitemap.xml — o que o Google deve rastrear: páginas públicas fixas, as
@@ -30,13 +31,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     await connectDB();
-    const [vagas, empresas] = await Promise.all([
+    const [vagas, empresas, cidades] = await Promise.all([
       Vaga.find({ status: "ativa", aprovadaPorAdmin: true }).select("_id updatedAt").sort({ createdAt: -1 }).limit(5000).lean(),
       Empresa.find({ slug: { $ne: null } }).select("slug updatedAt").limit(5000).lean(),
+      cidadesComVagas(),
+    ]);
+
+    // Páginas por cidade e por função — só as que têm vaga ativa.
+    const locais: MetadataRoute.Sitemap = cidades.flatMap((c) => [
+      { url: urlAbsoluta(`/vagas/em/${c.slug}`), changeFrequency: "daily" as const, priority: 0.7 },
+      ...c.funcoes.map((f) => ({
+        url: urlAbsoluta(`/vagas/em/${c.slug}/${f.slug}`),
+        changeFrequency: "daily" as const,
+        priority: 0.7,
+      })),
     ]);
 
     return [
       ...fixas,
+      ...locais,
       ...vagas.map((v) => ({
         url: urlAbsoluta(`/vagas/${v._id}`),
         lastModified: v.updatedAt,
