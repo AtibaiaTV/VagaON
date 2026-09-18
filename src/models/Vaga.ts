@@ -30,6 +30,7 @@ export interface IVaga extends Document {
   aprovadaPorAdmin: boolean;
   totalCandidaturas: number;
   visualizacoes: number;
+  ultimaVisualizacaoEm: Date | null;
   /** Validade: 60 dias (CLT) ou a data de término (temporária/sazonal). O cron expira. */
   expiresAt: Date | null;
   /** Quando o aviso "expira em 3 dias" foi enviado (uma vez por validade). */
@@ -109,6 +110,8 @@ const VagaSchema = new Schema<IVaga>(
     aprovadaPorAdmin: { type: Boolean, default: true }, // auto-aprovação no início
     totalCandidaturas: { type: Number, default: 0 },
     visualizacoes: { type: Number, default: 0 },
+    /** Última vez que alguém que não é a empresa dona abriu a vaga. */
+    ultimaVisualizacaoEm: { type: Date, default: null },
     expiresAt: { type: Date, default: null },
     expiraAvisoEm: { type: Date, default: null },
     preenchidas: { type: Number, default: 0, min: 0 },
