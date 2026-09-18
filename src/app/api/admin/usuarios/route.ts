@@ -18,7 +18,10 @@ export async function GET() {
       .lean();
 
     return NextResponse.json(usuarios);
-  } catch {
-    return NextResponse.json({ error: "Erro interno." }, { status: 500 });
+  } catch (err) {
+    // Rota só de admin: a mensagem real ajuda a diagnosticar e não vaza para usuário comum.
+    console.error("[admin/usuarios]", err);
+    const detalhe = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Erro interno: ${detalhe}` }, { status: 500 });
   }
 }
