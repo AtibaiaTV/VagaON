@@ -14,6 +14,7 @@ import Footer from "@/components/layout/Footer";
 import VagasListaPublica from "@/components/vagas/VagasListaPublica";
 import BrandBand from "@/components/shared/BrandBand";
 import { COR_STATUS_VAGA, LABEL_STATUS_VAGA, diasAte, type StatusVaga } from "@/lib/vagas-estado";
+import { cidadesComVagas } from "@/lib/servicos/paginas-vagas";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
@@ -68,6 +69,8 @@ export default async function VagasPage() {
       vagas = JSON.parse(JSON.stringify(raw));
     }
   }
+
+  const cidadesSeo = isEmpresa ? [] : await cidadesComVagas().catch(() => []);
 
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
@@ -173,6 +176,26 @@ export default async function VagasPage() {
 
         {/* Vista Pública / Profissional: filtros + lista via API */}
         {!isEmpresa && <VagasListaPublica />}
+
+        {/* Páginas por cidade (SEO): só cidades com vaga ativa */}
+        {!isEmpresa && cidadesSeo.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Vagas por cidade</h2>
+            <div className="flex flex-wrap gap-2">
+              {cidadesSeo.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/vagas/em/${c.slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 text-sm hover:border-primary/50 hover:text-primary"
+                >
+                  <MapPin className="h-3.5 w-3.5 text-primary/60" />
+                  {c.cidade}, {c.uf}
+                  <span className="text-xs text-muted-foreground">{c.total}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>
