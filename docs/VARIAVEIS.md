@@ -21,7 +21,7 @@ Sem qualquer uma destas, o site não funciona.
 |---|---|---|---|
 | `MONGODB_URI` | Banco (MongoDB Atlas) | Nada carrega | Atlas → Database → Connect → Drivers |
 | `AUTH_SECRET` | Assina as sessões do NextAuth | Ninguém entra | `openssl rand -base64 32` |
-| `NEXT_PUBLIC_APP_URL` | Domínio público; base de QR, links e e-mails | QR Code, cartaz e links de aviso saem com `http://localhost:3000` | O domínio real, com `https` e sem barra no fim |
+| `NEXT_PUBLIC_APP_URL` | Domínio público; base de QR, links, e-mails, `sitemap.xml` e `robots.txt` | QR Code, cartaz, links de aviso e sitemap saem com `http://localhost:3000` | O domínio real, com `https` e sem barra no fim: `https://www.vagaon.com.br` |
 
 `AUTH_URL` serve de reserva para `NEXT_PUBLIC_APP_URL` (ver
 [`src/lib/qr.ts`](../src/lib/qr.ts)), mas o valor público é o que vale para o
