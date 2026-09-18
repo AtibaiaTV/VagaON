@@ -24,6 +24,7 @@ interface IProfissionalLean {
   resumoProfissional: string;
   disponibilidade: { tipo: string[]; imediata: boolean };
   match?: { ativo?: boolean };
+  createdAt?: string;
 }
 
 const DISPON_LABEL: Record<string, string> = {
@@ -111,11 +112,11 @@ export default async function ProfissionaisPage() {
                         <img
                           src={prof.fotoPerfil}
                           alt={prof.nomeCompleto}
-                          className="w-11 h-11 rounded-full object-cover shrink-0"
+                          className="w-16 h-16 rounded-full object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <span className="text-base font-bold text-primary">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <span className="text-xl font-bold text-primary">
                             {prof.nomeCompleto.charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -166,10 +167,10 @@ export default async function ProfissionaisPage() {
                       </p>
                     )}
 
-                    {/* Disponibilidade */}
-                    {(prof.disponibilidade?.tipo ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1 pt-3 border-t">
-                        {prof.disponibilidade.tipo.map((t) => (
+                    {/* Disponibilidade + data do cadastro */}
+                    {((prof.disponibilidade?.tipo ?? []).length > 0 || prof.createdAt) && (
+                      <div className="flex flex-wrap items-center gap-1 pt-3 border-t">
+                        {(prof.disponibilidade?.tipo ?? []).map((t) => (
                           <span
                             key={t}
                             className={`text-xs px-2 py-0.5 rounded-full font-medium ${DISPON_COR[t] ?? "bg-muted text-muted-foreground"}`}
@@ -177,6 +178,11 @@ export default async function ProfissionaisPage() {
                             {DISPON_LABEL[t] ?? t}
                           </span>
                         ))}
+                        {prof.createdAt && (
+                          <span className="ml-auto text-[11px] text-muted-foreground" title="Data do cadastro">
+                            {new Date(prof.createdAt).toLocaleDateString("pt-BR")}
+                          </span>
+                        )}
                       </div>
                     )}
                   </CardContent>
