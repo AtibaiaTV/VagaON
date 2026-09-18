@@ -30,9 +30,10 @@ Um e-mail que já é de **profissional** ou de **admin** nunca é adotado — se
 fundir duas identidades sem ninguém pedir. O SSO recusa com a página de erro
 `email-em-uso`.
 
-O User criado pelo SSO não tem senha: a porta dele é a RedeSA. Se quiser usar o
-login normal do VagaON, define uma senha pelo perfil (recurso a fazer — hoje
-não há "definir senha" para conta sem senha).
+O User criado pelo SSO não tem senha: a porta dele é a RedeSA. Para usar o
+login normal do VagaON, define uma senha em **Perfil → Definir uma senha**
+(`PUT /api/conta/senha`, PR #32); o painel lembra disso enquanto não houver
+senha. Conta que já tem senha usa o mesmo cartão para trocar, informando a atual.
 
 **O token precisa trazer `email`.** Sem e-mail não há como criar a conta, e o
 SSO (ou a API de vagas, ao criar empresa nova) responde 400.
@@ -116,7 +117,5 @@ Falha de webhook vai para o log e não interrompe nada do lado do VagaON.
 
 - **Resumo no backoffice**: vagas ativas, candidatos novos, botão "Gerenciar".
   A leitura já existe (`GET /api/redesa/vagas`); falta a tela na RedeSA.
-- **Definir senha** para conta criada sem senha, para quem quiser entrar
-  direto no VagaON.
 - Depois de mesclar o PR do diagnóstico, subir `CROSS_PLATFORM_SECRET` de
   "opcional" para "importante" em `src/lib/diagnostico.ts`.
