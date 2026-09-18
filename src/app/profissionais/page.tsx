@@ -6,6 +6,7 @@ import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import { menorDistancia, paraCoords, type PontoDoProfissional } from "@/lib/match/geo";
 import { geocodificarCidade } from "@/constants/municipios";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import Profissional from "@/models/Profissional";
 import Paywall from "@/components/planos/Paywall";
 import Link from "next/link";
@@ -69,7 +70,7 @@ export default async function ProfissionaisPage({ searchParams }: { searchParams
   // Admin não tem empresa nem plano: entra direto.
   const empresa = ehAdmin
     ? null
-    : await Empresa.findOne({ userId: session.user.id }).select("assinatura cidade estado").lean();
+    : await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).select("assinatura cidade estado").lean();
   if (!ehAdmin && !acessoDaEmpresa(empresa).limites.bancoCurriculos) {
     return (
       <div className="min-h-screen bg-[#f4f7f5]">

@@ -4,6 +4,7 @@ import Notificacao from "@/models/Notificacao";
 import Profissional from "@/models/Profissional";
 import PushSubscription from "@/models/PushSubscription";
 import User from "@/models/User";
+import { usuariosDaEmpresa } from "@/lib/servicos/equipe";
 import { emailConfigurado, enviarEmail } from "./canais/email";
 import { enviarPush, pushConfigurado } from "./canais/push";
 import { enviarWhatsApp, whatsappConfigurado } from "./canais/whatsapp";
@@ -19,30 +20,10 @@ export * from "./mensagens";
  * função encerra assim que a resposta sai.
  */
 
-async function resolverDestinatario(alvo: AlvoNotificacao): Promise<Destinatario | null> {
-  await connectDB();
-
-  // Sempre como string: o Mongoose converte para ObjectId nas queries.
-  let userId: string;
-  let nome = "";
-  let telefone: string | null = null;
-
-  if (alvo.tipo === "profissional") {
-    const p = await Profissional.findById(alvo.perfilId).select("userId nomeCompleto telefone").lean();
-    if (!p) return null;
-    userId = String(p.userId);
-    nome = p.nomeCompleto;
-    telefone = p.telefone || null;
-  } else if (alvo.tipo === "empresa") {
-    const e = await Empresa.findById(alvo.perfilId).select("userId nomeFantasia telefone").lean();
-    if (!e) return null;
-    userId = String(e.userId);
-    nome = e.nomeFantasia;
-    telefone = e.telefone || null;
-  } else {
-    userId = String(alvo.userId);
-  }
-
+async function montarDestinatario(
+  userId: string,
+  extras: { nome?: string; telefone?: string | null }
+): Promise<Destinatario | null> {
   const [user, inscricoes] = await Promise.all([
     User.findById(userId).select("name email status notificacoes").lean(),
     PushSubscription.find({ userId }).select("endpoint keys").lean(),
@@ -51,9 +32,9 @@ async function resolverDestinatario(alvo: AlvoNotificacao): Promise<Destinatario
 
   return {
     userId: String(user._id),
-    nome: nome || user.name,
+    nome: extras.nome || user.name,
     email: user.email || null,
-    telefone,
+    telefone: extras.telefone ?? null,
     preferencias: {
       email: user.notificacoes?.email ?? true,
       whatsapp: user.notificacoes?.whatsapp ?? true,
@@ -63,11 +44,51 @@ async function resolverDestinatario(alvo: AlvoNotificacao): Promise<Destinatario
   };
 }
 
+/**
+ * Quem recebe. Profissional e user: uma pessoa. Empresa: a equipe inteira
+ * (dono + gerentes) — quem cuida do funil precisa saber da candidatura,
+ * não só quem criou a conta. O telefone da empresa vai só para o dono,
+ * para o WhatsApp não bombardear o mesmo número várias vezes.
+ */
+async function resolverDestinatarios(alvo: AlvoNotificacao): Promise<Destinatario[]> {
+  await connectDB();
+
+  if (alvo.tipo === "profissional") {
+    const p = await Profissional.findById(alvo.perfilId).select("userId nomeCompleto telefone").lean();
+    if (!p) return [];
+    const d = await montarDestinatario(String(p.userId), { nome: p.nomeCompleto, telefone: p.telefone || null });
+    return d ? [d] : [];
+  }
+
+  if (alvo.tipo === "empresa") {
+    const e = await Empresa.findById(alvo.perfilId).select("userId membros nomeFantasia telefone").lean();
+    if (!e) return [];
+    const ids = usuariosDaEmpresa(e);
+    const lista = await Promise.all(
+      ids.map((id, i) =>
+        montarDestinatario(id, i === 0 ? { nome: e.nomeFantasia, telefone: e.telefone || null } : {})
+      )
+    );
+    return lista.filter((d): d is Destinatario => d !== null);
+  }
+
+  const d = await montarDestinatario(String(alvo.userId), {});
+  return d ? [d] : [];
+}
+
 export async function notificar(alvo: AlvoNotificacao, msg: MensagemNotificacao): Promise<ResultadoEnvio[]> {
   try {
-    const d = await resolverDestinatario(alvo);
-    if (!d) return [];
+    const destinatarios = await resolverDestinatarios(alvo);
+    const tudo = await Promise.all(destinatarios.map((d) => notificarUm(d, msg)));
+    return tudo.flat();
+  } catch (err) {
+    console.error("[notificacoes] erro inesperado:", err);
+    return [];
+  }
+}
 
+async function notificarUm(d: Destinatario, msg: MensagemNotificacao): Promise<ResultadoEnvio[]> {
+  try {
     const envios: Promise<ResultadoEnvio>[] = [
       Notificacao.create({
         userId: d.userId,
@@ -111,7 +132,7 @@ export async function notificar(alvo: AlvoNotificacao, msg: MensagemNotificacao)
     }
     return resultados;
   } catch (err) {
-    console.error("[notificacoes] erro inesperado:", err);
+    console.error("[notificacoes] erro ao notificar", d.userId, err);
     return [];
   }
 }

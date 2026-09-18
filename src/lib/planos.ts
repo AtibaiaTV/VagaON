@@ -65,7 +65,7 @@ export const RECURSOS_PLANO: { chave: string; rotulo: string; gratis: string; pr
   { chave: "descobrir", rotulo: "Descobrir (deck de candidatos)", gratis: "10 por dia", pro: "Ilimitado" },
   { chave: "banco", rotulo: "Banco de currículos com filtros", gratis: "—", pro: "Sim" },
   { chave: "triagem", rotulo: "Resumo das respostas de triagem por IA", gratis: "—", pro: "Sim" },
-  { chave: "multi", rotulo: "Vários usuários na mesma empresa", gratis: "—", pro: "Em breve" },
+  { chave: "multi", rotulo: "Vários usuários na mesma empresa", gratis: "—", pro: "Até 10" },
   { chave: "selo", rotulo: "Selo de empresa verificada", gratis: "—", pro: "Em breve" },
 ];
 
@@ -153,7 +153,7 @@ export const MENSAGENS_LIMITE = {
     `Você usou as ${limite} avaliações de hoje do plano Grátis. Assine o Pro para continuar descobrindo candidatos.`,
   bancoCurriculos: "O banco de currículos faz parte do plano Pro. Quem se candidatou às suas vagas continua visível no funil.",
   triagemIA: "O resumo das respostas por IA faz parte do plano Pro. As respostas completas continuam no funil.",
-  multiusuario: "Vários usuários por empresa fazem parte do plano Pro.",
+  multiusuario: "Convidar gerentes para a equipe faz parte do plano Pro. Quem já foi convidado continua com acesso.",
   selo: "O selo de verificação faz parte do plano Pro.",
 } as const;
 

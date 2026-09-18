@@ -27,6 +27,11 @@ operação que a disparou. Tudo é aguardado (Vercel encerra a função ao respo
 Textos em `mensagens.ts`. Preferências por canal em `User.notificacoes`
 (tela: `/perfil` → Notificações).
 
+Alvo do tipo **empresa** avisa a equipe inteira (dono + gerentes, ver
+[EQUIPE.md](EQUIPE.md)), cada um com as próprias preferências e inscrições
+de push. O telefone da empresa (WhatsApp) só vai para o dono, para o mesmo
+número não receber o aviso repetido.
+
 ## Push — como ativar
 
 1. `npx web-push generate-vapid-keys` → cole as chaves no `.env` (local e Vercel).

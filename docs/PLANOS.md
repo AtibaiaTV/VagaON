@@ -18,7 +18,8 @@ candidatou continuam grátis. O plano cobra a **busca ativa** e as
 | Descobrir (deck de candidatos) | 10 decisões/dia | ilimitado |
 | Banco de currículos (`/profissionais`) | não | sim |
 | Resumo das respostas de triagem por IA | não | sim |
-| Vários usuários por empresa, selo verificado | não | previsto |
+| Vários usuários por empresa (ver [EQUIPE.md](EQUIPE.md)) | não | até 10 gerentes |
+| Selo verificado | não | previsto |
 
 Preço de referência (`src/lib/planos.ts`): Pro R$ 149/mês ou passe de
 temporada R$ 199 por 30 dias (buffet, hotel, evento). Ajuste em `PLANOS`.
@@ -47,6 +48,7 @@ todas as empresas: nenhum limite é aplicado, o card do painel some e a página
 | `/profissionais/[id]` | idem, **exceto** quem tem candidatura ou match com a empresa | `Paywall` |
 | `POST /api/candidaturas/[id]/triagem-ia` | `exigirRecurso("triagemIA")` | 402; o Kanban só pede resumo quando `iaDisponivel` (chave + plano) |
 | `/painel` (empresa) | `CardPlanoPainel` | situação do plano e chamada para o Pro |
+| `POST /api/empresa/equipe` | `exigirRecurso("multiusuario")` | 402; `/perfil/equipe` esconde o formulário e mostra o link para `/planos`. Gerente já convidado nunca perde acesso |
 
 Tudo passa por `src/lib/servicos/planos.ts`, que usa `resolverPlano` (puro,
 em `src/lib/planos.ts`): assinatura `ativa`/`inadimplente` com `ativoAte`

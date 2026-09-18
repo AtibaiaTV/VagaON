@@ -7,6 +7,7 @@ import { responderErro } from "@/lib/servicos/http";
 import { exigirRecurso } from "@/lib/servicos/planos";
 import { gerarResumoTriagem } from "@/lib/servicos/triagem";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (!iaConfigurada()) throw new ErroAtor(503, "Resumo por IA não está ativado neste ambiente.");
 
     await connectDB();
-    const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id assinatura").lean();
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).select("_id assinatura").lean();
     if (!empresa) throw new ErroAtor(404, "Perfil de empresa não encontrado.");
     exigirRecurso(empresa, "triagemIA");
 

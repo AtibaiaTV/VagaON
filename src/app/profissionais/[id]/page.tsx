@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText, Cake, RefreshCw, Activity, Navigation } from "lucide-react";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import { menorDistancia, paraCoords, type PontoDoProfissional } from "@/lib/match/geo";
 import { geocodificarCidade } from "@/constants/municipios";
 import Navbar from "@/components/layout/Navbar";
@@ -107,7 +108,7 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
   let viaInteresse: string | null = null;
   let nomeEmpresa: string | null = null;
   if (!ehAdmin) {
-    const minha = await Empresa.findOne({ userId: session!.user.id }).select("cidade estado nomeFantasia").lean();
+    const minha = await Empresa.findOne(filtroEmpresaDoUsuario(session!.user.id)).select("cidade estado nomeFantasia").lean();
     const daEmpresa = minha ? geocodificarCidade(minha.cidade, minha.estado) : null;
     const pontos: PontoDoProfissional[] = [];
     const casa = paraCoords(prof.localizacao) ?? geocodificarCidade(prof.cidade, prof.estado);

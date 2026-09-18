@@ -5,6 +5,7 @@ import { ErroAtor } from "@/lib/servicos/ator";
 import { moverCandidatura } from "@/lib/servicos/candidaturas";
 import { responderErro } from "@/lib/servicos/http";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!session || session.user.role !== "empresa") throw new ErroAtor(401, "Não autorizado.");
 
     await connectDB();
-    const empresa = await Empresa.findOne({ userId: session.user.id }).lean();
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).lean();
     if (!empresa) throw new ErroAtor(404, "Perfil de empresa não encontrado.");
 
     const body = await req.json().catch(() => ({}));

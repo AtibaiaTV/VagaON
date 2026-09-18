@@ -2,8 +2,20 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 import slugify from "slugify";
 import type { Assinatura } from "@/lib/planos";
 
-export interface IEmpresa extends Document {
+export type PapelEmpresa = "dono" | "gerente";
+
+/** Usuário extra que opera a empresa. O dono é `userId`, fora desta lista. */
+export interface MembroEmpresa {
   userId: mongoose.Types.ObjectId;
+  papel: "gerente";
+  convidadoPor: mongoose.Types.ObjectId | null;
+  desde: Date;
+}
+
+export interface IEmpresa extends Document {
+  /** Dono: quem criou a conta. Único por empresa; gerentes ficam em `membros`. */
+  userId: mongoose.Types.ObjectId;
+  membros: MembroEmpresa[];
   redesaId?: string;
   /** Identificador da página pública (/empresas/[slug]). Gerado do nome; estável depois de criado. */
   slug: string | null;
@@ -58,6 +70,20 @@ const AssinaturaSchema = new Schema<Assinatura>(
 const EmpresaSchema = new Schema<IEmpresa>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+    membros: {
+      type: [
+        new Schema<MembroEmpresa>(
+          {
+            userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+            papel: { type: String, enum: ["gerente"], default: "gerente" },
+            convidadoPor: { type: Schema.Types.ObjectId, ref: "User", default: null },
+            desde: { type: Date, default: Date.now },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
     redesaId: { type: String, index: true, sparse: true },
     slug: { type: String, unique: true, sparse: true, default: null },
     nomeFantasia: { type: String, required: true },
@@ -96,6 +122,8 @@ const EmpresaSchema = new Schema<IEmpresa>(
 );
 
 EmpresaSchema.index({ estado: 1, setor: 1 });
+// "Qual é a empresa deste usuário?" — dono via userId (unique) ou gerente via membros.
+EmpresaSchema.index({ "membros.userId": 1 });
 // Admin: listar quem está em trial/assinatura e quando vence.
 EmpresaSchema.index({ "assinatura.status": 1, "assinatura.ativoAte": 1 });
 

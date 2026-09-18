@@ -53,6 +53,7 @@ export async function GET() {
         userId: e.userId?.toString(),
         userStatus: userMap[e.userId?.toString()]?.status ?? "desconhecido",
         userEmail: userMap[e.userId?.toString()]?.email ?? "",
+        gerentes: e.membros?.length ?? 0,
         // Valor entregue — é o que decide o preço quando os planos ligarem.
         vagasAtivas: vagasAtivas.get(id) ?? 0,
         candidaturas: candidaturas.get(id) ?? 0,
