@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link2, Mail, MapPin, Phone } from "lucide-react";
+import { Cake, Link2, Mail, MapPin, Phone } from "lucide-react";
 import { COR_PADRAO, coresMinimalista, type DadosCurriculo } from "@/lib/curriculo";
 import { Descricao, FotoCV } from "./comum";
 
@@ -26,6 +26,7 @@ export default function ModeloMinimalista({ d, cor = COR_PADRAO.minimalista }: {
   const contatos = [
     d.telefone && { icone: <Phone className="inline h-[3.5mm] w-[3.5mm]" />, texto: d.telefone },
     d.email && { icone: <Mail className="inline h-[3.5mm] w-[3.5mm]" />, texto: d.email },
+    d.nascimento && { icone: <Cake className="inline h-[3.5mm] w-[3.5mm]" />, texto: d.nascimento },
     d.local && { icone: <MapPin className="inline h-[3.5mm] w-[3.5mm]" />, texto: d.local },
     d.linkedin && { icone: <Link2 className="inline h-[3.5mm] w-[3.5mm]" />, texto: d.linkedin },
   ].filter(Boolean) as { icone: ReactNode; texto: string }[];

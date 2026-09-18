@@ -47,6 +47,7 @@ export default function ModeloExecutivo({ d, cor = COR_PADRAO.executivo }: { d: 
         <SecaoLateral titulo="CONTATO" destaque={DESTAQUE}>
           {d.telefone && <p>{d.telefone}</p>}
           {d.email && <p className="break-all">{d.email}</p>}
+          {d.nascimento && <p>{d.nascimento}</p>}
           {d.local && <p>{d.local}</p>}
           {d.linkedin && <p className="break-all">{d.linkedin}</p>}
         </SecaoLateral>

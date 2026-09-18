@@ -55,7 +55,7 @@ export default function ModeloCriativo({ d, cor = COR_PADRAO.criativo }: { d: Da
   ].filter(Boolean) as string[];
   const numero = (s: string) => String(secoes.indexOf(s) + 1).padStart(2, "0");
 
-  const contato = [d.telefone && `Telefone: ${d.telefone}`, d.email && `E-mail: ${d.email}`, d.linkedin, d.local].filter(Boolean).join("  |  ");
+  const contato = [d.telefone && `Telefone: ${d.telefone}`, d.email && `E-mail: ${d.email}`, d.nascimento && `Nascimento: ${d.nascimento}`, d.linkedin, d.local].filter(Boolean).join("  |  ");
 
   return (
     <article className="cv-pagina relative" style={{ color: TEXTO }}>
