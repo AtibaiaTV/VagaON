@@ -93,6 +93,63 @@ entregue → lida, ou falhou) e o que o usuário responde. Código em
    Assine o campo **messages**.
 3. Todo POST é validado pela assinatura `X-Hub-Signature-256`; sem
    `WHATSAPP_APP_SECRET` o webhook descarta tudo (503).
+4. Evento cujo `metadata.phone_number_id` não é o `WHATSAPP_PHONE_NUMBER_ID`
+   é ignorado: um app assinado numa WABA recebe os eventos de **todos** os
+   números dela. Mesmo assim, o recomendado é o VagaON ter **WABA e app
+   próprios** dentro do mesmo portfólio da RedeSA — o webhook é um por app,
+   e assim nenhum lado recebe o tráfego do outro (ver "Ligando o número").
+
+## Ligando o número do VagaON na Meta (roteiro)
+
+Tudo no painel da Meta, com a conta do portfólio da RedeSA. A verificação
+de empresa (Business Verification) já existe no portfólio e vale para a
+WABA nova.
+
+1. **WABA própria.** business.facebook.com → Configurações do negócio →
+   Contas → Contas do WhatsApp → Adicionar → "Criar uma conta do WhatsApp
+   Business" → nome "VagaON", fuso America/Sao_Paulo.
+2. **App próprio.** developers.facebook.com → Meus apps → Criar app → tipo
+   *Empresa* → vincular ao portfólio → adicionar produto **WhatsApp** →
+   escolher a WABA "VagaON".
+3. **Número.** WhatsApp → Configuração da API → Adicionar número. Precisa
+   de um número que **nunca teve WhatsApp** (ou apague a conta do WhatsApp
+   nele antes). Verificação por SMS ou ligação. Nome de exibição "VagaON"
+   (a Meta aprova o nome; pode levar horas). Anote o **Phone number ID** →
+   `WHATSAPP_PHONE_NUMBER_ID`.
+4. **Token permanente.** Configurações do negócio → Usuários → Usuários do
+   sistema → criar "vagaon-api" (função Administrador) → Adicionar ativos:
+   o app (controle total) e a WABA "VagaON" (controle total) → Gerar token
+   com `whatsapp_business_messaging` e `whatsapp_business_management`,
+   validade "nunca" → `WHATSAPP_TOKEN`.
+5. **Chave do app.** App → Configurações do app → Básico → Chave secreta do
+   app → `WHATSAPP_APP_SECRET`.
+6. **Webhook.** App → WhatsApp → Configuração → Webhook: URL de callback
+   `https://www.vagaon.com.br/api/webhooks/whatsapp`, token de verificação
+   = valor que você inventar (`openssl rand -hex 24`) → `WHATSAPP_VERIFY_TOKEN`.
+   **Coloque a variável na Vercel e faça o deploy ANTES de clicar em
+   "Verificar e salvar"**, senão a Meta recebe 403. Depois, em Campos do
+   webhook, assine **messages**.
+7. **Template.** WhatsApp Manager → Ferramentas da conta → Modelos de
+   mensagem → Criar: nome `vagaon_aviso`, categoria **Utilidade**, idioma
+   Português (BR), corpo `Olá, {{1}}! {{2}}` + nova linha + `Acesse: {{3}}`,
+   exemplos: Maria · `Deu match! Trattoria Nonna Rosa também tem interesse em
+   você para a vaga "Sous Chef". Comece a conversa.` ·
+   `https://www.vagaon.com.br/matches/abc`. Aprovação leva de minutos a 1 dia.
+8. **Modo do app.** Enquanto o app está em *Desenvolvimento*, só manda para
+   até 5 números de teste (WhatsApp → Configuração da API → "Para"). Para
+   valer para todo mundo: App → Modo → **Ativo** (exige política de
+   privacidade cadastrada e a verificação de empresa).
+9. **Vercel.** Settings → Environment Variables (Production):
+   `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`,
+   `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_TEMPLATE=vagaon_aviso`. Redeploy.
+10. **Teste.** `/admin/diagnostico` (as 5 variáveis verdes) → `/admin/whatsapp`
+    → Testar envio para o seu número → chegou? → o status vira "entregue" no
+    log quando o webhook responder → responda PARAR e VOLTAR para ver o
+    opt-out funcionando.
+
+Limite inicial da Meta: 250 conversas iniciadas pela empresa por dia por
+número (sobe sozinho com uso e qualidade). Cobrança: 1.000 conversas de
+utilidade grátis por mês; depois por conversa de 24 h.
 
 O que acontece com o que o usuário escreve:
 
