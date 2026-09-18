@@ -11,6 +11,7 @@
  */
 
 import { MUNICIPIOS_IBGE } from "./municipios-ibge";
+import { NOMES_MUNICIPIOS } from "./municipios-nomes";
 
 export interface Coordenadas {
   lat: number;
@@ -534,6 +535,44 @@ export function geocodificarCidade(
 
   const ufs = ufsDaCidade(nome);
   return ufs.length === 1 ? MUNICIPIOS[`${ufs[0]}:${nome}`] : null;
+}
+
+export interface MunicipioSugerido {
+  cidade: string;
+  uf: string;
+  lat: number;
+  lng: number;
+}
+
+let listaMunicipios: { chave: string; nome: string; uf: string; normalizado: string }[] | null = null;
+
+/**
+ * Autopreenchimento: municípios cujo nome contém o trecho digitado, com o
+ * nome oficial (acentos) de municipios-nomes.ts. Quem começa com o trecho vem
+ * antes; empate por ordem alfabética. Só no servidor (a tabela é grande).
+ */
+export function buscarMunicipios(trecho: string, uf: string | null | undefined, limite = 8): MunicipioSugerido[] {
+  const q = normalizarCidade(trecho ?? "");
+  if (!q) return [];
+  if (!listaMunicipios) {
+    listaMunicipios = Object.entries(NOMES_MUNICIPIOS).map(([chave, nome]) => {
+      const [ufChave, normalizado] = chave.split(":");
+      return { chave, nome, uf: ufChave, normalizado };
+    });
+  }
+  const ufFiltro = (uf ?? "").trim().toUpperCase();
+  const encontrados = listaMunicipios.filter(
+    (m) => (!ufFiltro || m.uf === ufFiltro) && m.normalizado.includes(q)
+  );
+  encontrados.sort((a, b) => {
+    const pa = Number(!a.normalizado.startsWith(q));
+    const pb = Number(!b.normalizado.startsWith(q));
+    return pa - pb || a.nome.localeCompare(b.nome, "pt-BR") || a.uf.localeCompare(b.uf);
+  });
+  return encontrados.slice(0, limite).map((m) => {
+    const c = MUNICIPIOS[m.chave];
+    return { cidade: m.nome, uf: m.uf, lat: c?.lat ?? 0, lng: c?.lng ?? 0 };
+  });
 }
 
 /** Centro aproximado da UF — só para centralizar mapas, nunca para pontuar. */

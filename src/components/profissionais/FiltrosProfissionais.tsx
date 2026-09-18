@@ -126,6 +126,7 @@ export default function FiltrosProfissionais({ temReferencia, referenciaLabel }:
           uf={uf || undefined}
           onSelect={(c) => definir({ cidade: c.cidade, ...(c.uf ? { uf: c.uf } : {}) })}
           onClear={() => definir({ cidade: "" })}
+          inputClassName="w-full h-10 rounded-lg border px-3 pr-8 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
 
         {/* Raio */}

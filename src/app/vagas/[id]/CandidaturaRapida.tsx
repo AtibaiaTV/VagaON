@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
 import PerguntasTriagem from "@/components/triagem/PerguntasTriagem";
 import { ESTADOS } from "@/constants/estados";
+import AutocompleteCidade from "@/components/shared/AutocompleteCidade";
 
 interface Props {
   vagaId: string;
@@ -144,7 +145,16 @@ export default function CandidaturaRapida({ vagaId, vagaTitulo, cidade, estado, 
         </div>
         <div className="space-y-1">
           <Label htmlFor="cr-cidade">Cidade *</Label>
-          <Input id="cr-cidade" value={form.cidade} onChange={campo("cidade")} required autoComplete="address-level2" />
+          <AutocompleteCidade
+            id="cr-cidade"
+            contexto="todas"
+            uf={form.estado || undefined}
+            value={form.cidade}
+            onChange={(v) => setForm((f) => ({ ...f, cidade: v }))}
+            onSelect={(s) => setForm((f) => ({ ...f, cidade: s.cidade, estado: s.uf ?? f.estado }))}
+            required
+            autoComplete="address-level2"
+          />
         </div>
         <div className="space-y-1">
           <Label>Estado *</Label>

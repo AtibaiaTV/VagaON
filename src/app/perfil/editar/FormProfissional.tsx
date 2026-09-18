@@ -16,6 +16,7 @@ import { paraInputDate } from "@/lib/idade";
 import ImportarCurriculo from "@/components/ia/ImportarCurriculo";
 import VideoApresentacao, { type VideoPerfil } from "@/components/perfil/VideoApresentacao";
 import { ESTADOS } from "@/constants/estados";
+import AutocompleteCidade from "@/components/shared/AutocompleteCidade";
 import { ESCALAS, NIVEIS_IDIOMA, RAIO_PADRAO_KM, TURNOS } from "@/constants/match";
 import { AMPLITUDE_ESPECIALIDADES } from "@/lib/match/pesos";
 import type { PerfilExtraido } from "@/lib/ia/curriculo";
@@ -596,12 +597,16 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="cidade">Cidade *</Label>
-                  <Input
+                  <AutocompleteCidade
                     id="cidade"
+                    contexto="todas"
+                    uf={pessoal.estado || undefined}
                     value={pessoal.cidade}
-                    onChange={(e) => setPessoal((p) => ({ ...p, cidade: e.target.value }))}
+                    onChange={(v) => setPessoal((p) => ({ ...p, cidade: v }))}
+                    onSelect={(c) => setPessoal((p) => ({ ...p, cidade: c.cidade, estado: c.uf ?? p.estado }))}
                     placeholder="São Paulo"
                     required
+                    autoComplete="address-level2"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1032,11 +1037,13 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                   )}
                   {cidadesInteresse.length < 5 && (
                     <div className="grid grid-cols-[1fr_5.5rem_auto] gap-2">
-                      <Input
+                      <AutocompleteCidade
                         id="cidadeInteresse"
+                        contexto="todas"
+                        uf={novaCidade.estado || undefined}
                         value={novaCidade.cidade}
-                        onChange={(e) => setNovaCidade((n) => ({ ...n, cidade: e.target.value }))}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); adicionarCidadeInteresse(); } }}
+                        onChange={(v) => setNovaCidade((n) => ({ ...n, cidade: v }))}
+                        onSelect={(c) => setNovaCidade((n) => ({ cidade: c.cidade, estado: c.uf ?? n.estado }))}
                         placeholder="Campos do Jordão"
                       />
                       <Select value={novaCidade.estado} onValueChange={(v) => setNovaCidade((n) => ({ ...n, estado: v ?? "" }))}>

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ESTADOS } from "@/constants/estados";
+import AutocompleteCidade from "@/components/shared/AutocompleteCidade";
 import { AFIRMATIVAS, ESCALAS, TURNOS } from "@/constants/match";
 import { MAX_PERGUNTAS, MAX_PERGUNTA_CHARS } from "@/lib/triagem";
 import type { VagaEstruturada } from "@/lib/ia/vaga";
@@ -439,8 +440,16 @@ export default function FormNovaVaga({ iaDisponivel = false }: { iaDisponivel?: 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="cidade">Cidade *</Label>
-                  <Input id="cidade" name="cidade" value={form.cidade} onChange={handleChange}
-                    placeholder="São Paulo" required />
+                  <AutocompleteCidade
+                    id="cidade"
+                    contexto="todas"
+                    uf={form.estado || undefined}
+                    value={form.cidade}
+                    onChange={(v) => setForm((p) => ({ ...p, cidade: v }))}
+                    onSelect={(c) => setForm((p) => ({ ...p, cidade: c.cidade, estado: c.uf ?? p.estado }))}
+                    placeholder="São Paulo"
+                    required
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label>Estado *</Label>

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
 import { ESTADOS } from "@/constants/estados";
+import AutocompleteCidade from "@/components/shared/AutocompleteCidade";
 
 export interface ContaRapida {
   nome: string;
@@ -126,7 +127,16 @@ export default function FormEntradaRapida({
         </div>
         <div className="space-y-1">
           <Label htmlFor="er-cidade">Cidade *</Label>
-          <Input id="er-cidade" value={conta.cidade} onChange={campo("cidade")} required autoComplete="address-level2" />
+          <AutocompleteCidade
+            id="er-cidade"
+            contexto="todas"
+            uf={conta.estado || undefined}
+            value={conta.cidade}
+            onChange={(v) => setConta((c) => ({ ...c, cidade: v }))}
+            onSelect={(s) => setConta((c) => ({ ...c, cidade: s.cidade, estado: s.uf ?? c.estado }))}
+            required
+            autoComplete="address-level2"
+          />
         </div>
         <div className="space-y-1">
           <Label>Estado *</Label>

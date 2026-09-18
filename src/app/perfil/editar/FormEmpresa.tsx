@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SETORES } from "@/constants/setores";
 import { ESTADOS } from "@/constants/estados";
+import AutocompleteCidade from "@/components/shared/AutocompleteCidade";
 import { Building2, ArrowLeft, CheckCircle, Phone, MapPin } from "lucide-react";
 import BrandBand from "@/components/shared/BrandBand";
 import DefinirSenha from "@/components/perfil/DefinirSenha";
@@ -240,13 +241,16 @@ export default function FormEmpresa({ profileId, dados, temSenha = true }: Props
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="cidade">Cidade *</Label>
-                  <Input
+                  <AutocompleteCidade
                     id="cidade"
-                    name="cidade"
+                    contexto="todas"
+                    uf={form.estado || undefined}
                     value={form.cidade}
-                    onChange={handleChange}
+                    onChange={(v) => setForm((p) => ({ ...p, cidade: v }))}
+                    onSelect={(c) => setForm((p) => ({ ...p, cidade: c.cidade, estado: c.uf ?? p.estado }))}
                     placeholder="São Paulo"
                     required
+                    autoComplete="address-level2"
                   />
                 </div>
                 <div className="space-y-1">

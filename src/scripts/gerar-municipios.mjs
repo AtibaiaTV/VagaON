@@ -56,7 +56,7 @@ for (const linha of linhas) {
   const chave = `${uf}:${normalizarCidade(nome)}`;
   if (vistos.has(chave)) continue; // homônimos na mesma UF não existem no IBGE, mas por garantia
   vistos.add(chave);
-  entradas.push([chave, lat.toFixed(4), lng.toFixed(4)]);
+  entradas.push([chave, lat.toFixed(4), lng.toFixed(4), nome.trim()]);
 }
 entradas.sort((a, b) => a[0].localeCompare(b[0]));
 
@@ -75,3 +75,17 @@ const saida =
 
 writeFileSync("src/constants/municipios-ibge.ts", saida);
 console.log(`${entradas.length} municípios → src/constants/municipios-ibge.ts (${(saida.length / 1024).toFixed(0)} KB)`);
+
+// Nome de exibição (com acento e maiúsculas do IBGE) por chave — para o
+// autopreenchimento de cidade. Só no servidor (GET /api/geo/cidades).
+const nomes =
+  "/**\n" +
+  " * Nome oficial (com acentos) de cada município, pela mesma chave \"UF:nome\n" +
+  " * normalizado\" de municipios-ibge.ts. GERADO por src/scripts/gerar-municipios.mjs.\n" +
+  " * Usado só no servidor, pelo autopreenchimento de cidade.\n" +
+  " */\n\n" +
+  "export const NOMES_MUNICIPIOS: Record<string, string> = {\n" +
+  entradas.map(([k, , , nome]) => `  ${JSON.stringify(k)}: ${JSON.stringify(nome)},`).join("\n") +
+  "\n};\n";
+writeFileSync("src/constants/municipios-nomes.ts", nomes);
+console.log(`nomes → src/constants/municipios-nomes.ts (${(nomes.length / 1024).toFixed(0)} KB)`);
