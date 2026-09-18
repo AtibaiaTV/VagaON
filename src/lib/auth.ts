@@ -3,6 +3,8 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import { verificarTokenCrossPlatform } from "@/lib/cross-platform-auth";
+import { garantirContaRedesa, sessaoDaConta, VALIDADE_TOKEN_SSO } from "@/lib/servicos/sso-redesa";
 
 // Extend the session type to include role and profileId
 declare module "next-auth" {
@@ -61,6 +63,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           profileId: user.profileId?.toString() ?? null,
           status: user.status,
         };
+      },
+    }),
+    // SSO da RedeSA: o backoffice já autenticou o dono e assina um token curto
+    // com CROSS_PLATFORM_SECRET. Sem senha — ver src/lib/servicos/sso-redesa.ts.
+    Credentials({
+      id: "redesa",
+      name: "RedeSA",
+      credentials: { token: { label: "Token", type: "text" } },
+      async authorize(credentials) {
+        const token = credentials?.token;
+        if (typeof token !== "string" || !token) return null;
+        try {
+          const payload = verificarTokenCrossPlatform(token, { maxAge: VALIDADE_TOKEN_SSO });
+          return sessaoDaConta(await garantirContaRedesa(payload));
+        } catch (err) {
+          console.error("[SSO RedeSA] Recusado:", err instanceof Error ? err.message : err);
+          return null;
+        }
       },
     }),
   ],
