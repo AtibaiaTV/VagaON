@@ -34,6 +34,11 @@ interface IProfissionalLean {
   fotoPerfil: string | null;
   cidade: string;
   estado: string;
+  bairro?: string;
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
   dispostoViajar: boolean;
   especialidades: string[];
   resumoProfissional: string;
@@ -82,8 +87,9 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
     }
   }
 
+  // Empresa recebe só o bairro do endereço; admin recebe o endereço completo.
   const rawProf = await Profissional.findById(params.id)
-    .select("-cpf -dataNascimento -cep")
+    .select(ehAdmin ? "-cpf -dataNascimento" : "-cpf -dataNascimento -cep -logradouro -numero -complemento")
     .lean();
 
   if (!rawProf) notFound();
@@ -151,12 +157,18 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
               </div>
 
               <div className="flex flex-wrap gap-4 mt-3 text-sm text-white/70">
-                {(prof.cidade || prof.estado) && (
+                {/* Sem cidade a pessoa quase não aparece nos filtros: para o admin isso é o que importa ver. */}
+                {!prof.cidade && ehAdmin ? (
+                  <span className="flex items-center gap-1 text-amber-200">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {prof.estado ? `${prof.estado} · sem cidade no cadastro` : "Sem cidade no cadastro"}
+                  </span>
+                ) : (prof.bairro || prof.cidade || prof.estado) ? (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
-                    {[prof.cidade, prof.estado].filter(Boolean).join(", ")}
+                    {[prof.bairro, [prof.cidade, prof.estado].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}
                   </span>
-                )}
+                ) : null}
                 {prof.telefone && (
                   <span className="flex items-center gap-1">
                     <Phone className="h-3.5 w-3.5" />
@@ -177,6 +189,35 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
 
       {/* Conteúdo */}
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-5">
+
+        {/* Endereço completo: só o admin recebe estes campos do servidor. */}
+        {ehAdmin && (
+          <Card className="border-dashed">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                Endereço <span className="text-xs font-normal text-muted-foreground">(visível só para o admin)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {prof.logradouro || prof.numero || prof.complemento || prof.bairro || prof.cep ? (
+                <p className="text-sm text-muted-foreground">
+                  {[
+                    [prof.logradouro, prof.numero].filter(Boolean).join(", "),
+                    prof.complemento,
+                    prof.bairro,
+                    [prof.cidade, prof.estado].filter(Boolean).join(" / "),
+                    prof.cep && `CEP ${prof.cep}`,
+                  ].filter(Boolean).join(" · ")}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Não informado. O cadastro só passou a pedir endereço agora; a pessoa preenche em Perfil → Editar.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Vídeo de apresentação */}
         {prof.videoApresentacao?.url && (

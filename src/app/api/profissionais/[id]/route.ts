@@ -75,7 +75,7 @@ export async function PUT(
 
     const camposPermitidos = [
       "nomeCompleto", "telefone", "fotoPerfil", "dataNascimento",
-      "cidade", "estado", "cep", "dispostoViajar",
+      "cidade", "estado", "cep", "logradouro", "numero", "complemento", "bairro", "dispostoViajar",
       "especialidades", "resumoProfissional", "habilidades",
       "disponibilidade", "experiencias", "formacao",
       "linkedinUrl", "curriculoUrl",

@@ -261,7 +261,8 @@ export function montarDadosCurriculo(p: Doc, email: string | null): DadosCurricu
     foto: texto(p.fotoPerfil) || null,
     telefone: texto(p.telefone),
     email: texto(email),
-    local: [texto(p.cidade), texto(p.estado)].filter(Boolean).join(", "),
+    // Bairro + cidade/UF: o que um currículo mostra hoje; rua e número não vão para um PDF que circula no WhatsApp.
+    local: [texto(p.bairro), [texto(p.cidade), texto(p.estado)].filter(Boolean).join(", ")].filter(Boolean).join(" · "),
     linkedin: linkedinBruto ? linkedinBruto.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") : null,
     resumo: texto(p.resumoProfissional),
     especialidades,
