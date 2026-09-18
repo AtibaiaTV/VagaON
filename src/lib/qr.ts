@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { LOGO_MIOLO_PNG_BASE64 } from "./qr-miolo-logo";
 
 /**
  * QR Codes de entrada: cada um aponta para uma página de cadastro rápido e
@@ -27,17 +28,33 @@ export function urlDestino(destino: DestinoQr, origem?: string | null, base: str
   return origem ? `${url}?origem=${encodeURIComponent(origem)}` : url;
 }
 
-/** Selo central: círculo verde-escuro com o "V" e VAGAON, como no material da marca. */
+/**
+ * Selo central: o miolo oficial da marca (MIOLO_QRCODE.svg, CorelDRAW):
+ * círculo verde #0E513A com o logo em PNG recortado em duas faixas — o check
+ * em cima, VAGAON embaixo, cada um com sua escala. As medidas abaixo são as
+ * do arquivo original (viewBox 18.91) e só recebem uma transformação para o
+ * tamanho do QR. Um anel branco fino separa o selo dos módulos.
+ */
+const MIOLO_VIEWBOX = 18.91;
+
 function selo(tamanho: number): string {
   const c = tamanho / 2;
   const r = tamanho * 0.15;
-  const traco = r * 0.16;
+  const anel = r * 0.12;
+  const escala = (2 * r) / MIOLO_VIEWBOX;
   return (
-    `<g transform="translate(${c} ${c})">` +
-    `<circle r="${(r + traco * 0.9).toFixed(2)}" fill="#ffffff"/>` +
-    `<circle r="${r.toFixed(2)}" fill="#1a5c38"/>` +
-    `<path d="M ${(-r * 0.42).toFixed(2)} ${(-r * 0.12).toFixed(2)} L ${(-r * 0.1).toFixed(2)} ${(r * 0.18).toFixed(2)} L ${(r * 0.5).toFixed(2)} ${(-r * 0.48).toFixed(2)}" fill="none" stroke="#4ade80" stroke-width="${traco.toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<text y="${(r * 0.66).toFixed(2)}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="${(r * 0.4).toFixed(2)}" fill="#ffffff" letter-spacing="${(r * 0.02).toFixed(2)}">VAGA<tspan fill="#4ade80">ON</tspan></text>` +
+    `<defs>` +
+    // symbol com viewBox: assim o <use> consegue dar tamanho à imagem (numa <image> solta ele não consegue).
+    `<symbol id="qr-miolo-logo" viewBox="0 0 1024 1024"><image width="1024" height="1024" href="data:image/png;base64,${LOGO_MIOLO_PNG_BASE64}"/></symbol>` +
+    `<clipPath id="qr-miolo-check"><rect x="3.7" y="3.14" width="11.5" height="6.15"/></clipPath>` +
+    `<clipPath id="qr-miolo-texto"><rect x="1.1" y="9.54" width="16.72" height="4.37"/></clipPath>` +
+    `</defs>` +
+    `<circle cx="${c.toFixed(2)}" cy="${c.toFixed(2)}" r="${(r + anel).toFixed(2)}" fill="#ffffff"/>` +
+    `<g transform="translate(${(c - r).toFixed(3)} ${(c - r).toFixed(3)}) scale(${escala.toFixed(5)})">` +
+    `<circle cx="9.455" cy="9.455" r="9.455" fill="#0E513A"/>` +
+    // clip no <g>, não no <use>: no <use>, x/y viram translate e arrastariam o recorte junto.
+    `<g clip-path="url(#qr-miolo-check)"><use href="#qr-miolo-logo" x="-2.39" y="-1.47" width="23.6" height="23.6"/></g>` +
+    `<g clip-path="url(#qr-miolo-texto)"><use href="#qr-miolo-logo" x="-4.53" y="-4.68" width="28.19" height="28.19"/></g>` +
     `</g>`
   );
 }
