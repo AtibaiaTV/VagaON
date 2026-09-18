@@ -12,9 +12,13 @@ export async function GET() {
 
     await connectDB();
 
+    // Só o que a tela usa. Sem projeção e sem índice, o sort em memória do
+    // Mongo estourava os 32 MB (era o "Erro interno" do /admin/usuarios).
+    // allowDiskUse cobre o caso de a coleção crescer antes do índice existir.
     const usuarios = await User.find()
+      .select("name email role status createdAt profileId origemCadastro")
       .sort({ createdAt: -1 })
-      .select("-password")
+      .allowDiskUse(true)
       .lean();
 
     return NextResponse.json(usuarios);
