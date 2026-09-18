@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, UserCheck, UserX, ShieldCheck, FileText, Pencil, X, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Search, UserCheck, UserX, ShieldCheck, FileText, Pencil, X, Loader2, Eye } from "lucide-react";
 import CurriculumModal from "@/components/admin/CurriculumModal";
 
 interface Usuario {
@@ -16,6 +17,8 @@ interface Usuario {
   role: string;
   status: string;
   createdAt: string;
+  /** Profissional ou Empresa ligado à conta; null se ainda não completou o perfil. */
+  profileId: string | null;
 }
 
 interface FormEdicao {
@@ -168,6 +171,15 @@ export default function AdminUsuariosPage() {
                       </td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {u.role === "profissional" && u.profileId && (
+                            <Link
+                              href={`/profissionais/${u.profileId}`}
+                              title="Perfil completo, como a empresa vê"
+                              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border text-xs font-medium text-[#1a5c38] border-[#c6e9d9] hover:bg-[#f0faf5] transition-colors"
+                            >
+                              <Eye className="h-3 w-3" />Perfil
+                            </Link>
+                          )}
                           {u.role === "profissional" && (
                             <Button size="sm" variant="outline"
                               className="h-7 text-xs gap-1 text-[#1a5c38] border-[#c6e9d9] hover:bg-[#f0faf5]"
