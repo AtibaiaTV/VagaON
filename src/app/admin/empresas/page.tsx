@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, CheckCircle, XCircle, Building2, Sparkles } from "lucide-react";
+import { Search, CheckCircle, XCircle, Building2, Sparkles, UsersRound } from "lucide-react";
+import EquipeAdmin from "./EquipeAdmin";
 
 interface Empresa {
   _id: string;
@@ -209,6 +210,8 @@ function EmpresaCard({
 }) {
   const isLoading =
     atualizando === empresa._id || atualizando === empresa._id + "_status" || atualizando === empresa._id + "_plano";
+  const [equipeAberta, setEquipeAberta] = useState(false);
+  const [gerentes, setGerentes] = useState(empresa.gerentes ?? 0);
   const plano = empresa.plano;
   const rotuloPlano = !plano
     ? null
@@ -241,10 +244,30 @@ function EmpresaCard({
       <CardContent className="space-y-2">
         <div className="text-xs text-muted-foreground space-y-1">
           <p>{SETOR_LABEL[empresa.setor] ?? empresa.setor} · {empresa.cidade}/{empresa.estado}</p>
-          <p>
-            {empresa.userEmail}
-            {(empresa.gerentes ?? 0) > 0 && ` · +${empresa.gerentes} gerente${empresa.gerentes === 1 ? "" : "s"}`}
+          <p className="flex flex-wrap items-center gap-x-2">
+            <span>{empresa.userEmail}</span>
+            <button
+              type="button"
+              onClick={() => setEquipeAberta((v) => !v)}
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+              title="Ver e remover gerentes desta empresa"
+            >
+              <UsersRound className="h-3 w-3" />
+              equipe{gerentes > 0 ? ` (+${gerentes})` : ""}
+            </button>
           </p>
+          {equipeAberta && (
+            <EquipeAdmin
+              empresaId={empresa._id}
+              onMudou={() => {
+                // Recarrega a contagem do cabeçalho sem refazer a lista inteira.
+                fetch(`/api/admin/empresas/${empresa._id}/equipe`)
+                  .then((r) => (r.ok ? r.json() : null))
+                  .then((d) => d && setGerentes(d.membros.filter((m: { papel: string }) => m.papel === "gerente").length))
+                  .catch(() => {});
+              }}
+            />
+          )}
           <p>
             Conta:{" "}
             <span

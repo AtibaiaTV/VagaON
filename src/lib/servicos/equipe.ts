@@ -206,16 +206,26 @@ export async function convidarGerente(
 
 export async function cancelarConvite(empresa: IEmpresa, donoId: string, conviteId: string): Promise<void> {
   exigirDono(empresa, donoId);
+  await cancelarConviteDaEmpresa(empresa._id, conviteId);
+}
+
+export async function removerGerente(empresa: IEmpresa, donoId: string, userId: string): Promise<void> {
+  exigirDono(empresa, donoId);
+  await removerMembroDaEmpresa(empresa, userId);
+}
+
+// ─── Operações sem checagem de papel (dono já checado, ou admin) ───────────
+
+export async function cancelarConviteDaEmpresa(empresaId: unknown, conviteId: string): Promise<void> {
   await connectDB();
   const r = await ConviteEmpresa.updateOne(
-    { _id: conviteId, empresaId: empresa._id, aceitoEm: null },
+    { _id: conviteId, empresaId: String(empresaId), aceitoEm: null },
     { $set: { canceladoEm: new Date() } }
   );
   if (r.matchedCount === 0) throw new ErroAtor(404, "Convite não encontrado.");
 }
 
-export async function removerGerente(empresa: IEmpresa, donoId: string, userId: string): Promise<void> {
-  exigirDono(empresa, donoId);
+export async function removerMembroDaEmpresa(empresa: Doc, userId: string): Promise<void> {
   if (String(userId) === String(empresa.userId)) throw new ErroAtor(400, "O dono não pode ser removido.");
   await connectDB();
   const r = await Empresa.updateOne({ _id: empresa._id }, { $pull: { membros: { userId } } });
