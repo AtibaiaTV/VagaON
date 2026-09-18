@@ -59,6 +59,8 @@ interface MensagemMeta {
 
 interface ValorMeta {
   messaging_product?: string;
+  /** Número que recebeu/enviou. Um app assinado numa WABA recebe eventos de todos os números dela. */
+  metadata?: { phone_number_id?: string; display_phone_number?: string };
   statuses?: StatusMeta[];
   messages?: MensagemMeta[];
   contacts?: { wa_id?: string; profile?: { name?: string } }[];
@@ -260,6 +262,13 @@ export async function processarWebhookWhatsApp(corpo: CorpoWebhookMeta): Promise
         continue;
       }
       const v = mudanca.value;
+      // Evento de outro número da mesma WABA (ex.: o da RedeSA): não é nosso.
+      // Sem isso, um PARAR mandado ao número da RedeSA desligaria avisos aqui.
+      const meuNumero = process.env.WHATSAPP_PHONE_NUMBER_ID;
+      if (meuNumero && v.metadata?.phone_number_id && v.metadata.phone_number_id !== meuNumero) {
+        resumo.ignorados++;
+        continue;
+      }
       for (const s of v.statuses ?? []) {
         try {
           await processarStatus(s);
