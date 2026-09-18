@@ -8,6 +8,10 @@ import Link from "next/link";
 import { Users, Building2, ChefHat, Briefcase, ClipboardList, TrendingUp, FlaskConical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AvisoConfiguracao from "@/components/admin/AvisoConfiguracao";
+import PainelLiquidez from "@/components/admin/PainelLiquidez";
+import { metricasLiquidez } from "@/lib/servicos/metricas-liquidez";
+
+export const dynamic = "force-dynamic";
 
 interface StatCardProps {
   titulo: string;
@@ -45,6 +49,7 @@ export default async function AdminDashboardPage() {
     totalVagasAtivas,
     totalCandidaturas,
     usuariosRecentes,
+    liquidez,
   ] = await Promise.all([
     User.countDocuments(),
     Empresa.countDocuments(),
@@ -53,6 +58,7 @@ export default async function AdminDashboardPage() {
     Vaga.countDocuments({ status: "ativa" }),
     Candidatura.countDocuments(),
     User.find().sort({ createdAt: -1 }).limit(5).select("name email role status createdAt").lean(),
+    metricasLiquidez(30).catch(() => null),
   ]);
 
   const ROLE_LABEL: Record<string, string> = {
@@ -129,6 +135,8 @@ export default async function AdminDashboardPage() {
           cor="bg-indigo-100 text-indigo-600"
         />
       </div>
+
+      {liquidez && <PainelLiquidez m={liquidez} />}
 
       {/* Usuários recentes */}
       <Card>
