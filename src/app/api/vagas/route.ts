@@ -9,6 +9,7 @@ import { sanitizarPerguntas } from "@/lib/triagem";
 import { ErroAtor } from "@/lib/servicos/erros";
 import { verificarLimiteVagas } from "@/lib/servicos/planos";
 import { expiracaoInicial } from "@/lib/servicos/vagas";
+import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
 
 const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
   gastronomia: ["cozinha", "bar", "salao"],
@@ -133,6 +134,9 @@ export async function POST(req: NextRequest) {
       afirmativa: Array.isArray(afirmativa) ? afirmativa : [],
       perguntasTriagem: sanitizarPerguntas(perguntasTriagem),
     });
+
+    // Aguardado: a função da Vercel encerra ao responder. Nunca lança.
+    await alertarSemFalhar(vaga._id, "publicacao");
 
     return NextResponse.json(vaga, { status: 201 });
   } catch {

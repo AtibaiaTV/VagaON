@@ -37,6 +37,8 @@ export interface IVaga extends Document {
   expiresAt: Date | null;
   /** Quando o aviso "expira em 3 dias" foi enviado (uma vez por validade). */
   expiraAvisoEm: Date | null;
+  /** Alerta "vaga nova que combina com você" já disparado para os profissionais aderentes (uma vez por vaga). */
+  alertaVagaNovaEm: Date | null;
   /** Contratações registradas (chat ou funil). Ao atingir `posicoes`, a empresa é avisada. */
   preenchidas: number;
   /** Quando saiu de `ativa` pela última vez (preenchida, encerrada ou expirada). */
@@ -117,6 +119,7 @@ const VagaSchema = new Schema<IVaga>(
     ultimaVisualizacaoEm: { type: Date, default: null },
     expiresAt: { type: Date, default: null },
     expiraAvisoEm: { type: Date, default: null },
+    alertaVagaNovaEm: { type: Date, default: null },
     preenchidas: { type: Number, default: 0, min: 0 },
     encerradaEm: { type: Date, default: null },
 

@@ -5,6 +5,7 @@ import Empresa from "@/models/Empresa";
 import Vaga from "@/models/Vaga";
 import { ErroAtor } from "@/lib/servicos/erros";
 import { garantirContaRedesa } from "@/lib/servicos/sso-redesa";
+import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
 
 // GET /api/redesa/vagas — lista vagas do estabelecimento Redesa
 export async function GET(req: NextRequest) {
@@ -51,6 +52,8 @@ export async function POST(req: NextRequest) {
       status: "ativa",
       aprovadaPorAdmin: true,
     });
+
+    await alertarSemFalhar(vaga._id, "redesa");
 
     return NextResponse.json(vaga, { status: 201 });
   } catch (err) {

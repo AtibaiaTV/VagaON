@@ -12,6 +12,7 @@ import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor } from "./erros";
 import { expiracaoInicial } from "./vagas";
+import { alertarSemFalhar } from "./alerta-vaga";
 
 /**
  * Entrada rápida pelo QR Code ou link: uma tela, quatro ou cinco campos,
@@ -187,6 +188,8 @@ export async function criarEmpresaRapida(e: EntradaEmpresaRapida) {
       periodo: (dadosVaga.periodo as { dataFim?: string | null } | undefined) ?? null,
     }),
   });
+
+  await alertarSemFalhar(vaga._id, "entrada-rapida");
 
   return { userId: String(user._id), empresaId: String(empresa._id), vagaId: String(vaga._id), montadaPorIA };
 }
