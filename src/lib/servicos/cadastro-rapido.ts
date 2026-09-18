@@ -12,6 +12,7 @@ import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor } from "./erros";
 import { expiracaoInicial } from "./vagas";
+import { alertarSemFalhar } from "./alerta-vaga";
 import { enviarCodigoVerificacao } from "./whatsapp-verificacao";
 
 /**
@@ -200,6 +201,7 @@ export async function criarEmpresaRapida(e: EntradaEmpresaRapida) {
   });
 
   await confirmarWhatsAppNoCadastro(user._id, "empresa");
+  await alertarSemFalhar(vaga._id, "entrada-rapida");
 
   return { userId: String(user._id), empresaId: String(empresa._id), vagaId: String(vaga._id), montadaPorIA };
 }

@@ -190,6 +190,24 @@ export function msgNovaCandidatura(p: {
   };
 }
 
+// ─── Vaga nova que combina (na publicação) ──────────────────────────────────
+
+export function msgVagaNovaCombina(p: {
+  vagaTitulo: string;
+  empresaNome: string;
+  cidade: string;
+  remoto: boolean;
+  score: number;
+  vagaId: string;
+}): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: `Vaga nova que combina com você: ${trecho(p.vagaTitulo, 60)}`,
+    corpo: `${p.empresaNome} acabou de publicar "${p.vagaTitulo}"${p.remoto ? " (remoto)" : p.cidade ? ` em ${p.cidade}` : ""}, com ${p.score}% de aderência ao seu perfil. Vagas assim fecham rápido: veja e candidate-se.`,
+    url: `/vagas/${p.vagaId}`,
+  };
+}
+
 // ─── Engajamento (cron) ─────────────────────────────────────────────────────
 
 export function msgMatchParado(p: {
