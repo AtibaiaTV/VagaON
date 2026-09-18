@@ -9,8 +9,16 @@ export interface MensagemNotificacao {
   titulo: string;
   /** Uma ou duas frases. */
   corpo: string;
+  /** Itens curtos depois do corpo (resumos). E-mail mostra como lista; os outros canais juntam ao corpo. */
+  linhas?: string[];
   /** Caminho relativo (ex.: /matches/abc). Os canais montam a URL absoluta. */
   url: string;
+}
+
+/** Corpo + linhas num texto só, para canais sem lista (push, WhatsApp, in-app). */
+export function corpoCompleto(msg: MensagemNotificacao, separador = " · "): string {
+  const linhas = (msg.linhas ?? []).filter(Boolean);
+  return linhas.length ? `${msg.corpo} ${linhas.join(separador)}` : msg.corpo;
 }
 
 /** Quem recebe, já com tudo que cada canal precisa. */

@@ -37,6 +37,8 @@ export interface IEmpresa extends Document {
   match: {
     /** Modo às cegas: esconde foto e nome dos candidatos até a entrevista/match. */
     modoCego: boolean;
+    /** Último resumo semanal (candidatos, matches, vagas) enviado à equipe. */
+    resumoSemanalEm: Date | null;
   };
   /** Agregado das avaliações publicadas recebidas de profissionais. */
   reputacao: {
@@ -107,6 +109,7 @@ const EmpresaSchema = new Schema<IEmpresa>(
     documentos: [{ type: String }],
     match: {
       modoCego: { type: Boolean, default: false },
+      resumoSemanalEm: { type: Date, default: null },
     },
     reputacao: {
       media: { type: Number, default: null },

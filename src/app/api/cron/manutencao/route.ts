@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { convidarParaAvaliar, publicarPendentes } from "@/lib/servicos/avaliacoes";
+import { alertarMatchesParados, enviarResumoSemanal } from "@/lib/servicos/engajamento";
 import { manutencaoVagas } from "@/lib/servicos/vagas";
 import { manutencaoInatividade } from "@/lib/servicos/visibilidade";
 
@@ -9,7 +10,8 @@ export const maxDuration = 60;
 /**
  * Cron diário único (o plano Hobby da Vercel permite dois crons; o outro é
  * o lembrete de entrevista). Roda em sequência, cada passo isolado:
- * avaliações (convites + publicação), validade das vagas, inatividade.
+ * avaliações (convites + publicação), validade das vagas, inatividade,
+ * match parado (48 h sem mensagem) e resumo semanal (segunda-feira).
  */
 export async function GET(req: NextRequest) {
   const segredo = process.env.CRON_SECRET;
@@ -23,6 +25,8 @@ export async function GET(req: NextRequest) {
     ["avaliacoesPublicadas", publicarPendentes],
     ["vagas", () => manutencaoVagas()],
     ["inatividade", () => manutencaoInatividade()],
+    ["matchesParados", () => alertarMatchesParados()],
+    ["resumoSemanal", () => enviarResumoSemanal()],
   ];
 
   for (const [nome, passo] of passos) {

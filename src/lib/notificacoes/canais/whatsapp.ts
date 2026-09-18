@@ -1,5 +1,5 @@
 import MensagemWhatsApp from "@/models/MensagemWhatsApp";
-import { urlAbsoluta, type MensagemNotificacao, type ResultadoEnvio } from "../tipos";
+import { corpoCompleto, urlAbsoluta, type MensagemNotificacao, type ResultadoEnvio } from "../tipos";
 
 /**
  * WhatsApp via API oficial da Meta (Cloud API).
@@ -112,7 +112,7 @@ export async function enviarWhatsApp(
   if (!numero) return { canal: "whatsapp", ok: false, detalhe: "telefone inválido" };
 
   const template = process.env.WHATSAPP_TEMPLATE || TEMPLATE_PADRAO;
-  const texto = `${msg.titulo}. ${msg.corpo}`;
+  const texto = `${msg.titulo}. ${corpoCompleto(msg)}`;
 
   const resultado = await chamarApi({
     to: numero,

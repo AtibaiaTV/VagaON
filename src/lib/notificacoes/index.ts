@@ -8,7 +8,7 @@ import { usuariosDaEmpresa } from "@/lib/servicos/equipe";
 import { emailConfigurado, enviarEmail } from "./canais/email";
 import { enviarPush, pushConfigurado } from "./canais/push";
 import { enviarWhatsApp, whatsappConfigurado } from "./canais/whatsapp";
-import type { AlvoNotificacao, Destinatario, MensagemNotificacao, ResultadoEnvio } from "./tipos";
+import { corpoCompleto, type AlvoNotificacao, type Destinatario, type MensagemNotificacao, type ResultadoEnvio } from "./tipos";
 
 export * from "./tipos";
 export * from "./mensagens";
@@ -94,7 +94,7 @@ async function notificarUm(d: Destinatario, msg: MensagemNotificacao): Promise<R
         userId: d.userId,
         categoria: msg.categoria,
         titulo: msg.titulo,
-        corpo: msg.corpo,
+        corpo: corpoCompleto(msg).slice(0, 1000),
         url: msg.url,
       }).then(
         () => ({ canal: "app" as const, ok: true }),
