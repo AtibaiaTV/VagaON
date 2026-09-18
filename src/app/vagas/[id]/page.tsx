@@ -219,6 +219,11 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
               <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
                 <Clock className="h-3.5 w-3.5" />{TIPO_LABEL[vagaObj.tipo]}
               </span>
+              {!vagaObj.remoto && vagaObj.raioKm && (
+                <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20" title="Distância máxima que a empresa aceita para candidatos">
+                  <Navigation className="h-3.5 w-3.5" />Candidatos até {vagaObj.raioKm} km
+                </span>
+              )}
               {vagaObj.remoto && (
                 <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
                   Remoto

@@ -24,6 +24,8 @@ export interface IVaga extends Document {
   cidade: string;
   estado: string;
   remoto: boolean;
+  /** Até quantos km da vaga a empresa aceita candidatos; null = sem limite. O motor rebaixa além disso e elimina além de 1,5×. */
+  raioKm: number | null;
   /** Ciclo de vida em src/lib/vagas-estado.ts. Só `ativa` aparece no Descobrir e no site. */
   status: StatusVaga;
   motivoRejeicao: string | null;
@@ -101,6 +103,7 @@ const VagaSchema = new Schema<IVaga>(
     cidade: { type: String, required: true },
     estado: { type: String, required: true },
     remoto: { type: Boolean, default: false },
+    raioKm: { type: Number, default: null, min: 1, max: 1000 },
     status: {
       type: String,
       enum: ["rascunho", "ativa", "pausada", "preenchida", "encerrada", "expirada", "rejeitada"],

@@ -164,16 +164,19 @@ export async function feedParaEmpresa(
 
   if (!vaga.remoto) {
     if (coords) {
+      // Com raio na vaga, o pré-filtro encolhe para 1,5× dele (o mesmo limite
+      // em que o motor elimina) — e "disposto a viajar" deixa de furar o raio.
+      const km = vaga.raioKm ? Math.min(RAIO_BUSCA_EMPRESA_KM, vaga.raioKm * 1.5) : RAIO_BUSCA_EMPRESA_KM;
       condicoes.push({
         $or: [
-          dentroDoRaio(coords, RAIO_BUSCA_EMPRESA_KM),
+          dentroDoRaio(coords, km),
           // Quem declarou interesse numa cidade perto da vaga entra mesmo morando longe.
           {
             "cidadesInteresse.localizacao": {
-              $geoWithin: { $centerSphere: [[coords.lng, coords.lat], RAIO_BUSCA_EMPRESA_KM / RAIO_TERRA_KM] },
+              $geoWithin: { $centerSphere: [[coords.lng, coords.lat], km / RAIO_TERRA_KM] },
             },
           },
-          { dispostoViajar: true },
+          ...(vaga.raioKm ? [] : [{ dispostoViajar: true }]),
           { ...SEM_GEO, estado: vaga.estado },
         ],
       });

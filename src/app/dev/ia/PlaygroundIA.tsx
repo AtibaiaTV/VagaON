@@ -77,7 +77,7 @@ export default function PlaygroundIA({ iaConfigurada }: { iaConfigurada: boolean
               mostrar("VagaEstruturada (da API) → formulário", {
                 vaga: v,
                 formulario: vagaParaFormulario(v, {
-                  titulo: "", descricao: "", requisitos: "", tipo: "", especialidade: "", cidade: "Atibaia", estado: "SP", remoto: false,
+                  titulo: "", descricao: "", requisitos: "", tipo: "", especialidade: "", cidade: "Atibaia", estado: "SP", remoto: false, raioKm: "",
                   salarioTipo: "a_combinar", salarioMin: "", salarioMax: "", salarioPeriodo: "mes", periodoInicio: "", periodoFim: "",
                   anosExperienciaMin: "", habilidadesDesejadas: "", turno: "", escala: "", posicoes: "1",
                 }),

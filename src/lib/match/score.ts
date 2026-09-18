@@ -120,7 +120,7 @@ function avaliarLocalizacao(
   const melhor = menorDistancia(pontos, v.coords)!;
   const d = melhor.km;
   const raio = raioEfetivoKm(p.raioKm, p.dispostoViajar);
-  const nota = notaDistancia(d, raio);
+  let nota = notaDistancia(d, raio);
   const deInteresse = melhor.ponto.cidadeInteresse;
 
   let explicacao: string | null = null;
@@ -129,8 +129,15 @@ function avaliarLocalizacao(
   } else if (d <= 5) explicacao = "Na sua região";
   else if (nota >= 0.55) explicacao = `A ${d} km de distância`;
 
-  const alerta =
+  let alerta =
     nota < 0.35 ? `A ${d} km — além do seu raio de ${Math.round(raio)} km` : null;
+
+  // Raio da vaga: a empresa disse até onde aceita candidatos. Além dele a
+  // nota cai pela metade (a eliminação dura fica em `eliminar`, a 1,5×).
+  if (v.raioKm && d > v.raioKm) {
+    nota *= 0.5;
+    alerta = `A ${d} km — a vaga aceita candidatos até ${v.raioKm} km`;
+  }
 
   return { dimensao: dim("localizacao", nota, explicacao, alerta), distancia: d };
 }
@@ -276,6 +283,10 @@ function eliminar(p: ProfissionalMatch, v: VagaMatch): string | null {
     const melhor = menorDistancia(pontosDe(p), v.coords);
     const limite = raioEfetivoKm(p.raioKm, p.dispostoViajar) * 1.5;
     if (melhor && melhor.km > limite) return `Distância de ${melhor.km} km excede o limite de deslocamento`;
+    // O raio da vaga vale mesmo para quem se diz disposto a viajar: é a empresa quem decide.
+    if (melhor && v.raioKm && melhor.km > v.raioKm * 1.5) {
+      return `Distância de ${melhor.km} km — a vaga aceita candidatos até ${v.raioKm} km`;
+    }
   }
 
   if (p.especialidades?.length) {
