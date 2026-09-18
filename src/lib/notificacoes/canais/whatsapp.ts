@@ -9,8 +9,9 @@ import { corpoCompleto, urlAbsoluta, type MensagemNotificacao, type ResultadoEnv
  * a aprovação — cadastre no Gerenciador do WhatsApp (categoria "Utilidade",
  * idioma pt_BR) com este corpo:
  *
- *   Olá, {{1}}! {{2}}
- *   Acesse: {{3}}
+ *   Olá, {{1}}. Há uma atualização na sua conta do VagaON: {{2}}
+ *   Acesse para ver os detalhes: {{3}}
+ *   Se não quiser mais receber estes avisos, responda PARAR.
  *
  * Env: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID,
  *      WHATSAPP_TEMPLATE (padrão "vagaon_aviso"), WHATSAPP_API_VERSION (v21.0).

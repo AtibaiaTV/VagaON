@@ -67,12 +67,14 @@ utilitário, para simplificar.
    **Phone number ID** e gere um **token permanente** (System User).
 2. Gerenciador do WhatsApp → Modelos de mensagem → criar:
    - Nome: `vagaon_aviso` · Categoria: **Utilidade** · Idioma: **Português (BR)**
-   - Corpo:
+   - Corpo (aprovado em 2026-09-18; a Meta recusa variável no fim da
+     mensagem e classifica "plataforma de vagas…" como Marketing):
      ```
-     Olá, {{1}}! {{2}}
-     Acesse: {{3}}
+     Olá, {{1}}. Há uma atualização na sua conta do VagaON: {{2}}
+     Acesse para ver os detalhes: {{3}}
+     Se não quiser mais receber estes avisos, responda PARAR.
      ```
-   - Exemplos para aprovação: `{{1}}` = Maria · `{{2}}` = Deu match! Trattoria Nonna Rosa também tem interesse em você para a vaga "Sous Chef". Comece a conversa. · `{{3}}` = https://vagaon.com.br/matches/abc
+   - Exemplos para aprovação: `{{1}}` = Maria · `{{2}}` = Deu match: Trattoria Nonna Rosa também tem interesse no seu perfil para a vaga de Sous Chef. · `{{3}}` = https://www.vagaon.com.br/matches/abc
 3. `.env`: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE="vagaon_aviso"`.
 4. Telefones são normalizados para `55 + DDD + número` (`normalizarTelefoneBR`).
 
@@ -147,10 +149,21 @@ WABA nova.
     número, que é um passo à parte. Em `/admin/whatsapp` → "Registrar número
     na API" → PIN de 6 dígitos (vira a verificação em duas etapas do número;
     anote). Chama `POST /{phone_number_id}/register`.
+9c. **Assinar o app na conta (WABA).** Verificar o webhook no painel não
+    basta: o app precisa estar assinado na WABA (`POST /{waba}/subscribed_apps`),
+    e o assistente da Meta não fez isso. Sintoma: a mensagem sai e chega, mas
+    o status não muda e o PARAR não é recebido. Em `/admin/whatsapp` →
+    "Assinar o app na conta (webhook)" → ID da WABA → Conferir e assinar.
+    O "antes" deve mostrar `{"data":[]}` e o "depois" o app VagaON.
 10. **Teste.** `/admin/diagnostico` (as 5 variáveis verdes) → `/admin/whatsapp`
     → Testar envio para o seu número → chegou? → o status vira "entregue" no
     log quando o webhook responder → responda PARAR e VOLTAR para ver o
     opt-out funcionando.
+
+**Ativado em 2026-09-18:** app 1612527023749648, WABA 2199226190644935,
+número +55 11 92615 3687 (phone_number_id 1311361735394845). Roteiro
+completo levou ~1 h; os dois tropeços foram o registro do número (9b) e a
+assinatura do app na WABA (9c).
 
 Limite inicial da Meta: 250 conversas iniciadas pela empresa por dia por
 número (sobe sozinho com uso e qualidade). Cobrança: 1.000 conversas de
