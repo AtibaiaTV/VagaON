@@ -4,7 +4,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star } from "lucide-react";
+import { User as UserIcon, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star, KeyRound } from "lucide-react";
+import User from "@/models/User";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PainelMetricas, { type Tile } from "@/components/painel/PainelMetricas";
@@ -74,6 +75,8 @@ export default async function PainelPage() {
 
   const { role, name } = session.user;
   const metricas = await montarMetricas(role, session.user.id).catch(() => null);
+  // Conta criada pelo SSO da RedeSA nasce sem senha: lembra de definir uma.
+  const semSenha = await User.exists({ _id: session.user.id, password: null }).catch(() => null);
 
   const titleMap: Record<string, string> = {
     profissional: "Painel do Profissional",
@@ -122,6 +125,18 @@ export default async function PainelPage() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-10">
+        {semSenha && (
+          <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 flex items-start gap-3">
+            <KeyRound className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <p className="text-sm">
+              <span className="font-semibold">Sua conta ainda não tem senha.</span> Você entrou pela RedeSA; defina
+              uma senha para entrar direto no VagaON em qualquer aparelho.{" "}
+              <Link href="/perfil/editar#senha" className="font-semibold text-primary underline underline-offset-2">
+                Definir senha
+              </Link>
+            </p>
+          </div>
+        )}
         {metricas?.acesso && <CardPlanoPainel acesso={metricas.acesso} />}
         {metricas && <PainelMetricas tiles={metricas.tiles} porVaga={metricas.porVaga} />}
 
@@ -176,7 +191,7 @@ export default async function PainelPage() {
                 <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer h-full">
                   <CardHeader>
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
-                      <User className="h-5 w-5 text-primary" />
+                      <UserIcon className="h-5 w-5 text-primary" />
                     </div>
                     <CardTitle className="text-base">Meu Perfil</CardTitle>
                     <CardDescription>Complete seu currículo para aparecer para as empresas.</CardDescription>

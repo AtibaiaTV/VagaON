@@ -13,13 +13,16 @@ import { SETORES } from "@/constants/setores";
 import { ESTADOS } from "@/constants/estados";
 import { Building2, ArrowLeft, CheckCircle, Phone, MapPin } from "lucide-react";
 import BrandBand from "@/components/shared/BrandBand";
+import DefinirSenha from "@/components/perfil/DefinirSenha";
 
 interface Props {
   profileId: string;
   dados: Record<string, string> | null;
+  /** false para conta criada pelo SSO da RedeSA. */
+  temSenha?: boolean;
 }
 
-export default function FormEmpresa({ profileId, dados }: Props) {
+export default function FormEmpresa({ profileId, dados, temSenha = true }: Props) {
   const router = useRouter();
   const [form, setForm] = useState({
     nomeFantasia: dados?.nomeFantasia ?? "",
@@ -291,6 +294,10 @@ export default function FormEmpresa({ profileId, dados }: Props) {
             {salvando ? "Salvando..." : "Salvar perfil"}
           </Button>
         </form>
+
+        <div className="mt-8">
+          <DefinirSenha temSenha={temSenha} />
+        </div>
       </main>
     </div>
   );
