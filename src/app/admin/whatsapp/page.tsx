@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowDownLeft, ArrowUpRight, KeyRound, Loader2, RefreshCw, Send } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, KeyRound, Loader2, RefreshCw, Send, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,6 +63,29 @@ export default function AdminWhatsAppPage() {
   const [pin, setPin] = useState("");
   const [registrando, setRegistrando] = useState(false);
   const [resultadoRegistro, setResultadoRegistro] = useState<{ ok: boolean; texto: string } | null>(null);
+
+  const [wabaId, setWabaId] = useState("");
+  const [assinando, setAssinando] = useState(false);
+  const [resultadoWaba, setResultadoWaba] = useState<{ ok: boolean; texto: string } | null>(null);
+
+  async function assinarWaba(e: React.FormEvent) {
+    e.preventDefault();
+    setAssinando(true);
+    setResultadoWaba(null);
+    const r = await fetch("/api/admin/whatsapp/assinatura", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wabaId }),
+    });
+    const d = await r.json().catch(() => ({}));
+    setAssinando(false);
+    setResultadoWaba({
+      ok: Boolean(d.ok),
+      texto: d.error || d.detalhe
+        ? String(d.error || d.detalhe)
+        : `antes: ${d.antes}\nassinar: ${d.assinar}\ndepois: ${d.depois}`,
+    });
+  }
 
   async function registrar(e: React.FormEvent) {
     e.preventDefault();
@@ -188,6 +211,33 @@ export default function AdminWhatsAppPage() {
               </form>
               {resultadoRegistro && (
                 <p className={`mt-2 text-sm break-all ${resultadoRegistro.ok ? "text-emerald-700" : "text-red-700"}`}>{resultadoRegistro.texto}</p>
+              )}
+            </div>
+
+            {/* Assinatura do app na WABA: sem isso o webhook não recebe
+                status nem respostas, mesmo verificado no painel da Meta. */}
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-sm font-semibold">Assinar o app na conta (webhook)</p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Se as mensagens saem mas o status não muda e as respostas (PARAR) não chegam, o app não está assinado na
+                conta do WhatsApp Business. ID da conta (WABA): em Configuração da API, ao lado do número.
+              </p>
+              <form onSubmit={assinarWaba} className="flex flex-wrap gap-2">
+                <Input
+                  value={wabaId}
+                  onChange={(e) => setWabaId(e.target.value.replace(/\D/g, ""))}
+                  placeholder="ID da conta (WABA)"
+                  inputMode="numeric"
+                  className="w-56 bg-white"
+                  required
+                />
+                <Button type="submit" variant="outline" disabled={assinando || !wabaId || !dados?.configurado} className="gap-2">
+                  {assinando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Webhook className="h-4 w-4" />}
+                  Conferir e assinar
+                </Button>
+              </form>
+              {resultadoWaba && (
+                <pre className={`mt-2 text-xs whitespace-pre-wrap break-all rounded-lg p-2 ${resultadoWaba.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>{resultadoWaba.texto}</pre>
               )}
             </div>
           </CardContent>
