@@ -17,28 +17,54 @@ interface Props {
   onSelect: (c: { cidade: string; uf: string | null }) => void;
   /** Limpou o campo. */
   onClear?: () => void;
-  /** De onde vêm as sugestões: onde há profissionais ou onde há vagas ativas. */
-  contexto: "profissionais" | "vagas";
+  /** De onde vêm as sugestões: todos os municípios (formulários), onde há profissionais ou onde há vagas ativas (filtros). */
+  contexto: "todas" | "profissionais" | "vagas";
   /** Restringe as sugestões a esta UF, se houver. */
   uf?: string;
   placeholder?: string;
   className?: string;
+  /** Classes do <input>; por padrão as mesmas do componente Input dos formulários. */
+  inputClassName?: string;
+  id?: string;
+  required?: boolean;
+  autoComplete?: string;
 }
+
+const CLASSES_INPUT =
+  "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 pr-8 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm";
 
 /**
  * Campo de cidade com sugestões do que existe no banco (ver
  * /api/geo/cidades). Setas, Enter e Escape funcionam; clique também.
  */
-export default function AutocompleteCidade({ value, onChange, onSelect, onClear, contexto, uf, placeholder = "Cidade", className = "" }: Props) {
+export default function AutocompleteCidade({
+  value,
+  onChange,
+  onSelect,
+  onClear,
+  contexto,
+  uf,
+  placeholder = "Cidade",
+  className = "",
+  inputClassName = CLASSES_INPUT,
+  id,
+  required,
+  autoComplete = "off",
+}: Props) {
   const [sugestoes, setSugestoes] = useState<CidadeSugerida[]>([]);
   const [aberto, setAberto] = useState(false);
   const [ativo, setAtivo] = useState(-1);
   const raiz = useRef<HTMLDivElement>(null);
   const listaId = useId();
 
-  // Busca com atraso curto; ignora respostas fora de ordem.
+  // Busca com atraso curto; ignora respostas fora de ordem. Na tabela
+  // completa só a partir de 2 letras, senão a lista não diz nada.
   useEffect(() => {
     if (!aberto) return;
+    if (contexto === "todas" && value.trim().length < 2) {
+      setSugestoes([]);
+      return;
+    }
     let cancelado = false;
     const t = setTimeout(async () => {
       const p = new URLSearchParams({ q: value, contexto });
@@ -106,9 +132,11 @@ export default function AutocompleteCidade({ value, onChange, onSelect, onClear,
         aria-expanded={aberto && sugestoes.length > 0}
         aria-controls={listaId}
         aria-autocomplete="list"
-        autoComplete="off"
-        className="w-full h-10 rounded-lg border px-3 pr-8 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+        autoComplete={autoComplete}
+        className={inputClassName}
         aria-label="Cidade"
+        id={id}
+        required={required}
       />
       {value && (
         <button
@@ -148,7 +176,7 @@ export default function AutocompleteCidade({ value, onChange, onSelect, onClear,
                   {s.uf && <span className="text-muted-foreground"> · {s.uf}</span>}
                 </span>
               </span>
-              <span className="text-xs text-muted-foreground shrink-0">{s.n}</span>
+              {s.n > 0 && <span className="text-xs text-muted-foreground shrink-0">{s.n}</span>}
             </li>
           ))}
         </ul>

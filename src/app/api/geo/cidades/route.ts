@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { normalizarCidade } from "@/constants/municipios";
+import { buscarMunicipios, normalizarCidade } from "@/constants/municipios";
 import Profissional from "@/models/Profissional";
 import Vaga from "@/models/Vaga";
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/geo/cidades?q=ati&contexto=profissionais|vagas&uf=SP
+ * GET /api/geo/cidades?q=ati&contexto=todas|profissionais|vagas&uf=SP
  *
- * Sugestões para o campo de cidade dos filtros. Não vem da tabela de 5.571
- * municípios (que só tem o nome normalizado, sem acento) e sim do que existe
- * no banco: cidades onde há profissionais (casa ou cidade de interesse) ou
- * vagas ativas. Assim a sugestão nunca leva a uma lista vazia, e o nome sai
- * como foi cadastrado. Cache de 5 minutos por contexto.
+ * Sugestões para campos de cidade.
+ * - `todas` (padrão, público): os 5.571 municípios do IBGE com nome oficial,
+ *   para cadastro e formulários — quem mora numa cidade sem ninguém ainda
+ *   precisa conseguir escolhê-la.
+ * - `profissionais` (empresa/admin) e `vagas`: só o que existe no banco, com
+ *   contagem, para os filtros — a sugestão nunca leva a uma lista vazia.
+ * Cache de 5 minutos por contexto de banco.
  */
 
 interface Sugestao {
@@ -63,7 +65,16 @@ async function listar(contexto: "profissionais" | "vagas"): Promise<Sugestao[]> 
 }
 
 export async function GET(req: NextRequest) {
-  const contexto = req.nextUrl.searchParams.get("contexto") === "vagas" ? "vagas" : "profissionais";
+  const param = req.nextUrl.searchParams.get("contexto");
+  const contexto = param === "vagas" ? "vagas" : param === "profissionais" ? "profissionais" : "todas";
+  const qBruto = (req.nextUrl.searchParams.get("q") ?? "").slice(0, 60);
+  const ufBruto = (req.nextUrl.searchParams.get("uf") ?? "").trim().toUpperCase().slice(0, 2);
+
+  if (contexto === "todas") {
+    const sugestoes = buscarMunicipios(qBruto, ufBruto || null, 8).map((m) => ({ cidade: m.cidade, uf: m.uf, n: 0 }));
+    return NextResponse.json({ sugestoes }, { headers: { "Cache-Control": "public, max-age=86400" } });
+  }
+
   // Onde há profissionais é informação de quem busca gente (empresa/admin); vagas são públicas.
   if (contexto === "profissionais") {
     const session = await auth();
@@ -72,8 +83,8 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const q = normalizarCidade((req.nextUrl.searchParams.get("q") ?? "").slice(0, 60));
-  const uf = (req.nextUrl.searchParams.get("uf") ?? "").trim().toUpperCase().slice(0, 2);
+  const q = normalizarCidade(qBruto);
+  const uf = ufBruto;
 
   const todas = await listar(contexto);
   const sugestoes = todas
