@@ -19,6 +19,8 @@ import { MapPin, Phone, Globe, Mail, Pencil, Building2, ChefHat, Printer, Check 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { MODELOS_CURRICULO, MODELO_PADRAO, ehModeloCurriculo } from "@/lib/curriculo";
+import { filtroEmpresaDoUsuario, papelNaEmpresa } from "@/lib/servicos/equipe";
+import { UsersRound } from "lucide-react";
 
 export default async function PerfilPage() {
   const session = await auth();
@@ -45,10 +47,12 @@ export default async function PerfilPage() {
   );
 
   if (session.user.role === "empresa") {
-    const empresa = await Empresa.findOne({ userId: session.user.id }).lean<IEmpresa>();
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).lean<IEmpresa>();
     if (!empresa) redirect("/perfil/editar");
 
     const setor = SETORES.find((s) => s.value === empresa.setor)?.label ?? empresa.setor;
+    const papel = papelNaEmpresa(empresa, session.user.id);
+    const totalEquipe = 1 + (empresa.membros?.length ?? 0);
 
     return (
       <div className="min-h-screen bg-[#f4f7f5]">
@@ -119,6 +123,30 @@ export default async function PerfilPage() {
                 )}
               </div>
             </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <UsersRound className="h-4 w-4 text-primary" />
+                    Equipe
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {totalEquipe === 1
+                      ? "Só você opera esta empresa."
+                      : `${totalEquipe} pessoas operam esta empresa.`}{" "}
+                    Você é {papel === "dono" ? "o dono" : "gerente"}.
+                  </p>
+                </div>
+                <Link href="/perfil/equipe">
+                  <Button size="sm" variant="outline">
+                    {papel === "dono" ? "Gerenciar equipe" : "Ver equipe"}
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
           </Card>
 
           <CardReputacaoPropria reputacao={empresa.reputacao} lado="empresa" />

@@ -5,6 +5,7 @@ import Candidatura from "@/models/Candidatura";
 import Vaga from "@/models/Vaga";
 import Profissional from "@/models/Profissional";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import User from "@/models/User";
 import { notifyRedesaCandidatura } from "@/lib/redesa-webhook";
 import { msgNovaCandidatura, notificar } from "@/lib/notificacoes";
@@ -23,7 +24,7 @@ export async function GET(
 
     await connectDB();
 
-    const empresa = await Empresa.findOne({ userId: session.user.id });
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id));
     const vaga = await Vaga.findById(params.id);
 
     if (!vaga || !empresa || vaga.empresaId.toString() !== empresa._id.toString()) {

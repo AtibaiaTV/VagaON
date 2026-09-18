@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import { sanitizarPerguntas } from "@/lib/triagem";
 
 export async function GET(
@@ -40,7 +41,7 @@ export async function PUT(
 
     await connectDB();
 
-    const empresa = await Empresa.findOne({ userId: session.user.id });
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id));
     const vaga = await Vaga.findById(params.id);
 
     if (!vaga) return NextResponse.json({ error: "Vaga não encontrada." }, { status: 404 });
@@ -79,7 +80,7 @@ export async function DELETE(
     }
 
     await connectDB();
-    const empresa = await Empresa.findOne({ userId: session.user.id });
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id));
     const vaga = await Vaga.findById(params.id);
 
     if (!vaga) return NextResponse.json({ error: "Vaga não encontrada." }, { status: 404 });

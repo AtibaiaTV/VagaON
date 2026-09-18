@@ -7,6 +7,7 @@ import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import FormEmpresa from "./FormEmpresa";
 import FormProfissional from "./FormProfissional";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 
 export default async function PerfilEditarPage({ searchParams }: { searchParams: { boasvindas?: string } }) {
   const session = await auth();
@@ -19,10 +20,12 @@ export default async function PerfilEditarPage({ searchParams }: { searchParams:
   const temSenha = Boolean(usuario?.password);
 
   if (session.user.role === "empresa") {
-    const empresa = await Empresa.findOne({ userId: session.user.id }).lean();
+    // A empresa vem do banco, não do JWT: gerente convidado depois do login
+    // e dono que trocou de conta continuam apontando para a empresa certa.
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).lean();
     return (
       <FormEmpresa
-        profileId={session.user.profileId ?? ""}
+        profileId={empresa ? String(empresa._id) : session.user.profileId ?? ""}
         dados={empresa ? JSON.parse(JSON.stringify(empresa)) : null}
         temSenha={temSenha}
       />

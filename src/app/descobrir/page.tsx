@@ -11,6 +11,7 @@ import DeckProfissional from "@/components/match/DeckProfissional";
 import AtivarPush from "@/components/notificacoes/AtivarPush";
 import { registrarAtividadeProfissional } from "@/lib/servicos/visibilidade";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import Profissional from "@/models/Profissional";
 import Vaga from "@/models/Vaga";
 
@@ -75,7 +76,7 @@ export default async function DescobrirPage() {
         <DeckProfissional />
       );
   } else {
-    const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id match").lean();
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).select("_id match").lean();
     const vagas = empresa
       ? await Vaga.find({ empresaId: empresa._id, status: "ativa", "match.ativo": { $ne: false } })
           .select("titulo cidade especialidade match.totalLikesRecebidos")

@@ -14,6 +14,7 @@ import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
 import { resumoReputacaoPublico } from "@/lib/reputacao";
 import { Button } from "@/components/ui/button";
 import Empresa from "@/models/Empresa";
+import { papelNaEmpresa } from "@/lib/servicos/equipe";
 import Vaga from "@/models/Vaga";
 
 export const dynamic = "force-dynamic";
@@ -63,7 +64,7 @@ export default async function EmpresaPublicaPage({ params }: { params: { slug: s
 
   const setor = SETORES.find((s) => s.value === empresa.setor)?.label ?? "Estabelecimento";
   const local = [empresa.cidade, empresa.estado].filter(Boolean).join(", ");
-  const ehDona = session?.user.role === "empresa" && session.user.profileId === String(empresa._id);
+  const ehDona = session?.user.role === "empresa" && Boolean(papelNaEmpresa(empresa, session.user.id));
   const vagasCard = vagas.map((v) => ({
     _id: String(v._id),
     titulo: v.titulo,

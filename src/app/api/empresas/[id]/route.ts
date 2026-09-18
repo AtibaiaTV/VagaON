@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Empresa from "@/models/Empresa";
+import { papelNaEmpresa } from "@/lib/servicos/equipe";
 
 export async function GET(
   _req: NextRequest,
@@ -31,12 +32,12 @@ export async function PUT(
 
     await connectDB();
 
-    // Garante que só o dono pode editar
+    // Dono ou gerente da empresa podem editar o perfil dela.
     const empresa = await Empresa.findById(params.id);
     if (!empresa) {
       return NextResponse.json({ error: "Empresa não encontrada." }, { status: 404 });
     }
-    if (empresa.userId.toString() !== session.user.id) {
+    if (!papelNaEmpresa(empresa, session.user.id)) {
       return NextResponse.json({ error: "Sem permissão." }, { status: 403 });
     }
 

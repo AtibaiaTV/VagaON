@@ -18,6 +18,8 @@ interface Empresa {
   verificada: boolean;
   userStatus: string;
   userEmail: string;
+  /** Gerentes além do dono (ver docs/EQUIPE.md). */
+  gerentes?: number;
   createdAt: string;
   // Planos (ver docs/PLANOS.md)
   assinatura?: { status?: string; interesseEm?: string | null };
@@ -239,7 +241,10 @@ function EmpresaCard({
       <CardContent className="space-y-2">
         <div className="text-xs text-muted-foreground space-y-1">
           <p>{SETOR_LABEL[empresa.setor] ?? empresa.setor} · {empresa.cidade}/{empresa.estado}</p>
-          <p>{empresa.userEmail}</p>
+          <p>
+            {empresa.userEmail}
+            {(empresa.gerentes ?? 0) > 0 && ` · +${empresa.gerentes} gerente${empresa.gerentes === 1 ? "" : "s"}`}
+          </p>
           <p>
             Conta:{" "}
             <span

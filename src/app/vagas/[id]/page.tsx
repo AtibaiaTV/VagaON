@@ -21,6 +21,7 @@ import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import { AVISO_STATUS_VAGA, type StatusVaga } from "@/lib/vagas-estado";
 import AcoesVaga from "@/components/vagas/AcoesVaga";
 import Empresa from "@/models/Empresa";
+import { papelNaEmpresa } from "@/lib/servicos/equipe";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -87,15 +88,14 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
 
   if (session?.user.role === "empresa") {
     const empresaDaVaga = vaga.empresaId as EmpresaPopulada;
-    if (session.user.profileId === empresaDaVaga._id.toString()) {
+    // Dono ou gerente da empresa da vaga: decidido pelo banco, não pelo JWT.
+    const dona = await Empresa.findById(empresaDaVaga._id).lean();
+    if (dona && papelNaEmpresa(dona, session.user.id)) {
       isDonoEmpresa = true;
-      const dona = await Empresa.findById(empresaDaVaga._id).lean();
-      if (dona) {
-        modoCego = dona.match?.modoCego === true;
-        candidatos = await candidatosDaVaga(dona, vaga);
-        // Resumo por IA: precisa da chave e do plano (no-op com planos desligados).
-        triagemIA = iaConfigurada() && acessoDaEmpresa(dona).limites.triagemIA;
-      }
+      modoCego = dona.match?.modoCego === true;
+      candidatos = await candidatosDaVaga(dona, vaga);
+      // Resumo por IA: precisa da chave e do plano (no-op com planos desligados).
+      triagemIA = iaConfigurada() && acessoDaEmpresa(dona).limites.triagemIA;
     }
   }
 

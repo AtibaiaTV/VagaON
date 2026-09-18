@@ -4,7 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { User as UserIcon, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star, KeyRound, MapPin } from "lucide-react";
+import { User as UserIcon, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star, KeyRound, MapPin, UsersRound } from "lucide-react";
 import User from "@/models/User";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -14,6 +14,7 @@ import { connectDB } from "@/lib/db";
 import type { PlanoResolvido } from "@/lib/planos";
 import { metricasEmpresa, metricasProfissional, type LinhaVaga } from "@/lib/servicos/metricas";
 import { acessoDaEmpresa } from "@/lib/servicos/planos";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import { registrarAtividadeProfissional } from "@/lib/servicos/visibilidade";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
@@ -27,7 +28,7 @@ async function montarMetricas(
   await connectDB();
 
   if (role === "empresa") {
-    const empresa = await Empresa.findOne({ userId }).select("_id assinatura").lean();
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(userId)).select("_id assinatura").lean();
     if (!empresa) return null;
     const m = await metricasEmpresa(empresa._id);
     return {
@@ -283,6 +284,17 @@ export default async function PainelPage() {
                     </div>
                     <CardTitle className="text-base">Minhas Vagas</CardTitle>
                     <CardDescription>Veja e gerencie as vagas publicadas.</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <Link href="/perfil/equipe">
+                <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer h-full">
+                  <CardHeader>
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
+                      <UsersRound className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-base">Equipe</CardTitle>
+                    <CardDescription>Convide gerentes para publicar vagas e cuidar dos candidatos com você.</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>

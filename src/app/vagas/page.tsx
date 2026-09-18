@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +60,7 @@ export default async function VagasPage() {
 
   if (session?.user.role === "empresa") {
     isEmpresa = true;
-    const empresa = await Empresa.findOne({ userId: session.user.id });
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id));
     if (empresa) {
       const raw = await Vaga.find({ empresaId: empresa._id })
         .sort({ createdAt: -1 })

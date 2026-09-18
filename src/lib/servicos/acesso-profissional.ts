@@ -3,6 +3,7 @@ import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import Candidatura from "@/models/Candidatura";
 import Empresa from "@/models/Empresa";
 import Match from "@/models/Match";
+import { filtroEmpresaDoUsuario } from "./equipe";
 
 /**
  * Quem pode abrir o perfil (ou o currículo) de um profissional:
@@ -21,7 +22,7 @@ export async function acessoAoProfissional(session: Session | null, profissional
   if (session.user.role === "admin") return { ok: true, ehAdmin: true };
   if (session.user.role !== "empresa") return { ok: false, motivo: "papel" };
 
-  const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id assinatura").lean();
+  const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).select("_id assinatura").lean();
   if (empresa && !acessoDaEmpresa(empresa).limites.bancoCurriculos) {
     const relacionado =
       (await Candidatura.exists({ empresaId: empresa._id, profissionalId })) ||

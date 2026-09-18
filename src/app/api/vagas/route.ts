@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { sanitizarPerguntas } from "@/lib/triagem";
 import { ErroAtor } from "@/lib/servicos/erros";
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const empresa = await Empresa.findOne({ userId: session.user.id });
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id));
     if (!empresa) {
       return NextResponse.json({ error: "Perfil de empresa não encontrado." }, { status: 404 });
     }

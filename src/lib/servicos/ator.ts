@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Empresa, { type IEmpresa } from "@/models/Empresa";
 import Profissional, { type IProfissional } from "@/models/Profissional";
+import { filtroEmpresaDoUsuario } from "./equipe";
 
 /**
  * Quem está agindo no match: o perfil (não o User) do lado autenticado.
@@ -29,7 +30,7 @@ export async function resolverAtor(): Promise<Ator> {
   }
 
   if (session.user.role === "empresa") {
-    const empresa = await Empresa.findOne({ userId });
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(userId));
     if (!empresa) throw new ErroAtor(404, "Perfil de empresa não encontrado.");
     return { tipo: "empresa", userId, empresa };
   }

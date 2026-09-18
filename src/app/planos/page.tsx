@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import { PLANOS, RECURSOS_PLANO, formatarPreco, planosAtivos } from "@/lib/planos";
 import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import Empresa from "@/models/Empresa";
+import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BotaoInteresse from "./BotaoInteresse";
@@ -24,7 +25,7 @@ export default async function PlanosPage() {
   let situacao: { plano: string; motivo: string; ate: string | null; interesse: boolean } | null = null;
   if (session?.user.role === "empresa") {
     await connectDB();
-    const empresa = await Empresa.findOne({ userId: session.user.id }).select("assinatura").lean();
+    const empresa = await Empresa.findOne(filtroEmpresaDoUsuario(session.user.id)).select("assinatura").lean();
     if (empresa) {
       const a = acessoDaEmpresa(empresa);
       situacao = {
