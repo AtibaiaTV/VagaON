@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import { AFIRMATIVA_VALUES, ESCALA_VALUES, TURNO_VALUES } from "@/constants/match";
 import { geocodificarCidade } from "@/constants/municipios";
+import type { StatusVaga } from "@/lib/vagas-estado";
 
 export interface IVaga extends Document {
   empresaId: mongoose.Types.ObjectId;
@@ -23,12 +24,20 @@ export interface IVaga extends Document {
   cidade: string;
   estado: string;
   remoto: boolean;
-  status: "rascunho" | "ativa" | "pausada" | "encerrada" | "rejeitada";
+  /** Ciclo de vida em src/lib/vagas-estado.ts. Só `ativa` aparece no Descobrir e no site. */
+  status: StatusVaga;
   motivoRejeicao: string | null;
   aprovadaPorAdmin: boolean;
   totalCandidaturas: number;
   visualizacoes: number;
+  /** Validade: 60 dias (CLT) ou a data de término (temporária/sazonal). O cron expira. */
   expiresAt: Date | null;
+  /** Quando o aviso "expira em 3 dias" foi enviado (uma vez por validade). */
+  expiraAvisoEm: Date | null;
+  /** Contratações registradas (chat ou funil). Ao atingir `posicoes`, a empresa é avisada. */
+  preenchidas: number;
+  /** Quando saiu de `ativa` pela última vez (preenchida, encerrada ou expirada). */
+  encerradaEm: Date | null;
 
   // ─── Sinais usados pelo motor de match ──────────────────────────────────────
   /** Especialidades adicionais que a empresa também aceita além da principal. */
@@ -93,7 +102,7 @@ const VagaSchema = new Schema<IVaga>(
     remoto: { type: Boolean, default: false },
     status: {
       type: String,
-      enum: ["rascunho", "ativa", "pausada", "encerrada", "rejeitada"],
+      enum: ["rascunho", "ativa", "pausada", "preenchida", "encerrada", "expirada", "rejeitada"],
       default: "ativa",
     },
     motivoRejeicao: { type: String, default: null },
@@ -101,6 +110,9 @@ const VagaSchema = new Schema<IVaga>(
     totalCandidaturas: { type: Number, default: 0 },
     visualizacoes: { type: Number, default: 0 },
     expiresAt: { type: Date, default: null },
+    expiraAvisoEm: { type: Date, default: null },
+    preenchidas: { type: Number, default: 0, min: 0 },
+    encerradaEm: { type: Date, default: null },
 
     // ─── Sinais usados pelo motor de match ────────────────────────────────────
     especialidadesAceitas: [{ type: String }],
@@ -135,6 +147,8 @@ VagaSchema.index({ createdAt: -1 });
 VagaSchema.index({ localizacao: "2dsphere" });
 // Deck do profissional: vagas ativas e abertas ao match.
 VagaSchema.index({ status: 1, "match.ativo": 1, especialidade: 1 });
+// Cron de expiração.
+VagaSchema.index({ status: 1, expiresAt: 1 });
 
 // Mantém as coordenadas sincronizadas com cidade/estado.
 // (Mongoose 9: middleware é async, sem callback `next`.)

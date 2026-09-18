@@ -7,6 +7,7 @@ import { ESPECIALIDADES } from "@/constants/especialidades";
 import { sanitizarPerguntas } from "@/lib/triagem";
 import { ErroAtor } from "@/lib/servicos/erros";
 import { verificarLimiteVagas } from "@/lib/servicos/planos";
+import { expiracaoInicial } from "@/lib/servicos/vagas";
 
 const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
   gastronomia: ["cozinha", "bar", "salao"],
@@ -117,6 +118,8 @@ export async function POST(req: NextRequest) {
       remoto: remoto ?? false,
       status: "ativa",
       aprovadaPorAdmin: true,
+      // 60 dias (CLT) ou a data de término; o cron avisa e expira.
+      expiresAt: expiracaoInicial({ tipo, periodo: periodo ?? null }),
       especialidadesAceitas: Array.isArray(especialidadesAceitas) ? especialidadesAceitas : [],
       anosExperienciaMin: Number(anosExperienciaMin) || 0,
       habilidadesDesejadas: Array.isArray(habilidadesDesejadas) ? habilidadesDesejadas : [],

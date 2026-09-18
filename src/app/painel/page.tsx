@@ -13,6 +13,7 @@ import { connectDB } from "@/lib/db";
 import type { PlanoResolvido } from "@/lib/planos";
 import { metricasEmpresa, metricasProfissional, type LinhaVaga } from "@/lib/servicos/metricas";
 import { acessoDaEmpresa } from "@/lib/servicos/planos";
+import { registrarAtividadeProfissional } from "@/lib/servicos/visibilidade";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
 
@@ -49,6 +50,7 @@ async function montarMetricas(
   if (role === "profissional") {
     const prof = await Profissional.findOne({ userId }).select("_id completude").lean();
     if (!prof) return null;
+    await registrarAtividadeProfissional(userId); // abrir o painel conta como atividade
     const m = await metricasProfissional(prof._id, prof.completude ?? 0);
     return {
       tiles: [

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import DeckEmpresa from "@/components/match/DeckEmpresa";
 import DeckProfissional from "@/components/match/DeckProfissional";
 import AtivarPush from "@/components/notificacoes/AtivarPush";
+import { registrarAtividadeProfissional } from "@/lib/servicos/visibilidade";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
 import Vaga from "@/models/Vaga";
@@ -55,6 +56,7 @@ export default async function DescobrirPage() {
   let conteudo: React.ReactNode;
 
   if (role === "profissional") {
+    await registrarAtividadeProfissional(session.user.id);
     const perfil = await Profissional.findOne({ userId: session.user.id })
       .select("especialidades cidade estado")
       .lean();

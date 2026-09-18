@@ -12,6 +12,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import VagasListaPublica from "@/components/vagas/VagasListaPublica";
 import BrandBand from "@/components/shared/BrandBand";
+import { COR_STATUS_VAGA } from "@/components/vagas/AcoesVaga";
+import { LABEL_STATUS_VAGA, diasAte, type StatusVaga } from "@/lib/vagas-estado";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",
@@ -29,8 +31,11 @@ interface VagaPopulada {
   especialidade: string;
   cidade: string;
   estado: string;
-  status: string;
+  status: StatusVaga;
   totalCandidaturas: number;
+  expiresAt?: string | null;
+  preenchidas?: number;
+  posicoes?: number;
   createdAt: string;
   empresaId: { nomeFantasia: string; cidade: string; estado: string };
   salario: { tipo: string; min: number | null; max: number | null; periodo: string };
@@ -125,13 +130,21 @@ export default async function VagasPage() {
                         </span>
                         <span>{formatarSalario(vaga.salario)}</span>
                       </div>
-                      <div className="mt-3 pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
-                        <span className={`font-medium ${vaga.status === "ativa" ? "text-green-600" : "text-muted-foreground"}`}>
-                          {vaga.status === "ativa" ? "Ativa" : vaga.status}
+                      <div className="mt-3 pt-3 border-t flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className={`font-semibold px-2 py-0.5 rounded-full ${COR_STATUS_VAGA[vaga.status] ?? "bg-muted"}`}>
+                            {LABEL_STATUS_VAGA[vaga.status] ?? vaga.status}
+                          </span>
+                          {vaga.status === "ativa" && diasAte(vaga.expiresAt) !== null && (
+                            <span className={`truncate ${(diasAte(vaga.expiresAt) ?? 99) <= 3 ? "text-amber-700 font-medium" : ""}`}>
+                              expira em {Math.max(0, diasAte(vaga.expiresAt) ?? 0)} dia(s)
+                            </span>
+                          )}
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 shrink-0">
                           <Clock className="h-3 w-3" />
                           {vaga.totalCandidaturas} candidatura(s)
+                          {(vaga.preenchidas ?? 0) > 0 && ` · ${vaga.preenchidas}/${vaga.posicoes ?? 1} contratada(s)`}
                         </span>
                       </div>
                     </CardContent>

@@ -5,7 +5,7 @@
       "schedule": "0 12 * * *"
     },
     {
-      "path": "/api/cron/avaliacoes",
+      "path": "/api/cron/manutencao",
       "schedule": "30 12 * * *"
     }
   ]

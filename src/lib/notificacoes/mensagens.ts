@@ -189,3 +189,66 @@ export function msgNovaCandidatura(p: {
     url: `/vagas/${p.vagaId}`,
   };
 }
+
+// ─── Ciclo de vida da vaga e do perfil ──────────────────────────────────────
+
+export function msgPosicoesPreenchidas(p: { vagaTitulo: string; vagaId: string; posicoes: number }): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: p.posicoes === 1 ? "Vaga preenchida?" : `As ${p.posicoes} posições foram preenchidas?`,
+    corpo: `Você registrou ${p.posicoes === 1 ? "a contratação" : `${p.posicoes} contratações`} em "${p.vagaTitulo}". Marque a vaga como preenchida para parar de receber candidatos, ou deixe ativa para continuar.`,
+    url: `/vagas/${p.vagaId}`,
+  };
+}
+
+export function msgVagaExpirando(p: { vagaTitulo: string; vagaId: string; dias: number }): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: `Sua vaga expira em ${p.dias} dia${p.dias === 1 ? "" : "s"}`,
+    corpo: `"${p.vagaTitulo}" sai do ar em ${p.dias} dia${p.dias === 1 ? "" : "s"}. Se ainda está contratando, renove por mais 30 dias com um clique.`,
+    url: `/vagas/${p.vagaId}`,
+  };
+}
+
+export function msgVagaExpirada(p: { vagaTitulo: string; vagaId: string }): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: "Vaga expirada",
+    corpo: `"${p.vagaTitulo}" saiu do ar por prazo. Os candidatos e conversas continuam no funil; reative se ainda estiver contratando.`,
+    url: `/vagas/${p.vagaId}`,
+  };
+}
+
+export function msgVagaFechadaParaCandidato(p: {
+  vagaTitulo: string;
+  empresaNome: string;
+  status: "preenchida" | "encerrada";
+}): MensagemNotificacao {
+  return {
+    categoria: "candidatura",
+    titulo: p.status === "preenchida" ? "Vaga preenchida" : "Vaga encerrada",
+    corpo:
+      p.status === "preenchida"
+        ? `${p.empresaNome} preencheu a vaga "${p.vagaTitulo}". Obrigado por participar — continue no Descobrir, novas vagas entram todo dia.`
+        : `${p.empresaNome} encerrou a vaga "${p.vagaTitulo}". Continue no Descobrir — novas vagas entram todo dia.`,
+    url: "/candidaturas",
+  };
+}
+
+export function msgPerfilInativoAviso(p: { dias: number }): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: "Seu perfil vai ser pausado",
+    corpo: `Você não usa o VagaON há ${p.dias} dias. Para continuar aparecendo para as empresas, é só abrir o app. Sem atividade em 7 dias, pausamos seu perfil.`,
+    url: "/perfil",
+  };
+}
+
+export function msgPerfilPausadoInatividade(): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: "Perfil pausado por inatividade",
+    corpo: "Seu perfil saiu do Descobrir das empresas. Reative em um toque quando quiser voltar a receber vagas.",
+    url: "/perfil",
+  };
+}

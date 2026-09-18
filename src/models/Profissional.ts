@@ -84,8 +84,15 @@ export interface IProfissional extends Document {
   /** Derivado de `experiencias` — mantido em campo próprio para pontuar sem recalcular. */
   anosExperiencia: number;
   match: {
+    /** Aparece no Descobrir das empresas e no banco de currículos. */
     ativo: boolean;
+    /** Por que está pausado (null quando ativo). */
+    motivoPausa: "manual" | "contratado" | "inatividade" | null;
+    pausadoEm: Date | null;
+    /** Última vez que a pessoa usou o app (painel, Descobrir, swipe). */
     ultimaAtividade: Date | null;
+    /** Aviso de inatividade enviado; 7 dias depois sem atividade, o cron pausa. */
+    avisoInatividadeEm: Date | null;
   };
   /** Agregado das avaliações publicadas recebidas de empresas. Recalculado a cada publicação. */
   reputacao: {
@@ -196,7 +203,10 @@ const ProfissionalSchema = new Schema<IProfissional>(
     anosExperiencia: { type: Number, default: 0, min: 0 },
     match: {
       ativo: { type: Boolean, default: true },
+      motivoPausa: { type: String, enum: ["manual", "contratado", "inatividade", null], default: null },
+      pausadoEm: { type: Date, default: null },
       ultimaAtividade: { type: Date, default: null },
+      avisoInatividadeEm: { type: Date, default: null },
     },
     reputacao: {
       media: { type: Number, default: null },

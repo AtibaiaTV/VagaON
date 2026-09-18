@@ -11,9 +11,11 @@ interface Props {
   vagaAtiva: boolean;
   /** Perguntas de triagem da vaga — quando há, aparecem antes de enviar. */
   perguntas?: string[];
+  /** Texto quando a vaga não está ativa (preenchida, pausada, expirada…). */
+  aviso?: string;
 }
 
-export default function BotaoCandidatar({ vagaId, jaCandidatou, vagaAtiva, perguntas = [] }: Props) {
+export default function BotaoCandidatar({ vagaId, jaCandidatou, vagaAtiva, perguntas = [], aviso }: Props) {
   const [candidatou, setCandidatou] = useState(jaCandidatou);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
@@ -45,7 +47,7 @@ export default function BotaoCandidatar({ vagaId, jaCandidatou, vagaAtiva, pergu
   if (!vagaAtiva) {
     return (
       <div className="mt-4 p-3 bg-muted rounded-lg text-center text-sm text-muted-foreground">
-        Esta vaga não está mais disponível.
+        {aviso ?? "Esta vaga não está mais disponível."}
       </div>
     );
   }

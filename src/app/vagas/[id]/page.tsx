@@ -16,6 +16,8 @@ import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
 import { candidatosDaVaga, type CandidatoKanban } from "@/lib/servicos/candidaturas";
 import { iaConfigurada } from "@/lib/ia/cliente";
 import { acessoDaEmpresa } from "@/lib/servicos/planos";
+import { AVISO_STATUS_VAGA, type StatusVaga } from "@/lib/vagas-estado";
+import AcoesVaga from "@/components/vagas/AcoesVaga";
 import Empresa from "@/models/Empresa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -198,13 +200,23 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
             </div>
           </div>
 
-          {/* Ação — candidatar */}
+          {/* Ação — candidatar (ou gerir, se for a empresa dona) */}
           <div className="px-8 py-5 border-b bg-[#f9fdf9]">
+            {isDonoEmpresa && (
+              <AcoesVaga
+                vagaId={params.id}
+                status={vagaObj.status as StatusVaga}
+                expiresAt={vagaObj.expiresAt ?? null}
+                preenchidas={vagaObj.preenchidas ?? 0}
+                posicoes={vagaObj.posicoes ?? 1}
+              />
+            )}
             {session?.user.role === "profissional" && (
               <BotaoCandidatar
                 vagaId={params.id}
                 jaCandidatou={jaCandidatou}
                 vagaAtiva={vagaObj.status === "ativa"}
+                aviso={AVISO_STATUS_VAGA[vagaObj.status as StatusVaga]}
                 perguntas={perguntasTriagem}
               />
             )}
@@ -219,7 +231,9 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                   perguntas={perguntasTriagem}
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">Esta vaga não está mais disponível.</p>
+                <p className="text-sm text-muted-foreground">
+                  {AVISO_STATUS_VAGA[vagaObj.status as StatusVaga] ?? "Esta vaga não está mais disponível."}
+                </p>
               ))}
           </div>
 
