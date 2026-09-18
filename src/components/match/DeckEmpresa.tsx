@@ -28,6 +28,8 @@ export default function DeckEmpresa({ vagas, modoCegoInicial = false }: { vagas:
   const [carregando, setCarregando] = useState(true);
   const [restantes, setRestantes] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
+  /** Limite do plano atingido: deck travado e link para os planos. */
+  const [limitePlano, setLimitePlano] = useState(false);
   const [match, setMatch] = useState<MatchAberto | null>(null);
   const [modoCego, setModoCego] = useState(modoCegoInicial);
   const [salvandoModo, setSalvandoModo] = useState(false);
@@ -77,6 +79,11 @@ export default function DeckEmpresa({ vagas, modoCegoInicial = false }: { vagas:
         body: JSON.stringify({ vagaId, profissionalId: item.profissional.id, direcao }),
       });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 402) {
+        setLimitePlano(true);
+        setAviso(data.error ?? "Limite do plano atingido.");
+        return;
+      }
       if (!res.ok && res.status !== 409) {
         setAviso(data.error ?? "Não foi possível registrar sua escolha.");
         return;
@@ -155,10 +162,22 @@ export default function DeckEmpresa({ vagas, modoCegoInicial = false }: { vagas:
 
       {aviso && (
         <div className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm text-amber-800 flex items-center justify-between gap-3">
-          <span>{aviso}</span>
-          <button type="button" className="text-xs font-semibold underline" onClick={() => setAviso(null)}>
-            fechar
-          </button>
+          <span>
+            {aviso}
+            {limitePlano && (
+              <>
+                {" "}
+                <Link href="/planos" className="font-semibold underline">
+                  Ver planos
+                </Link>
+              </>
+            )}
+          </span>
+          {!limitePlano && (
+            <button type="button" className="text-xs font-semibold underline" onClick={() => setAviso(null)}>
+              fechar
+            </button>
+          )}
         </div>
       )}
 
@@ -175,6 +194,7 @@ export default function DeckEmpresa({ vagas, modoCegoInicial = false }: { vagas:
           renderizar={(item, topo) => <CardProfissionalSwipe item={item} topo={topo} />}
           aoDecidir={decidir}
           aoFicarNoFim={aoFicarNoFim}
+          travado={limitePlano}
           rotulos={{ like: "QUERO CONVERSAR", pass: "PASSAR", super: "PRIORIDADE" }}
           vazio={
             <div className="text-center max-w-xs">

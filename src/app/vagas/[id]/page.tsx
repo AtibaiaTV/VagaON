@@ -15,6 +15,7 @@ import CandidaturaRapida from "./CandidaturaRapida";
 import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
 import { candidatosDaVaga, type CandidatoKanban } from "@/lib/servicos/candidaturas";
 import { iaConfigurada } from "@/lib/ia/cliente";
+import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import Empresa from "@/models/Empresa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -73,6 +74,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   let isDonoEmpresa = false;
   let candidatos: CandidatoKanban[] = [];
   let modoCego = false;
+  let triagemIA = false;
 
   if (session?.user.role === "empresa") {
     const empresaDaVaga = vaga.empresaId as EmpresaPopulada;
@@ -82,6 +84,8 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
       if (dona) {
         modoCego = dona.match?.modoCego === true;
         candidatos = await candidatosDaVaga(dona, vaga);
+        // Resumo por IA: precisa da chave e do plano (no-op com planos desligados).
+        triagemIA = iaConfigurada() && acessoDaEmpresa(dona).limites.triagemIA;
       }
     }
   }
@@ -318,7 +322,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                 .
               </p>
             ) : (
-              <KanbanCandidatos candidatos={candidatos} modoCego={modoCego} iaDisponivel={iaConfigurada()} />
+              <KanbanCandidatos candidatos={candidatos} modoCego={modoCego} iaDisponivel={triagemIA} />
             )}
             {isDonoEmpresa && perguntasTriagem.length > 0 && (
               <p className="text-xs text-muted-foreground mt-3">

@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import slugify from "slugify";
+import type { Assinatura } from "@/lib/planos";
 
 export interface IEmpresa extends Document {
   userId: mongoose.Types.ObjectId;
@@ -34,9 +35,25 @@ export interface IEmpresa extends Document {
     pontosFortes: string[];
     atualizadoEm: Date | null;
   };
+  /** Plano da empresa (ver src/lib/planos.ts). Só tem efeito com PLANOS_ATIVOS=1. */
+  assinatura: Assinatura;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const AssinaturaSchema = new Schema<Assinatura>(
+  {
+    plano: { type: String, enum: ["gratis", "pro"], default: "gratis" },
+    status: { type: String, enum: ["nenhuma", "trial", "ativa", "inadimplente", "cancelada"], default: "nenhuma" },
+    ativoAte: { type: Date, default: null },
+    trialAte: { type: Date, default: null },
+    provedor: { type: String, default: null },
+    referenciaExterna: { type: String, default: null },
+    interesseEm: { type: Date, default: null },
+    atualizadoEm: { type: Date, default: null },
+  },
+  { _id: false }
+);
 
 const EmpresaSchema = new Schema<IEmpresa>(
   {
@@ -73,11 +90,14 @@ const EmpresaSchema = new Schema<IEmpresa>(
       pontosFortes: { type: [String], default: [] },
       atualizadoEm: { type: Date, default: null },
     },
+    assinatura: { type: AssinaturaSchema, default: () => ({}) },
   },
   { timestamps: true }
 );
 
 EmpresaSchema.index({ estado: 1, setor: 1 });
+// Admin: listar quem está em trial/assinatura e quando vence.
+EmpresaSchema.index({ "assinatura.status": 1, "assinatura.ativoAte": 1 });
 
 export function slugBase(nome: string): string {
   const s = slugify(nome ?? "", { lower: true, strict: true, locale: "pt", trim: true }).slice(0, 60);

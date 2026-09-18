@@ -8,21 +8,28 @@ import { User, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, La
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PainelMetricas, { type Tile } from "@/components/painel/PainelMetricas";
+import CardPlanoPainel from "@/components/planos/CardPlanoPainel";
 import { connectDB } from "@/lib/db";
+import type { PlanoResolvido } from "@/lib/planos";
 import { metricasEmpresa, metricasProfissional, type LinhaVaga } from "@/lib/servicos/metricas";
+import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
 
 export const dynamic = "force-dynamic";
 
-async function montarMetricas(role: string, userId: string): Promise<{ tiles: Tile[]; porVaga?: LinhaVaga[] } | null> {
+async function montarMetricas(
+  role: string,
+  userId: string
+): Promise<{ tiles: Tile[]; porVaga?: LinhaVaga[]; acesso?: PlanoResolvido } | null> {
   await connectDB();
 
   if (role === "empresa") {
-    const empresa = await Empresa.findOne({ userId }).select("_id").lean();
+    const empresa = await Empresa.findOne({ userId }).select("_id assinatura").lean();
     if (!empresa) return null;
     const m = await metricasEmpresa(empresa._id);
     return {
+      acesso: acessoDaEmpresa(empresa),
       tiles: [
         { rotulo: "Vagas ativas", valor: m.vagasAtivas },
         { rotulo: "Visualizações", valor: m.visualizacoes, dica: "nas suas vagas" },
@@ -113,6 +120,7 @@ export default async function PainelPage() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-10">
+        {metricas?.acesso && <CardPlanoPainel acesso={metricas.acesso} />}
         {metricas && <PainelMetricas tiles={metricas.tiles} porVaga={metricas.porVaga} />}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

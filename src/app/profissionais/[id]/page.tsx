@@ -1,7 +1,13 @@
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { connectDB } from "@/lib/db";
+import { MENSAGENS_LIMITE } from "@/lib/planos";
+import { acessoDaEmpresa } from "@/lib/servicos/planos";
+import Candidatura from "@/models/Candidatura";
+import Empresa from "@/models/Empresa";
+import Match from "@/models/Match";
 import Profissional from "@/models/Profissional";
+import Paywall from "@/components/planos/Paywall";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +60,25 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
   if (!session || session.user.role !== "empresa") redirect("/painel");
 
   await connectDB();
+
+  // Sem o Pro, a empresa só abre perfis de quem já se relacionou com ela
+  // (candidatura ou match): o candidato que veio até ela nunca fica escondido.
+  const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id assinatura").lean();
+  if (empresa && !acessoDaEmpresa(empresa).limites.bancoCurriculos) {
+    const relacionado =
+      (await Candidatura.exists({ empresaId: empresa._id, profissionalId: params.id })) ||
+      (await Match.exists({ empresaId: empresa._id, profissionalId: params.id }));
+    if (!relacionado) {
+      return (
+        <div className="min-h-screen bg-[#f4f7f5]">
+          <Navbar />
+          <main className="max-w-3xl mx-auto px-4 py-8">
+            <Paywall titulo="Este perfil está no banco de currículos" mensagem={MENSAGENS_LIMITE.bancoCurriculos} />
+          </main>
+        </div>
+      );
+    }
+  }
 
   const rawProf = await Profissional.findById(params.id)
     .select("-cpf -dataNascimento -cep")
