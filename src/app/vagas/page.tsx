@@ -37,6 +37,8 @@ interface VagaPopulada {
   preenchidas?: number;
   posicoes?: number;
   createdAt: string;
+  updatedAt?: string;
+  ultimaVisualizacaoEm?: string | null;
   empresaId: { nomeFantasia: string; cidade: string; estado: string };
   salario: { tipo: string; min: number | null; max: number | null; periodo: string };
 }
@@ -152,6 +154,15 @@ export default async function VagasPage() {
                           {(vaga.preenchidas ?? 0) > 0 && ` · ${vaga.preenchidas}/${vaga.posicoes ?? 1} contratada(s)`}
                         </span>
                       </div>
+                      <p className="mt-2 text-[11px] text-muted-foreground">
+                        {vaga.updatedAt && <span title="Última atualização">atualizada {new Date(vaga.updatedAt).toLocaleDateString("pt-BR")}</span>}
+                        <span title="Última vez que um candidato abriu a vaga">
+                          {" · "}
+                          {vaga.ultimaVisualizacaoEm
+                            ? `vista ${new Date(vaga.ultimaVisualizacaoEm).toLocaleDateString("pt-BR")}`
+                            : "ainda não vista"}
+                        </span>
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>

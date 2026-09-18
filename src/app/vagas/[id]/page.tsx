@@ -9,7 +9,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { labelAfirmativa } from "@/constants/match";
-import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink, HeartHandshake } from "lucide-react";
+import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink, HeartHandshake, RefreshCw, Eye, Navigation } from "lucide-react";
+import { distanciaKm, paraCoords } from "@/lib/match/geo";
+import { geocodificarCidade } from "@/constants/municipios";
 import BotaoCandidatar from "./BotaoCandidatar";
 import CandidaturaRapida from "./CandidaturaRapida";
 import KanbanCandidatos from "@/components/candidaturas/KanbanCandidatos";
@@ -63,11 +65,16 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
 
   let jaCandidatou = false;
   let profissionalId: string | null = null;
+  let distanciaDeMim: number | null = null;
 
   if (session?.user.role === "profissional") {
-    const prof = await Profissional.findOne({ userId: session.user.id }).select("_id");
+    const prof = await Profissional.findOne({ userId: session.user.id }).select("_id cidade estado localizacao");
     if (prof) {
       profissionalId = prof._id.toString();
+      // "A X km de você": cidade do profissional → cidade da vaga.
+      const deMim = paraCoords(prof.localizacao) ?? geocodificarCidade(prof.cidade, prof.estado);
+      const daVaga = paraCoords(vaga.localizacao) ?? geocodificarCidade(vaga.cidade, vaga.estado);
+      if (deMim && daVaga && !vaga.remoto) distanciaDeMim = distanciaKm(deMim, daVaga);
       const candidatura = await Candidatura.findOne({ vagaId: params.id, profissionalId: prof._id });
       jaCandidatou = !!candidatura;
     }
@@ -96,7 +103,7 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   // painel da empresa. (A rota GET /api/vagas/[id] também conta, mas a página
   // não passa por ela.)
   if (!isDonoEmpresa && session?.user.role !== "admin") {
-    await Vaga.updateOne({ _id: vaga._id }, { $inc: { visualizacoes: 1 } });
+    await Vaga.updateOne({ _id: vaga._id }, { $inc: { visualizacoes: 1 }, $set: { ultimaVisualizacaoEm: new Date() } });
   }
 
   const empresa = vaga.empresaId as EmpresaPopulada;
@@ -173,6 +180,26 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                     <span className="flex items-center gap-1.5 text-white/60" title="Data em que a vaga foi cadastrada">
                       <Clock className="h-4 w-4" />
                       Publicada em {new Date(vagaObj.createdAt).toLocaleDateString("pt-BR")}
+                    </span>
+                  )}
+                  {vagaObj.updatedAt && (
+                    <span className="flex items-center gap-1.5 text-white/60" title="Última atualização da vaga">
+                      <RefreshCw className="h-4 w-4" />
+                      Atualizada em {new Date(vagaObj.updatedAt).toLocaleDateString("pt-BR")}
+                    </span>
+                  )}
+                  {(isDonoEmpresa || session?.user.role === "admin") && (
+                    <span className="flex items-center gap-1.5 text-white/60" title="Última vez que um candidato abriu esta vaga">
+                      <Eye className="h-4 w-4" />
+                      {vagaObj.ultimaVisualizacaoEm
+                        ? `Vista por último em ${new Date(vagaObj.ultimaVisualizacaoEm).toLocaleDateString("pt-BR")}`
+                        : "Ainda não vista por candidatos"}
+                    </span>
+                  )}
+                  {distanciaDeMim !== null && (
+                    <span className="flex items-center gap-1.5 text-white font-medium" title="Distância entre a sua cidade e a da vaga">
+                      <Navigation className="h-4 w-4" />
+                      {distanciaDeMim === 0 ? "Na sua cidade" : `A ${distanciaDeMim} km de você`}
                     </span>
                   )}
                 </div>
