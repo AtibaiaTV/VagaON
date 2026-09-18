@@ -50,7 +50,7 @@ export async function PUT(
 
     const body = await req.json();
     const campos = ["titulo", "descricao", "requisitos", "tipo", "especialidade",
-      "salario", "periodo", "cidade", "estado", "remoto", "status",
+      "salario", "periodo", "cidade", "estado", "remoto", "raioKm", "status",
       // Sinais do match
       "especialidadesAceitas", "anosExperienciaMin", "habilidadesDesejadas",
       "turno", "escala", "idiomasDesejados", "posicoes", "afirmativa"];

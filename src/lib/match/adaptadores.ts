@@ -79,6 +79,7 @@ export function paraVagaMatch(entrada: unknown, empresaVerificada = false): Vaga
     estado: doc.estado ?? "",
     coords: coordsDe(doc),
     remoto: Boolean(doc.remoto),
+    raioKm: typeof doc.raioKm === "number" && doc.raioKm > 0 ? doc.raioKm : null,
     tipo: doc.tipo ?? "clt",
     periodo: {
       dataInicio: doc.periodo?.dataInicio ?? null,

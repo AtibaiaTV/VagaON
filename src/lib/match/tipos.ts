@@ -40,6 +40,8 @@ export interface VagaMatch {
   estado: string;
   coords: { lat: number; lng: number } | null;
   remoto: boolean;
+  /** Raio que a empresa aceita para esta vaga; null = sem limite. */
+  raioKm: number | null;
   tipo: TipoContrato;
   periodo: { dataInicio: Date | string | null; dataFim: Date | string | null };
   anosExperienciaMin: number;

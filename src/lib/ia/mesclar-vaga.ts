@@ -15,6 +15,8 @@ export interface FormVaga {
   cidade: string;
   estado: string;
   remoto: boolean;
+  /** \"\" = qualquer distância; senão, km como string do select. */
+  raioKm: string;
   salarioTipo: string;
   salarioMin: string;
   salarioMax: string;
@@ -50,6 +52,8 @@ export function vagaParaFormulario(v: VagaEstruturada, atual: FormVaga): EstadoN
       cidade: v.cidade ?? atual.cidade,
       estado: v.estado ?? atual.estado,
       remoto: v.remoto,
+      // A IA não decide o raio da empresa: fica o que já estava no formulário.
+      raioKm: atual.raioKm,
       salarioTipo: v.salario.tipo,
       // O formulário usa só "máximo" para valor fixo.
       salarioMin: fixo ? "" : numero(v.salario.min),

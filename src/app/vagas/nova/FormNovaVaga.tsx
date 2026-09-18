@@ -45,6 +45,7 @@ const FORM_INICIAL: FormVaga = {
   cidade: "",
   estado: "",
   remoto: false,
+  raioKm: "",
   salarioTipo: "a_combinar",
   salarioMin: "",
   salarioMax: "",
@@ -102,6 +103,7 @@ export default function FormNovaVaga({ iaDisponivel = false }: { iaDisponivel?: 
       cidade: form.cidade,
       estado: form.estado,
       remoto: form.remoto,
+      raioKm: form.raioKm ? Number(form.raioKm) : null,
       salario: {
         tipo: form.salarioTipo,
         min: form.salarioMin ? parseFloat(form.salarioMin) : null,
@@ -458,6 +460,24 @@ export default function FormNovaVaga({ iaDisponivel = false }: { iaDisponivel?: 
                   className="h-4 w-4 rounded border-input" />
                 <span className="text-sm">Aceita trabalho remoto / à distância</span>
               </label>
+              {!form.remoto && (
+                <div className="space-y-1">
+                  <Label htmlFor="raioKm">Aceita candidatos de até</Label>
+                  <Select value={form.raioKm} onValueChange={(v) => setForm((p) => ({ ...p, raioKm: v === "0" ? "" : (v ?? "") }))}>
+                    <SelectTrigger id="raioKm"><SelectValue placeholder="Qualquer distância" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">Qualquer distância</SelectItem>
+                      {[10, 25, 50, 100, 200].map((km) => (
+                        <SelectItem key={km} value={String(km)}>{km} km da vaga</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Quem mora além disso (e não declarou interesse numa cidade perto) perde posição no Descobrir e some
+                    acima de 1,5× o raio. Quem depende de transporte para longe raramente fica.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

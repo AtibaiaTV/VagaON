@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const {
-      titulo, descricao, requisitos, tipo, especialidade, salario, periodo, cidade, estado, remoto,
+      titulo, descricao, requisitos, tipo, especialidade, salario, periodo, cidade, estado, remoto, raioKm,
       // Sinais do match (todos opcionais)
       especialidadesAceitas, anosExperienciaMin, habilidadesDesejadas, turno, escala, idiomasDesejados, posicoes, afirmativa,
       perguntasTriagem,
@@ -116,6 +116,8 @@ export async function POST(req: NextRequest) {
       cidade,
       estado,
       remoto: remoto ?? false,
+      // Raio da empresa para esta vaga; vazio/0 = sem limite.
+      raioKm: Number.isFinite(Number(raioKm)) && Number(raioKm) > 0 ? Math.min(1000, Math.round(Number(raioKm))) : null,
       status: "ativa",
       aprovadaPorAdmin: true,
       // 60 dias (CLT) ou a data de término; o cron avisa e expira.
