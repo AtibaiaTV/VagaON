@@ -3,6 +3,7 @@ import { verifyCrossPlatformToken } from "@/lib/cross-platform-auth";
 import { connectDB } from "@/lib/db";
 import Empresa from "@/models/Empresa";
 import Vaga, { IVaga } from "@/models/Vaga";
+import { inferirEspecialidade } from "@/lib/especialidade-inferida";
 
 // Apenas os campos de negócio que a Redesa conhece — sem metadados do Mongoose
 function toRedesaShape(vaga: IVaga) {
@@ -62,6 +63,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const update: Record<string, unknown> = { status: "ativa", aprovadaPorAdmin: true };
     for (const campo of CAMPOS_EDITAVEIS) {
       if (body[campo] !== undefined) update[campo] = body[campo];
+    }
+    if (typeof update.especialidade === "string") {
+      update.especialidade = inferirEspecialidade(String(body?.titulo ?? ""), update.especialidade, update.especialidade);
     }
 
     const vaga = await Vaga.findOneAndUpdate(
