@@ -212,6 +212,24 @@ export const VARIAVEIS: VariavelAmbiente[] = [
     ler: () => process.env.WHATSAPP_TEMPLATE,
     mostrarValor: true,
   },
+  {
+    nome: "WHATSAPP_VERIFY_TOKEN",
+    grupo: "Notificações",
+    severidade: "opcional",
+    descricao: "Handshake do webhook do WhatsApp (/api/webhooks/whatsapp).",
+    semEla: "A Meta não consegue registrar o webhook: status de entrega e respostas (PARAR/VOLTAR) não chegam.",
+    comoObter: "openssl rand -hex 24 — o mesmo valor no campo \"Verify token\" do painel da Meta.",
+    ler: () => process.env.WHATSAPP_VERIFY_TOKEN,
+  },
+  {
+    nome: "WHATSAPP_APP_SECRET",
+    grupo: "Notificações",
+    severidade: "opcional",
+    descricao: "Segredo do app da Meta; valida a assinatura de cada evento do webhook.",
+    semEla: "O webhook responde 503 e descarta tudo: sem status de entrega e sem opt-out por WhatsApp.",
+    comoObter: "developers.facebook.com → seu app → Configurações do app → Básico → Chave secreta do app.",
+    ler: () => process.env.WHATSAPP_APP_SECRET,
+  },
 
   // ─── Integrações e interruptores ──────────────────────────────────────────
   {

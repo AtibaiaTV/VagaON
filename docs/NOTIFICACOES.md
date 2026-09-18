@@ -65,6 +65,36 @@ utilitário, para simplificar.
 Faixa gratuita da Meta: 1.000 conversas de utilidade/mês por número; depois
 é cobrado por conversa (24 h).
 
+### Webhook (status e respostas)
+
+`/api/webhooks/whatsapp` recebe da Meta o status de cada aviso (enviada →
+entregue → lida, ou falhou) e o que o usuário responde. Código em
+`src/lib/notificacoes/whatsapp-webhook.ts`; registros em `MensagemWhatsApp`
+(somem em 90 dias).
+
+1. `.env`: `WHATSAPP_VERIFY_TOKEN` (qualquer segredo; `openssl rand -hex 24`) e
+   `WHATSAPP_APP_SECRET` (Meta → app → Configurações → Básico → Chave secreta).
+2. Meta → app → WhatsApp → Configuração → Webhook: URL
+   `https://SEU-DOMINIO/api/webhooks/whatsapp`, Verify token = o mesmo valor.
+   Assine o campo **messages**.
+3. Todo POST é validado pela assinatura `X-Hub-Signature-256`; sem
+   `WHATSAPP_APP_SECRET` o webhook descarta tudo (503).
+
+O que acontece com o que o usuário escreve:
+
+| Resposta | Efeito |
+|---|---|
+| `PARAR` (ou pare, sair, cancelar, stop) | `User.notificacoes.whatsapp = false` e confirmação |
+| `VOLTAR` (ou ativar, continuar) | religa e confirma |
+| Qualquer outra coisa | uma orientação por dia por telefone apontando para `/matches` (ou para o cadastro, se o número não for de ninguém) |
+
+O dono do número é achado pelo telefone do Profissional ou da Empresa,
+tolerando máscara e o nono dígito. Mensagens recebidas ficam gravadas mesmo
+sem dono, para auditoria.
+
+Para testar sem número aprovado: o painel da Meta tem "Testar" no webhook,
+que envia um evento assinado; e `curl` sem assinatura deve responder 401.
+
 ## Testando
 
 - Sem nenhuma credencial: faça um match (ou envie uma mensagem) e veja o sino e `/notificacoes`.

@@ -97,7 +97,7 @@ export async function notificar(alvo: AlvoNotificacao, msg: MensagemNotificacao)
     }
 
     if (d.preferencias.whatsapp && d.telefone && whatsappConfigurado()) {
-      envios.push(enviarWhatsApp(d.telefone, d.nome, msg));
+      envios.push(enviarWhatsApp(d.telefone, d.nome, msg, d.userId));
     }
 
     const resultados = await Promise.all(
