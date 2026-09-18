@@ -36,7 +36,11 @@ export default function Footer() {
         </div>
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/30">
           <span>© {new Date().getFullYear()} VagaON. Todos os direitos reservados.</span>
-          <span>Gastronomia, Hotelaria &amp; Eventos — Brasil</span>
+          <span className="flex items-center gap-3">
+            <Link href="/privacidade" className="hover:text-white/70 transition-colors">Privacidade</Link>
+            <Link href="/termos" className="hover:text-white/70 transition-colors">Termos</Link>
+            <span>Gastronomia, Hotelaria &amp; Eventos — Brasil</span>
+          </span>
         </div>
       </div>
     </footer>

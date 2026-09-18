@@ -19,6 +19,8 @@ const FIXAS: { caminho: string; prioridade: number; freq: MetadataRoute.Sitemap[
   { caminho: "/curriculo", prioridade: 0.7, freq: "monthly" },
   { caminho: "/anunciar", prioridade: 0.7, freq: "monthly" },
   { caminho: "/planos", prioridade: 0.4, freq: "monthly" },
+  { caminho: "/privacidade", prioridade: 0.2, freq: "yearly" },
+  { caminho: "/termos", prioridade: 0.2, freq: "yearly" },
   { caminho: "/cadastro", prioridade: 0.5, freq: "monthly" },
 ];
 
