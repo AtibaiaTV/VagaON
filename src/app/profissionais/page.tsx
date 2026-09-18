@@ -23,6 +23,7 @@ interface IProfissionalLean {
   estado: string;
   resumoProfissional: string;
   disponibilidade: { tipo: string[]; imediata: boolean };
+  match?: { ativo?: boolean };
 }
 
 const DISPON_LABEL: Record<string, string> = {
@@ -37,13 +38,15 @@ const DISPON_COR: Record<string, string> = {
 
 export default async function ProfissionaisPage() {
   const session = await auth();
-  if (!session || session.user.role !== "empresa") redirect("/painel");
+  if (!session || (session.user.role !== "empresa" && session.user.role !== "admin")) redirect("/painel");
+  const ehAdmin = session.user.role === "admin";
 
   await connectDB();
 
   // Banco de currículos é recurso do plano Pro (no-op com planos desligados).
-  const empresa = await Empresa.findOne({ userId: session.user.id }).select("assinatura").lean();
-  if (!acessoDaEmpresa(empresa).limites.bancoCurriculos) {
+  // Admin não tem empresa nem plano: entra direto.
+  const empresa = ehAdmin ? null : await Empresa.findOne({ userId: session.user.id }).select("assinatura").lean();
+  if (!ehAdmin && !acessoDaEmpresa(empresa).limites.bancoCurriculos) {
     return (
       <div className="min-h-screen bg-[#f4f7f5]">
         <Navbar />
@@ -56,7 +59,8 @@ export default async function ProfissionaisPage() {
   }
 
   // Só quem está visível para empresas (perfil pausado/inativo fica fora).
-  const raw = await Profissional.find({ "match.ativo": { $ne: false } })
+  // Admin vê todos, com o pausado marcado.
+  const raw = await Profissional.find(ehAdmin ? {} : { "match.ativo": { $ne: false } })
     .select("-cpf -experiencias -habilidades -dataNascimento -cep")
     .sort({ completude: -1, createdAt: -1 })
     .limit(48)
@@ -80,6 +84,7 @@ export default async function ProfissionaisPage() {
             </div>
             <p className="text-white/60 text-sm">
               {profissionais.length} profissional{profissionais.length !== 1 ? "is" : ""} cadastrado{profissionais.length !== 1 ? "s" : ""}
+              {ehAdmin && " · visão de admin, inclui perfis pausados"}
             </p>
           </div>
         </div>
@@ -116,7 +121,14 @@ export default async function ProfissionaisPage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="font-semibold leading-tight truncate">{prof.nomeCompleto}</p>
+                        <p className="font-semibold leading-tight truncate">
+                          {prof.nomeCompleto}
+                          {ehAdmin && prof.match?.ativo === false && (
+                            <span className="ml-2 text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 align-middle">
+                              pausado
+                            </span>
+                          )}
+                        </p>
                         {(prof.cidade || prof.estado) && (
                           <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <MapPin className="h-3 w-3 shrink-0" />

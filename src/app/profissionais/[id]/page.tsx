@@ -57,13 +57,15 @@ function formatMes(iso: string | null | undefined): string {
 
 export default async function PerfilProfissionalPage({ params }: { params: { id: string } }) {
   const session = await auth();
-  if (!session || session.user.role !== "empresa") redirect("/painel");
+  if (!session || (session.user.role !== "empresa" && session.user.role !== "admin")) redirect("/painel");
+  const ehAdmin = session.user.role === "admin";
 
   await connectDB();
 
   // Sem o Pro, a empresa só abre perfis de quem já se relacionou com ela
   // (candidatura ou match): o candidato que veio até ela nunca fica escondido.
-  const empresa = await Empresa.findOne({ userId: session.user.id }).select("_id assinatura").lean();
+  // Admin não tem empresa, logo não passa pelo paywall.
+  const empresa = ehAdmin ? null : await Empresa.findOne({ userId: session.user.id }).select("_id assinatura").lean();
   if (empresa && !acessoDaEmpresa(empresa).limites.bancoCurriculos) {
     const relacionado =
       (await Candidatura.exists({ empresaId: empresa._id, profissionalId: params.id })) ||
@@ -101,13 +103,20 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/[0.04] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
         <div className="max-w-3xl mx-auto px-4 py-8 relative">
-          <Link
-            href="/profissionais"
-            className="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm mb-6 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Banco de Profissionais
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              href="/profissionais"
+              className="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Banco de Profissionais
+            </Link>
+            {ehAdmin && (
+              <Link href="/admin/usuarios" className="text-xs text-white/60 hover:text-white underline underline-offset-2">
+                Você está vendo como admin · voltar aos usuários
+              </Link>
+            )}
+          </div>
 
           <div className="flex items-start gap-5">
             {/* Avatar */}
