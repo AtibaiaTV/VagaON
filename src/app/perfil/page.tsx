@@ -21,6 +21,8 @@ import Footer from "@/components/layout/Footer";
 import { MODELOS_CURRICULO, MODELO_PADRAO, ehModeloCurriculo } from "@/lib/curriculo";
 import { filtroEmpresaDoUsuario, papelNaEmpresa } from "@/lib/servicos/equipe";
 import { UsersRound } from "lucide-react";
+import { estadoVerificacao } from "@/lib/servicos/whatsapp-verificacao";
+import ConfirmarWhatsApp from "@/components/notificacoes/ConfirmarWhatsApp";
 
 export default async function PerfilPage() {
   const session = await auth();
@@ -34,6 +36,8 @@ export default async function PerfilPage() {
     whatsapp: user?.notificacoes?.whatsapp ?? true,
     push: user?.notificacoes?.push ?? true,
   };
+  const wa = await estadoVerificacao(session.user.id, session.user.role).catch(() => null);
+  const pedirWhatsApp = Boolean(wa?.disponivel && wa.telefone && !wa.numeroConfere);
   const cardNotificacoes = (
     <Card>
       <CardHeader>
@@ -41,6 +45,12 @@ export default async function PerfilPage() {
       </CardHeader>
       <CardContent className="space-y-3">
         <CardInstalarApp />
+        {pedirWhatsApp && wa && (
+          <ConfirmarWhatsApp telefoneMascarado={wa.telefoneMascarado} enviadoEm={wa.enviadoEm} variante="card" />
+        )}
+        {wa?.disponivel && wa.numeroConfere && (
+          <p className="text-xs text-emerald-700">WhatsApp {wa.telefoneMascarado} confirmado.</p>
+        )}
         <PreferenciasNotificacao inicial={prefs} />
       </CardContent>
     </Card>
