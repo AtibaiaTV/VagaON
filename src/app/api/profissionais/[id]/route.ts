@@ -77,7 +77,7 @@ export async function PUT(
       "nomeCompleto", "telefone", "fotoPerfil", "dataNascimento",
       "cidade", "estado", "cep", "dispostoViajar",
       "especialidades", "resumoProfissional", "habilidades",
-      "disponibilidade", "experiencias",
+      "disponibilidade", "experiencias", "formacao",
       "linkedinUrl", "curriculoUrl",
       // Preferências do match
       "raioKm", "pretensaoSalarial", "turnos", "escalas", "idiomas",

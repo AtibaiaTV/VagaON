@@ -21,6 +21,7 @@ const PERFIL_EXEMPLO: PerfilExtraido = {
     { cargo: "Sous Chef", empresa: "Trattoria Nonna Rosa", cidade: "São Paulo", estado: "SP", dataInicio: "2021-03", dataFim: null, atual: true, descricao: "Liderança da brigada no turno da noite." },
     { cargo: "Chef de Partie", empresa: "Hotel Villa Verde", cidade: "Campos do Jordão", estado: "SP", dataInicio: null, dataFim: "2021-02", atual: false, descricao: null },
   ],
+  formacao: [{ curso: "Tecnólogo em Gastronomia", instituicao: "Senac São Paulo", ano: "2017" }],
   idiomas: [{ idioma: "Italiano", nivel: "intermediario" }],
   confianca: "alta",
   observacoes: ["Não encontrei CEP no currículo."],
@@ -31,6 +32,7 @@ const ESTADO_FORM = {
   especialidades: ["chef_partie"],
   habilidades: "custos, Excel",
   experiencias: [{ cargo: "Chef de partie", empresa: "hotel villa verde", cidade: "", estado: "", dataInicio: "2019-01", dataFim: "2021-02", descricao: "" }],
+  formacao: [],
   idiomas: [],
 };
 
