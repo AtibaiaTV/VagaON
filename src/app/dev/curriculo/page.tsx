@@ -3,7 +3,11 @@ import { MODELO_PADRAO, corValida, ehModeloCurriculo, montarDadosCurriculo } fro
 import PlaygroundCurriculo from "./PlaygroundCurriculo";
 
 /** Playground dos modelos de currículo com dados fictícios — sem banco, sem login. Só fora de produção. */
-export default function CurriculoDevPage({ searchParams }: { searchParams: { modelo?: string; vazio?: string; cor?: string } }) {
+export default function CurriculoDevPage({
+  searchParams,
+}: {
+  searchParams: { modelo?: string; vazio?: string; cor?: string; publico?: string };
+}) {
   if (process.env.NODE_ENV === "production") notFound();
 
   const completo = {
@@ -70,6 +74,7 @@ export default function CurriculoDevPage({ searchParams }: { searchParams: { mod
       modelo={modelo}
       cores={corValida(cor) ? { [modelo]: cor } : {}}
       vazio={searchParams.vazio === "1"}
+      publico={searchParams.publico === "1"}
     />
   );
 }

@@ -62,6 +62,12 @@ export interface IProfissional extends Document {
   curriculoModelo: ModeloCurriculo;
   /** Cor de detalhe escolhida por modelo (hex), ex.: { executivo: "#8e2a3b" }. */
   curriculoCores: Map<string, string>;
+  /**
+   * Link público do currículo (/cv/[token]) para compartilhar por WhatsApp.
+   * Criado sob demanda pelo próprio profissional; `ativo: false` desliga sem
+   * perder o token.
+   */
+  curriculoPublico: { token: string; ativo: boolean; criadoEm: Date } | null;
 
   // ─── Sinais usados pelo motor de match ──────────────────────────────────────
   /** GeoJSON Point [lng, lat] — permite pré-filtro por raio com índice 2dsphere. */
@@ -160,6 +166,17 @@ const ProfissionalSchema = new Schema<IProfissional>(
     videoApresentacao: { type: VideoSchema, default: null },
     curriculoModelo: { type: String, enum: MODELO_VALUES, default: MODELO_PADRAO },
     curriculoCores: { type: Map, of: String, default: {} },
+    curriculoPublico: {
+      type: new Schema(
+        {
+          token: { type: String, required: true },
+          ativo: { type: Boolean, default: true },
+          criadoEm: { type: Date, default: Date.now },
+        },
+        { _id: false }
+      ),
+      default: null,
+    },
 
     // ─── Sinais usados pelo motor de match ────────────────────────────────────
     // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra
@@ -199,6 +216,8 @@ ProfissionalSchema.index({ "disponibilidade.tipo": 1 });
 ProfissionalSchema.index({ localizacao: "2dsphere" });
 // Deck da empresa: candidatos ativos de uma especialidade.
 ProfissionalSchema.index({ "match.ativo": 1, especialidades: 1 });
+// Página pública do currículo (/cv/[token]).
+ProfissionalSchema.index({ "curriculoPublico.token": 1 }, { unique: true, sparse: true });
 
 /** Soma os meses de todas as experiências, sem contar sobreposições em dobro. */
 export function calcularAnosExperiencia(experiencias: IExperiencia[]): number {

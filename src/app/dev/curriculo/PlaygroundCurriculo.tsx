@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import CurriculoImpressao from "@/components/curriculo/CurriculoImpressao";
+import CurriculoPublico from "@/components/curriculo/CurriculoPublico";
 import { corDoModelo, type CoresCurriculo, type DadosCurriculo, type ModeloCurriculo } from "@/lib/curriculo";
 import { exportarCurriculo, type FormatoExportacao } from "@/lib/curriculo-exportar";
 
@@ -19,11 +20,13 @@ export default function PlaygroundCurriculo({
   modelo,
   cores,
   vazio,
+  publico,
 }: {
   dados: DadosCurriculo;
   modelo: ModeloCurriculo;
   cores: CoresCurriculo;
   vazio: boolean;
+  publico: boolean;
 }) {
   const [simulando, setSimulando] = useState(false);
 
@@ -44,6 +47,9 @@ export default function PlaygroundCurriculo({
     setSimulando((v) => !v);
   }
 
+  // Prévia da página pública (/cv/[token]) sem banco.
+  if (publico) return <CurriculoPublico dados={dados} modelo={modelo} cor={corDoModelo(modelo, cores)} />;
+
   return (
     <div className="min-h-screen bg-[#e9edeb]">
       <div style={{ backgroundColor: "#143f28" }} className="py-3 nao-imprimir">
@@ -53,6 +59,7 @@ export default function PlaygroundCurriculo({
             <Link href="/dev/curriculo">completo</Link>
             <Link href="/dev/curriculo?vazio=1">mínimo</Link>
             <Link href="/dev/curriculo?modelo=executivo&cor=8e2a3b">vinho</Link>
+            <Link href="/dev/curriculo?publico=1">página pública</Link>
             <button type="button" onClick={alternar} className="underline">
               {simulando ? "sair da simulação" : "simular impressão"}
             </button>

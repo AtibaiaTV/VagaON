@@ -44,6 +44,25 @@ reproduz o mockup (`COR_PADRAO`); as demais cores são derivadas em
   - **Word (.docx)**: documento editável montado a partir dos dados com a biblioteca `docx` — cabeçalho sombreado (ou barra lateral, no Criativo), títulos na cor de detalhe, experiências com marcadores. Não é uma imagem colada.
 - Nome do arquivo: `curriculo-<nome>-<modelo>.<ext>`.
 
+## Compartilhar no WhatsApp
+
+Botão **WhatsApp** na página do currículo:
+
+1. Garante o **link público** (`POST /api/perfil/curriculo-link`): token de 16
+   bytes em `Profissional.curriculoPublico`, página `/cv/[token]` sem login e
+   com `noindex`, mostrando o modelo e a cor salvos, com Imprimir e PDF para
+   quem recebe. O profissional vê o link na página, pode copiar, desativar,
+   reativar; `renovar` troca o token e mata o link antigo.
+2. **Celular** (Web Share API com arquivos — Chrome Android, Safari iOS): gera
+   o PDF e abre a folha de compartilhamento do sistema com o PDF anexado e a
+   mensagem com o link; a pessoa escolhe o WhatsApp e o contato.
+3. **Computador ou navegador sem suporte**: abre `wa.me` com a mensagem e o
+   link público (WhatsApp Web ou app do Windows/Mac).
+
+Se a pessoa fechar a folha de compartilhamento, nada acontece (AbortError é
+ignorado). No playground (`/dev/curriculo`) não há link, só a mensagem;
+`?publico=1` mostra a página pública com os dados fictícios.
+
 ## Dados usados
 
 Nome, telefone, e-mail (do `User`), cidade/UF, LinkedIn, foto, resumo,

@@ -50,6 +50,7 @@ export default async function CurriculoPage({
           dados={dados}
           modeloInicial={modeloInicial}
           coresIniciais={normalizarCores(prof.curriculoCores)}
+          linkInicial={prof.curriculoPublico?.token ? { token: prof.curriculoPublico.token, ativo: prof.curriculoPublico.ativo !== false } : null}
           salvarPreferencia
           autoImprimir={searchParams.imprimir === "1"}
         />
