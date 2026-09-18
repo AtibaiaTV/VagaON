@@ -12,6 +12,16 @@ import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor } from "./erros";
 import { expiracaoInicial } from "./vagas";
+import { enviarCodigoVerificacao } from "./whatsapp-verificacao";
+
+/**
+ * Manda o código de confirmação do WhatsApp logo no cadastro: a pessoa
+ * acabou de digitar o número e está com o celular na mão. Silencioso — sem
+ * canal ligado ou com falha, o painel oferece de novo.
+ */
+async function confirmarWhatsAppNoCadastro(userId: unknown, role: string) {
+  await enviarCodigoVerificacao(String(userId), role, { silencioso: true }).catch(() => null);
+}
 
 /**
  * Entrada rápida pelo QR Code ou link: uma tela, quatro ou cinco campos,
@@ -96,6 +106,7 @@ export async function criarProfissionalRapido(e: EntradaProfissionalRapido) {
   await User.updateOne({ _id: user._id }, { $set: { profileId: profissional._id } });
 
   await notifyRedesaTalento({ vagaonCandidatoId: String(profissional._id), nome: e.nome, email: e.email, telefone: e.telefone });
+  await confirmarWhatsAppNoCadastro(user._id, "profissional");
 
   return { userId: String(user._id), profissionalId: String(profissional._id) };
 }
@@ -187,6 +198,8 @@ export async function criarEmpresaRapida(e: EntradaEmpresaRapida) {
       periodo: (dadosVaga.periodo as { dataFim?: string | null } | undefined) ?? null,
     }),
   });
+
+  await confirmarWhatsAppNoCadastro(user._id, "empresa");
 
   return { userId: String(user._id), empresaId: String(empresa._id), vagaId: String(vaga._id), montadaPorIA };
 }

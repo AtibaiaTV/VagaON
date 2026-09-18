@@ -108,6 +108,25 @@ sem dono, para auditoria.
 Para testar sem número aprovado: o painel da Meta tem "Testar" no webhook,
 que envia um evento assinado; e `curl` sem assinatura deve responder 401.
 
+### Admin → WhatsApp (`/admin/whatsapp`)
+
+Log de tudo que passou pela Cloud API (enviadas, entregues, lidas, falhas e
+respostas), filtro por telefone e direção, e **Testar envio**: manda o
+template para um número e mostra a resposta da Meta na hora
+(`POST /api/admin/whatsapp/teste`). É por aqui que se descobre, no dia de
+ligar, se token, número e template estão certos.
+
+### Confirmação do número (código por WhatsApp)
+
+Telefone errado é silencioso: o aviso "sai" e ninguém recebe. Por isso o
+cadastro rápido já dispara um código de 6 dígitos pelo template, e o painel
+e o perfil pedem o código enquanto o número não estiver confirmado
+(`User.whatsapp.numeroVerificado`). Não bloqueia nada — só sobe a qualidade
+do dado. Limites: 1 envio/min, 5/dia, 5 tentativas, 10 min de validade;
+o código fica só como hash. Código em `src/lib/servicos/whatsapp-verificacao.ts`,
+API `GET/POST /api/whatsapp/verificacao`, componente `ConfirmarWhatsApp`.
+Sem `WHATSAPP_TOKEN`, nada disso aparece.
+
 ## Testando
 
 - Sem nenhuma credencial: faça um match (ou envie uma mensagem) e veja o sino e `/notificacoes`.

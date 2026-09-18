@@ -15,6 +15,8 @@ import type { PlanoResolvido } from "@/lib/planos";
 import { metricasEmpresa, metricasProfissional, type LinhaVaga } from "@/lib/servicos/metricas";
 import { acessoDaEmpresa } from "@/lib/servicos/planos";
 import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
+import { estadoVerificacao } from "@/lib/servicos/whatsapp-verificacao";
+import ConfirmarWhatsApp from "@/components/notificacoes/ConfirmarWhatsApp";
 import { registrarAtividadeProfissional } from "@/lib/servicos/visibilidade";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
@@ -84,6 +86,10 @@ export default async function PainelPage() {
       ? await Profissional.exists({ userId: session.user.id, $or: [{ cidade: "" }, { cidade: null }] }).catch(() => null)
       : null;
 
+  // WhatsApp ainda não confirmado: pede o código (só com o canal ligado e telefone no perfil).
+  const wa = role === "admin" ? null : await estadoVerificacao(session.user.id, role).catch(() => null);
+  const pedirWhatsApp = Boolean(wa?.disponivel && wa.telefone && !wa.numeroConfere);
+
   const titleMap: Record<string, string> = {
     profissional: "Painel do Profissional",
     empresa: "Painel da Empresa",
@@ -141,6 +147,11 @@ export default async function PainelPage() {
                 Definir senha
               </Link>
             </p>
+          </div>
+        )}
+        {pedirWhatsApp && wa && (
+          <div className="mb-6">
+            <ConfirmarWhatsApp telefoneMascarado={wa.telefoneMascarado} enviadoEm={wa.enviadoEm} variante="banner" />
           </div>
         )}
         {semCidade && (
