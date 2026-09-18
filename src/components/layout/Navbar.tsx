@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
 import SinoNotificacoes from "@/components/notificacoes/SinoNotificacoes";
+import BannerInstalacao from "@/components/pwa/BannerInstalacao";
 
 export default async function Navbar() {
   const session = await auth();
@@ -65,6 +66,9 @@ export default async function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Fixo no rodapé do celular; só para quem já tem conta e usa o match. */}
+      {usaMatch && <BannerInstalacao />}
     </header>
   );
 }

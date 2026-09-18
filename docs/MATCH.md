@@ -67,6 +67,12 @@ telefone, e-mail, data de nascimento, CEP, currículo ou LinkedIn. Contato só e
 - **Chat**: polling a cada 4 s com `?depois=`; trocar por Pusher/Ably não muda a UI.
 - **PWA**: `public/manifest.webmanifest` + `public/sw.js` (nunca cacheia
   `/api`, não cacheia páginas autenticadas). SW só registra em produção.
+- **Convite para instalar** (`components/pwa/`): banner fixo no rodapé do
+  celular para quem está logado (montado pelo Navbar), com prompt nativo no
+  Android e passo a passo no iPhone; "Agora não" silencia por 14 dias; card
+  permanente em `/perfil`. O script inline do `layout.tsx` guarda o
+  `beforeinstallprompt` e suprime o mini-aviso padrão do Chrome. Nunca aparece
+  dentro do app instalado. Playground: `/dev/instalacao?simularInstalacao=ios|android`.
 
 ## Calibrando
 
