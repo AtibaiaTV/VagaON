@@ -13,8 +13,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import VagasListaPublica from "@/components/vagas/VagasListaPublica";
 import BrandBand from "@/components/shared/BrandBand";
-import { COR_STATUS_VAGA } from "@/components/vagas/AcoesVaga";
-import { LABEL_STATUS_VAGA, diasAte, type StatusVaga } from "@/lib/vagas-estado";
+import { COR_STATUS_VAGA, LABEL_STATUS_VAGA, diasAte, type StatusVaga } from "@/lib/vagas-estado";
 
 const TIPO_LABEL: Record<string, string> = {
   clt: "CLT", temporario: "Temporário", sazonal: "Sazonal",

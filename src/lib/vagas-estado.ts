@@ -18,6 +18,17 @@ export const LABEL_STATUS_VAGA: Record<StatusVaga, string> = {
   rejeitada: "Rejeitada",
 };
 
+/** Cor da etiqueta de status (Tailwind). Aqui, e não num componente cliente, para a página de vagas (servidor) poder ler. */
+export const COR_STATUS_VAGA: Record<StatusVaga, string> = {
+  ativa: "bg-green-100 text-green-700",
+  pausada: "bg-amber-100 text-amber-700",
+  preenchida: "bg-emerald-100 text-emerald-800",
+  encerrada: "bg-gray-100 text-gray-600",
+  expirada: "bg-gray-100 text-gray-600",
+  rascunho: "bg-blue-100 text-blue-600",
+  rejeitada: "bg-red-100 text-red-700",
+};
+
 /** Como o candidato vê uma vaga que não está mais recebendo gente. */
 export const AVISO_STATUS_VAGA: Partial<Record<StatusVaga, string>> = {
   pausada: "Esta vaga está pausada pela empresa.",
