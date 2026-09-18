@@ -15,6 +15,8 @@ export interface IUser extends Document {
     whatsapp: boolean;
     push: boolean;
   };
+  /** De onde veio o cadastro (QR do cartaz, link do Instagram…) — `?origem=` na entrada rápida. */
+  origemCadastro: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +44,7 @@ const UserSchema = new Schema<IUser>(
       whatsapp: { type: Boolean, default: true },
       push: { type: Boolean, default: true },
     },
+    origemCadastro: { type: String, default: null },
   },
   { timestamps: true }
 );
