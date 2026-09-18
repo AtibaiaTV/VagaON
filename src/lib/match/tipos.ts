@@ -10,6 +10,8 @@ export interface ProfissionalMatch {
   cidade: string;
   estado: string;
   coords: { lat: number; lng: number } | null;
+  /** Cidades em que também aceita trabalhar; a distância usada é a menor entre todas as suas cidades. */
+  cidadesInteresse: { cidade: string; estado: string; coords: { lat: number; lng: number } }[];
   raioKm: number;
   dispostoViajar: boolean;
   disponibilidade: {

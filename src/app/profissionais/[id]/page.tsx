@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText, Cake, RefreshCw, Activity, Navigation } from "lucide-react";
 import Empresa from "@/models/Empresa";
-import { distanciaKm, paraCoords } from "@/lib/match/geo";
+import { menorDistancia, paraCoords, type PontoDoProfissional } from "@/lib/match/geo";
 import { geocodificarCidade } from "@/constants/municipios";
 import Navbar from "@/components/layout/Navbar";
 import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
@@ -55,6 +55,7 @@ interface IProfissionalLean {
   dataNascimento?: string | null;
   match?: { ultimaAtividade?: string | null };
   localizacao?: { coordinates?: number[] } | null;
+  cidadesInteresse?: { cidade: string; estado: string; localizacao?: { coordinates?: number[] } | null }[];
 }
 
 const TIPOS_LABEL: Record<string, string> = {
@@ -103,13 +104,22 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
 
   // Distância até a empresa que está olhando (admin não tem empresa).
   let distancia: number | null = null;
+  let viaInteresse: string | null = null;
   let nomeEmpresa: string | null = null;
   if (!ehAdmin) {
     const minha = await Empresa.findOne({ userId: session!.user.id }).select("cidade estado nomeFantasia").lean();
     const daEmpresa = minha ? geocodificarCidade(minha.cidade, minha.estado) : null;
-    const doProf = paraCoords(prof.localizacao) ?? geocodificarCidade(prof.cidade, prof.estado);
-    if (daEmpresa && doProf) {
-      distancia = distanciaKm(daEmpresa, doProf);
+    const pontos: PontoDoProfissional[] = [];
+    const casa = paraCoords(prof.localizacao) ?? geocodificarCidade(prof.cidade, prof.estado);
+    if (casa) pontos.push({ coords: casa, cidadeInteresse: null });
+    for (const c of prof.cidadesInteresse ?? []) {
+      const cc = paraCoords(c.localizacao) ?? geocodificarCidade(c.cidade, c.estado);
+      if (cc) pontos.push({ coords: cc, cidadeInteresse: c.cidade });
+    }
+    const melhor = daEmpresa ? menorDistancia(pontos, daEmpresa) : null;
+    if (melhor) {
+      distancia = melhor.km;
+      viaInteresse = melhor.ponto.cidadeInteresse;
       nomeEmpresa = minha?.nomeFantasia ?? null;
     }
   }
@@ -211,6 +221,13 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                   <span className="flex items-center gap-1 text-white font-medium" title={`Distância entre a cidade do profissional e ${nomeEmpresa ?? "a sua empresa"}`}>
                     <Navigation className="h-3.5 w-3.5" />
                     {distancia === 0 ? "Na sua cidade" : `A ${distancia} km da sua empresa`}
+                    {viaInteresse && <span className="font-normal text-white/70"> (contando {viaInteresse}, cidade de interesse)</span>}
+                  </span>
+                )}
+                {(prof.cidadesInteresse ?? []).length > 0 && (
+                  <span className="flex items-center gap-1 text-white/80 basis-full" title="Cidades em que aceita trabalhar">
+                    <Plane className="h-3.5 w-3.5" />
+                    Também aceita: {prof.cidadesInteresse!.map((c) => `${c.cidade}/${c.estado}`).join(", ")}
                   </span>
                 )}
                 {idade !== null && (
