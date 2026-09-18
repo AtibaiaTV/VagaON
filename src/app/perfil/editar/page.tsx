@@ -7,7 +7,7 @@ import Profissional from "@/models/Profissional";
 import FormEmpresa from "./FormEmpresa";
 import FormProfissional from "./FormProfissional";
 
-export default async function PerfilEditarPage() {
+export default async function PerfilEditarPage({ searchParams }: { searchParams: { boasvindas?: string } }) {
   const session = await auth();
   if (!session) redirect("/entrar");
 
@@ -30,6 +30,7 @@ export default async function PerfilEditarPage() {
         profileId={session.user.profileId ?? ""}
         dados={profissional ? JSON.parse(JSON.stringify(profissional)) : null}
         iaDisponivel={iaConfigurada()}
+        boasVindas={searchParams.boasvindas === "1"}
       />
     );
   }

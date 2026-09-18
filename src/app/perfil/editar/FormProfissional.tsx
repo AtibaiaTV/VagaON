@@ -32,6 +32,8 @@ interface Props {
   dados: Record<string, unknown> | null;
   /** ANTHROPIC_API_KEY configurada no servidor — mostra o painel "Preencher com IA". */
   iaDisponivel?: boolean;
+  /** Veio do cadastro rápido (QR/link): conta recém-criada, perfil ainda vazio. */
+  boasVindas?: boolean;
 }
 
 const ETAPAS = ["Dados pessoais", "Especialidades", "Experiências", "Disponibilidade"];
@@ -51,7 +53,7 @@ interface Importacao {
   };
 }
 
-export default function FormProfissional({ profileId, dados, iaDisponivel = false }: Props) {
+export default function FormProfissional({ profileId, dados, iaDisponivel = false, boasVindas = false }: Props) {
   const router = useRouter();
   const [etapa, setEtapa] = useState(0);
   const [salvando, setSalvando] = useState(false);
@@ -298,6 +300,17 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
         {erro && (
           <div className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {erro}
+          </div>
+        )}
+
+        {boasVindas && !importacao && (
+          <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
+            <p className="font-semibold">Cadastro criado! Agora deixe seu perfil completo — leva 2 minutos.</p>
+            <p className="text-xs text-green-800/90 mt-1">
+              {iaDisponivel
+                ? "O caminho mais rápido: envie seu currículo em PDF ou foto logo abaixo e a IA preenche tudo para você revisar. Ou preencha etapa por etapa."
+                : "Preencha as 4 etapas abaixo: dados, funções, experiências e disponibilidade. Perfil completo aparece primeiro para as empresas."}
+            </p>
           </div>
         )}
 
