@@ -33,7 +33,14 @@ function html(msg: MensagemNotificacao, link: string, nome: string): string {
 </td></tr>
 <tr><td style="padding:24px 28px">
   <p style="margin:0 0 8px;font-size:15px">Olá, ${escapar(nome)}!</p>
-  <p style="margin:0 0 22px;font-size:15px;line-height:1.55;color:#374151">${escapar(msg.corpo)}</p>
+  <p style="margin:0 0 ${msg.linhas?.length ? 12 : 22}px;font-size:15px;line-height:1.55;color:#374151">${escapar(msg.corpo)}</p>
+  ${
+    msg.linhas?.length
+      ? `<ul style="margin:0 0 22px;padding-left:20px;font-size:15px;line-height:1.6;color:#374151">${msg.linhas
+          .map((l) => `<li>${escapar(l)}</li>`)
+          .join("")}</ul>`
+      : ""
+  }
   <a href="${escapar(link)}" style="display:inline-block;background:#2DB87A;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px;font-size:15px">Abrir no VagaON</a>
   <p style="margin:22px 0 0;font-size:12px;color:#9ca3af">Você recebe este e-mail porque tem uma conta no VagaON. Para ajustar seus avisos, acesse seu perfil.</p>
 </td></tr>
@@ -58,7 +65,7 @@ export async function enviarEmail(
     to: para,
     subject: msg.titulo,
     html: html(msg, link, nome),
-    text: `Olá, ${nome}!\n\n${msg.corpo}\n\nAbrir no VagaON: ${link}`,
+    text: `Olá, ${nome}!\n\n${msg.corpo}${msg.linhas?.length ? `\n\n${msg.linhas.map((l) => `- ${l}`).join("\n")}` : ""}\n\nAbrir no VagaON: ${link}`,
   });
 
   if (error) return { canal: "email", ok: false, detalhe: error.message };

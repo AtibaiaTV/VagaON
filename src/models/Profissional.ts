@@ -100,6 +100,8 @@ export interface IProfissional extends Document {
     ultimaAtividade: Date | null;
     /** Aviso de inatividade enviado; 7 dias depois sem atividade, o cron pausa. */
     avisoInatividadeEm: Date | null;
+    /** Último resumo semanal de vagas enviado (cron). */
+    resumoSemanalEm: Date | null;
   };
   /** Agregado das avaliações publicadas recebidas de empresas. Recalculado a cada publicação. */
   reputacao: {
@@ -234,6 +236,7 @@ const ProfissionalSchema = new Schema<IProfissional>(
       pausadoEm: { type: Date, default: null },
       ultimaAtividade: { type: Date, default: null },
       avisoInatividadeEm: { type: Date, default: null },
+      resumoSemanalEm: { type: Date, default: null },
     },
     reputacao: {
       media: { type: Number, default: null },

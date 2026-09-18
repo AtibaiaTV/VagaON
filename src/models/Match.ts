@@ -44,6 +44,8 @@ export interface IMatch extends Document {
   };
   /** Quando o match virou "contratado" — abre o prazo de avaliação. */
   contratadoEm: Date | null;
+  /** Cron avisou os dois lados que o match está sem primeira mensagem (uma vez). */
+  alertaParadoEm: Date | null;
   avaliacoes: {
     /** Convite para avaliar já enviado aos dois lados. */
     lembradaEm: Date | null;
@@ -103,6 +105,7 @@ const MatchSchema = new Schema<IMatch>(
       empresa: { type: Number, default: 0 },
     },
     contratadoEm: { type: Date, default: null },
+    alertaParadoEm: { type: Date, default: null },
     avaliacoes: {
       lembradaEm: { type: Date, default: null },
     },
@@ -126,6 +129,8 @@ MatchSchema.index({ vagaId: 1, profissionalId: 1 }, { unique: true });
 MatchSchema.index({ "entrevista.escolhida": 1, "entrevista.lembreteEnviadoEm": 1 });
 // Cron de convites para avaliar: contratados sem convite.
 MatchSchema.index({ status: 1, contratadoEm: 1, "avaliacoes.lembradaEm": 1 });
+// Cron de match parado: novos, antigos, ainda sem alerta.
+MatchSchema.index({ status: 1, alertaParadoEm: 1, createdAt: 1 });
 // Listas de matches ordenadas por atividade, por lado.
 MatchSchema.index({ profissionalId: 1, status: 1, updatedAt: -1 });
 MatchSchema.index({ empresaId: 1, status: 1, updatedAt: -1 });

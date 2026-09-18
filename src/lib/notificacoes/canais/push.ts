@@ -1,5 +1,5 @@
 import webpush from "web-push";
-import type { MensagemNotificacao, ResultadoEnvio } from "../tipos";
+import { corpoCompleto, type MensagemNotificacao, type ResultadoEnvio } from "../tipos";
 
 /**
  * Web Push (PWA). Precisa do par VAPID:
@@ -33,7 +33,7 @@ export async function enviarPush(
 
   const payload = JSON.stringify({
     titulo: msg.titulo,
-    corpo: msg.corpo,
+    corpo: corpoCompleto(msg),
     url: msg.url,
     categoria: msg.categoria,
   });

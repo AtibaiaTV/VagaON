@@ -23,6 +23,14 @@ operação que a disparou. Tudo é aguardado (Vercel encerra a função ao respo
 | Match → entrevista / contratado / encerrado | o outro lado | `servicos/matches.ts` → `atualizarStatusMatch` |
 | Candidatura → em análise / aprovada / recusada | profissional | `api/candidaturas/[id]` PATCH |
 | Nova candidatura pelo board | empresa | `api/vagas/[id]/candidaturas` POST |
+| Match parado (48 h sem mensagem humana) | os dois lados, uma vez | cron `manutencao` → `servicos/engajamento.ts` |
+| Resumo semanal (segunda, BRT) | profissional: vagas novas que combinam; empresa: candidaturas, matches, matches parados, vagas expirando | cron `manutencao` → `servicos/engajamento.ts` |
+
+Os dois de engajamento só saem quando há o que dizer (profissional sem vaga
+nova ou empresa sem movimento não recebem nada). `Match.alertaParadoEm`,
+`Profissional.match.resumoSemanalEm` e `Empresa.match.resumoSemanalEm`
+garantem que reexecutar o cron não duplica. Mensagens com `linhas[]` viram
+lista no e-mail e texto corrido nos outros canais.
 
 Textos em `mensagens.ts`. Preferências por canal em `User.notificacoes`
 (tela: `/perfil` → Notificações).

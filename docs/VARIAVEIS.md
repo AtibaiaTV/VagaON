@@ -50,7 +50,7 @@ playground fora de produção é `/dev/ia`.
 
 | Variável | Sem ela |
 |---|---|
-| `CRON_SECRET` | Os dois crons respondem 401: vaga vencida não expira, perfil inativo não some, convite de avaliação não sai |
+| `CRON_SECRET` | Os dois crons respondem 401: vaga vencida não expira, perfil inativo não some, convite de avaliação não sai, match parado e resumo semanal não avisam |
 
 Gere com `openssl rand -hex 32`. O mesmo valor na Vercel, que o envia como
 `Authorization: Bearer`. Crons declarados em [`vercel.json`](../vercel.json):

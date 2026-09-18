@@ -190,6 +190,61 @@ export function msgNovaCandidatura(p: {
   };
 }
 
+// ─── Engajamento (cron) ─────────────────────────────────────────────────────
+
+export function msgMatchParado(p: {
+  lado: "profissional" | "empresa";
+  outroNome: string;
+  vagaTitulo: string;
+  matchId: string;
+  horas: number;
+}): MensagemNotificacao {
+  return {
+    categoria: "match",
+    titulo: "Seu match está esperando uma mensagem",
+    corpo:
+      p.lado === "profissional"
+        ? `Você e ${p.outroNome} deram match para "${p.vagaTitulo}" há ${p.horas} h e ninguém falou ainda. Vagas fecham rápido: mande um "oi" e se apresente.`
+        : `Você e ${p.outroNome} deram match para "${p.vagaTitulo}" há ${p.horas} h e ninguém falou ainda. Candidato bom some em dias: mande uma mensagem ou proponha um horário de entrevista.`,
+    url: `/matches/${p.matchId}`,
+  };
+}
+
+export function msgResumoSemanalProfissional(p: {
+  vagas: { titulo: string; empresa: string; cidade: string; score: number }[];
+  restantes: number;
+}): MensagemNotificacao {
+  const n = p.vagas.length + p.restantes;
+  return {
+    categoria: "sistema",
+    titulo: n === 1 ? "1 vaga nova para você esta semana" : `${n} vagas novas para você esta semana`,
+    corpo: "Entraram vagas que combinam com o seu perfil. Abra o Descobrir e curta as que interessam:",
+    linhas: p.vagas.map((v) => `${v.titulo} · ${v.empresa}${v.cidade ? ` · ${v.cidade}` : ""} · ${v.score}% de aderência`),
+    url: "/descobrir",
+  };
+}
+
+export function msgResumoSemanalEmpresa(p: {
+  candidaturas: number;
+  matchesNovos: number;
+  matchesParados: number;
+  vagasExpirando: { titulo: string; dias: number }[];
+  vagasAtivas: number;
+}): MensagemNotificacao {
+  const linhas: string[] = [];
+  if (p.candidaturas) linhas.push(`${p.candidaturas} candidatura${p.candidaturas === 1 ? "" : "s"} nova${p.candidaturas === 1 ? "" : "s"} nas suas vagas`);
+  if (p.matchesNovos) linhas.push(`${p.matchesNovos} match${p.matchesNovos === 1 ? "" : "es"} novo${p.matchesNovos === 1 ? "" : "s"}`);
+  if (p.matchesParados) linhas.push(`${p.matchesParados} match${p.matchesParados === 1 ? "" : "es"} sem nenhuma mensagem — responda antes que o candidato feche com outro`);
+  for (const v of p.vagasExpirando) linhas.push(`"${v.titulo}" expira em ${v.dias} dia${v.dias === 1 ? "" : "s"}`);
+  return {
+    categoria: "sistema",
+    titulo: "Resumo da semana das suas vagas",
+    corpo: `Você tem ${p.vagasAtivas} vaga${p.vagasAtivas === 1 ? "" : "s"} ativa${p.vagasAtivas === 1 ? "" : "s"}. Nos últimos 7 dias:`,
+    linhas,
+    url: "/painel",
+  };
+}
+
 // ─── Ciclo de vida da vaga e do perfil ──────────────────────────────────────
 
 export function msgPosicoesPreenchidas(p: { vagaTitulo: string; vagaId: string; posicoes: number }): MensagemNotificacao {

@@ -72,7 +72,8 @@ const SEM_GEO = { "localizacao.coordinates": { $exists: false } };
 
 export async function feedParaProfissional(
   p: IProfissional,
-  limite = 20
+  limite = 20,
+  opcoes: { criadasDesde?: Date } = {}
 ): Promise<{ cards: FeedVagaItem[]; restantes: number }> {
   await connectDB();
 
@@ -118,6 +119,8 @@ export async function feedParaProfissional(
     aprovadaPorAdmin: true,
     "match.ativo": { $ne: false },
     _id: { $nin: jaVistas },
+    // Resumo semanal: só o que entrou desde o último resumo.
+    ...(opcoes.criadasDesde ? { createdAt: { $gte: opcoes.criadasDesde } } : {}),
     ...(condicoes.length ? { $and: condicoes } : {}),
   };
 

@@ -113,9 +113,21 @@ O VagaON avisa a RedeSA, com token de 5 minutos no `Authorization`:
 
 Falha de webhook vai para o log e não interrompe nada do lado do VagaON.
 
-## O que falta
+## Onde fica a porta na RedeSA
 
-- **Resumo no backoffice**: vagas ativas, candidatos novos, botão "Gerenciar".
-  A leitura já existe (`GET /api/redesa/vagas`); falta a tela na RedeSA.
-- Depois de mesclar o PR do diagnóstico, subir `CROSS_PLATFORM_SECRET` de
-  "opcional" para "importante" em `src/lib/diagnostico.ts`.
+O dono do estabelecimento usa o **portal do lojista** (`apps/business`,
+business.redesa.com.br), não o backoffice: é lá que existe "estabelecimento
+ativo" e o token cross-platform. A página **Vagas** desse portal tem o card
+"VagaON" com o resumo (vagas ativas, candidaturas) e os botões **Gerenciar no
+VagaON** (`/painel`) e **Publicar no VagaON** (`/vagas/nova`). O clique pede um
+token novo em `POST /v1/auth/cross-platform-token` e envia o formulário para
+`/api/sso/redesa` numa aba nova — o token guardado no login não serve, porque
+o SSO só aceita token com menos de 5 minutos.
+
+Código na RedeSA: `apps/business/src/services/vagaon.ts` (`abrirNoVagaON`) e
+`apps/business/src/components/VagaOnPorta.tsx`. URL do VagaON em
+`VITE_VAGAON_URL`.
+
+O backoffice (`apps/backoffice`, para a equipe da RedeSA) não tem
+estabelecimento ativo; a rota `/professionals` dele é um cadastro interno de
+profissionais, não a porta do dono.
