@@ -55,7 +55,8 @@ export default async function ProfissionaisPage() {
     );
   }
 
-  const raw = await Profissional.find({})
+  // Só quem está visível para empresas (perfil pausado/inativo fica fora).
+  const raw = await Profissional.find({ "match.ativo": { $ne: false } })
     .select("-cpf -experiencias -habilidades -dataNascimento -cep")
     .sort({ completude: -1, createdAt: -1 })
     .limit(48)

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ClipboardList, MapPin } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { LABEL_STATUS_VAGA, type StatusVaga } from "@/lib/vagas-estado";
 
 const STATUS_LABEL: Record<string, string> = {
   enviada: "Enviada", visualizada: "Visualizada",
@@ -37,6 +38,7 @@ interface CandidaturaPopulada {
     tipo: string;
     cidade: string;
     estado: string;
+    status?: StatusVaga;
     empresaId: { nomeFantasia: string };
   };
 }
@@ -54,7 +56,7 @@ export default async function CandidaturasPage() {
     .sort({ createdAt: -1 })
     .populate({
       path: "vagaId",
-      select: "titulo tipo cidade estado empresaId",
+      select: "titulo tipo cidade estado status empresaId",
       populate: { path: "empresaId", select: "nomeFantasia" },
     })
     .lean() as unknown as CandidaturaPopulada[];
@@ -117,9 +119,16 @@ export default async function CandidaturasPage() {
                           </span>
                         </div>
                       </div>
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap ${STATUS_COR[c.status]}`}>
-                        {STATUS_LABEL[c.status]}
-                      </span>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${STATUS_COR[c.status]}`}>
+                          {STATUS_LABEL[c.status]}
+                        </span>
+                        {c.vagaId.status && c.vagaId.status !== "ativa" && (
+                          <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                            Vaga {LABEL_STATUS_VAGA[c.vagaId.status].toLowerCase()}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

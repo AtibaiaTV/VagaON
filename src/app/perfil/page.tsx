@@ -7,6 +7,8 @@ import User from "@/models/User";
 import PreferenciasNotificacao from "@/components/notificacoes/PreferenciasNotificacao";
 import CardReputacaoPropria from "@/components/avaliacoes/CardReputacaoPropria";
 import CardInstalarApp from "@/components/pwa/CardInstalarApp";
+import CardVisibilidade from "@/components/perfil/CardVisibilidade";
+import Match from "@/models/Match";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -140,6 +142,16 @@ export default async function PerfilPage() {
     };
     const modeloSalvo = ehModeloCurriculo(prof.curriculoModelo) ? prof.curriculoModelo : MODELO_PADRAO;
 
+    // Contratação recente → sugere pausar o perfil (a pessoa decide).
+    const ha30d = new Date(Date.now() - 30 * 86_400_000);
+    const contratado = await Match.findOne({ profissionalId: prof._id, status: "contratado", contratadoEm: { $gte: ha30d } })
+      .sort({ contratadoEm: -1 })
+      .select("snapshot.vagaTitulo contratadoEm")
+      .lean();
+    const contratadoRecente = contratado
+      ? { vagaTitulo: contratado.snapshot?.vagaTitulo ?? "uma vaga", quando: new Date(contratado.contratadoEm!).toLocaleDateString("pt-BR") }
+      : null;
+
     return (
       <div className="min-h-screen bg-[#f4f7f5]">
         <Navbar />
@@ -206,6 +218,12 @@ export default async function PerfilPage() {
               )}
             </CardContent>
           </Card>
+
+          <CardVisibilidade
+            ativo={prof.match?.ativo !== false}
+            motivoPausa={prof.match?.motivoPausa ?? null}
+            contratadoRecente={contratadoRecente}
+          />
 
           {/* Currículo para impressão — 1 clique com o modelo salvo */}
           <Card className="border-primary/20">

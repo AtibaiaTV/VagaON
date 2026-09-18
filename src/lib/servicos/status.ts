@@ -1,6 +1,7 @@
 import Candidatura from "@/models/Candidatura";
 import Match, { type IMatch, type StatusMatch } from "@/models/Match";
 import Mensagem from "@/models/Mensagem";
+import { registrarContratacao } from "./vagas";
 
 /**
  * Candidatura e Match são duas visões do mesmo par (vaga, profissional):
@@ -77,6 +78,9 @@ export async function aplicarStatusMatch(
 
   const texto = TEXTO_SISTEMA[status]?.(autor);
   if (texto) await registrarMensagemSistema(match, texto);
+
+  // Conta a posição preenchida na vaga (e avisa a empresa ao completar).
+  if (status === "contratado") await registrarContratacao(match.vagaId);
   return true;
 }
 

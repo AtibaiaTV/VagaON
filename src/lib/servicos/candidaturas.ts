@@ -15,6 +15,7 @@ import {
   type StatusCandidatura,
 } from "./status";
 import { triagemParaKanban, type TriagemKanban } from "./triagem";
+import { registrarContratacao } from "./vagas";
 
 /**
  * Funil de candidatos de uma vaga (Kanban da empresa).
@@ -154,7 +155,11 @@ export async function moverCandidatura(
   const statusMatch = CANDIDATURA_PARA_MATCH[candidatura.status];
   if (statusMatch) {
     const match = await Match.findOne({ vagaId: candidatura.vagaId, profissionalId: candidatura.profissionalId });
-    if (match) await aplicarStatusMatch(match, statusMatch, "empresa");
+    if (match) {
+      await aplicarStatusMatch(match, statusMatch, "empresa"); // com match, ele conta a contratação
+    } else if (candidatura.status === "aprovada") {
+      await registrarContratacao(candidatura.vagaId); // candidato do site, sem match
+    }
   }
 
   const vaga = await Vaga.findById(candidatura.vagaId).select("titulo").lean();
