@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Webhook não configurado" }, { status: 503 });
   }
   if (!assinaturaValida(bruto, req.headers.get("x-hub-signature-256"))) {
+    // Vai para o log da Vercel: se isto aparecer, WHATSAPP_APP_SECRET está errado.
+    console.warn("[whatsapp-webhook] assinatura inválida; evento descartado.");
     return NextResponse.json({ error: "Assinatura inválida" }, { status: 401 });
   }
 
