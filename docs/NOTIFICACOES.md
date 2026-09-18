@@ -142,6 +142,11 @@ WABA nova.
 9. **Vercel.** Settings → Environment Variables (Production):
    `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`,
    `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_TEMPLATE=vagaon_aviso`. Redeploy.
+9b. **Registrar o número na Cloud API.** Depois de tudo acima o primeiro
+    envio responde `(#133010) Account not registered`: falta o registro do
+    número, que é um passo à parte. Em `/admin/whatsapp` → "Registrar número
+    na API" → PIN de 6 dígitos (vira a verificação em duas etapas do número;
+    anote). Chama `POST /{phone_number_id}/register`.
 10. **Teste.** `/admin/diagnostico` (as 5 variáveis verdes) → `/admin/whatsapp`
     → Testar envio para o seu número → chegou? → o status vira "entregue" no
     log quando o webhook responder → responda PARAR e VOLTAR para ver o
