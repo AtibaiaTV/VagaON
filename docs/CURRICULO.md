@@ -22,6 +22,28 @@ Todos: A4, fonte Arial (igual em qualquer impressora), seções vazias somem,
 experiências da mais recente para a mais antiga, cada bloco com
 `break-inside: avoid`. O "cargo alvo" é a especialidade principal do perfil.
 
+## Cor de detalhe
+
+Cada modelo tem uma cor de destaque, escolhida numa paleta de 8 (`CORES_DETALHE`)
+ou num seletor livre. Fica salva por modelo em `Profissional.curriculoCores`
+(`POST /api/perfil/curriculo-modelo { modelo, cor }`). O padrão de cada modelo
+reproduz o mockup (`COR_PADRAO`); as demais cores são derivadas em
+`src/lib/curriculo.ts`:
+
+- **Executivo**: `destaque` = a cor; `lateral` = a cor misturada com grafite (72 %).
+- **Minimalista**: `destaque` = a cor; faixa e linhas = a cor clareada (90 % / 75 % de branco).
+- **Criativo**: barra e títulos = a cor; linhas finas = a cor clareada.
+- Cores claras demais para texto sobre branco são escurecidas (`paraTexto`, luminância ≤ 0,45).
+
+## Imprimir e baixar
+
+- **Imprimir**: `window.print()` — a janela do navegador também oferece "Salvar como PDF" (com paginação real).
+- **Baixar** (`src/lib/curriculo-exportar.ts`, tudo no navegador, bibliotecas carregadas sob demanda):
+  - **PDF**: fotografia da página com `html-to-image` (2×) fatiada em folhas A4 pelo `jsPDF`. Uma página de conteúdo = uma folha; em currículos longos o corte é por altura, não por parágrafo — para paginação perfeita, use Imprimir.
+  - **PNG / JPEG**: a mesma captura, em uma imagem só.
+  - **Word (.docx)**: documento editável montado a partir dos dados com a biblioteca `docx` — cabeçalho sombreado (ou barra lateral, no Criativo), títulos na cor de detalhe, experiências com marcadores. Não é uma imagem colada.
+- Nome do arquivo: `curriculo-<nome>-<modelo>.<ext>`.
+
 ## Dados usados
 
 Nome, telefone, e-mail (do `User`), cidade/UF, LinkedIn, foto, resumo,
@@ -47,5 +69,7 @@ do currículo importado.
 ## Testar
 
 `/dev/curriculo` (fora de produção): dados fictícios completos ou
-`?vazio=1` para um perfil mínimo; `?modelo=` escolhe; "simular impressão"
-aplica as regras de `@media print` na tela via `html.simular-impressao`.
+`?vazio=1` para um perfil mínimo; `?modelo=` escolhe; `?cor=8e2a3b` força a
+cor; "simular impressão" aplica as regras de `@media print` na tela via
+`html.simular-impressao`. No console, `await __cvExportar("pdf")` (ou
+`"docx"`, `"png"`, `"jpeg"`) gera o arquivo e devolve o tamanho, sem baixar.

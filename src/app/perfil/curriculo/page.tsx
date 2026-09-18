@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { MODELO_PADRAO, ehModeloCurriculo, montarDadosCurriculo } from "@/lib/curriculo";
+import { MODELO_PADRAO, ehModeloCurriculo, montarDadosCurriculo, normalizarCores } from "@/lib/curriculo";
 import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Navbar from "@/components/layout/Navbar";
@@ -49,6 +49,7 @@ export default async function CurriculoPage({
         <CurriculoImpressao
           dados={dados}
           modeloInicial={modeloInicial}
+          coresIniciais={normalizarCores(prof.curriculoCores)}
           salvarPreferencia
           autoImprimir={searchParams.imprimir === "1"}
         />

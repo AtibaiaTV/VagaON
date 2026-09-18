@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import { MODELO_PADRAO, ehModeloCurriculo, montarDadosCurriculo } from "@/lib/curriculo";
+import { MODELO_PADRAO, corValida, ehModeloCurriculo, montarDadosCurriculo } from "@/lib/curriculo";
 import PlaygroundCurriculo from "./PlaygroundCurriculo";
 
 /** Playground dos modelos de currículo com dados fictícios — sem banco, sem login. Só fora de produção. */
-export default function CurriculoDevPage({ searchParams }: { searchParams: { modelo?: string; vazio?: string } }) {
+export default function CurriculoDevPage({ searchParams }: { searchParams: { modelo?: string; vazio?: string; cor?: string } }) {
   if (process.env.NODE_ENV === "production") notFound();
 
   const completo = {
@@ -61,6 +61,15 @@ export default function CurriculoDevPage({ searchParams }: { searchParams: { mod
 
   const dados = montarDadosCurriculo(searchParams.vazio === "1" ? vazio : completo, "mariana.costa@email.com");
   const modelo = ehModeloCurriculo(searchParams.modelo) ? searchParams.modelo : MODELO_PADRAO;
+  // ?cor=8e2a3b (sem #) força a cor de detalhe do modelo escolhido.
+  const cor = searchParams.cor ? `#${searchParams.cor.replace("#", "")}` : null;
 
-  return <PlaygroundCurriculo dados={dados} modelo={modelo} vazio={searchParams.vazio === "1"} />;
+  return (
+    <PlaygroundCurriculo
+      dados={dados}
+      modelo={modelo}
+      cores={corValida(cor) ? { [modelo]: cor } : {}}
+      vazio={searchParams.vazio === "1"}
+    />
+  );
 }

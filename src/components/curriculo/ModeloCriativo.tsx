@@ -1,19 +1,32 @@
 import type { ReactNode } from "react";
-import type { DadosCurriculo } from "@/lib/curriculo";
+import { COR_PADRAO, coresCriativo, type DadosCurriculo } from "@/lib/curriculo";
 import { Descricao, FotoCV } from "./comum";
 
-const AZUL = "#0066cc";
+/** Texto: fixo, independente da cor de detalhe. */
 const PRETO = "#111111";
 const TEXTO = "#333333";
-const LINHA = "#e1e8ed";
 
-function SecaoNum({ n, titulo, destaque = false, children }: { n: string; titulo: string; destaque?: boolean; children: ReactNode }) {
+function SecaoNum({
+  n,
+  titulo,
+  cor,
+  linha,
+  destaque = false,
+  children,
+}: {
+  n: string;
+  titulo: string;
+  cor: string;
+  linha: string;
+  destaque?: boolean;
+  children: ReactNode;
+}) {
   return (
     <section className="mt-[9mm]">
-      <p className="text-[11.5pt] font-bold tracking-wide" style={{ color: AZUL }}>
+      <p className="text-[11.5pt] font-bold tracking-wide" style={{ color: cor }}>
         {n} / {titulo}
       </p>
-      <div className={destaque ? "h-[2px]" : "h-px"} style={{ backgroundColor: destaque ? AZUL : LINHA, marginTop: "1.5mm", marginBottom: "4mm" }} />
+      <div className={destaque ? "h-[2px]" : "h-px"} style={{ backgroundColor: destaque ? cor : linha, marginTop: "1.5mm", marginBottom: "4mm" }} />
       {children}
     </section>
   );
@@ -30,8 +43,9 @@ function Linha({ rotulo, children }: { rotulo: string; children: ReactNode }) {
   );
 }
 
-/** Modelo 3 — Criativo: barra lateral azul, seções numeradas, foto redonda no canto. */
-export default function ModeloCriativo({ d }: { d: DadosCurriculo }) {
+/** Modelo 3 — Criativo: barra lateral colorida, seções numeradas, foto redonda no canto. */
+export default function ModeloCriativo({ d, cor = COR_PADRAO.criativo }: { d: DadosCurriculo; cor?: string }) {
+  const { destaque: AZUL, linha: LINHA } = coresCriativo(cor);
   // Numera só as seções que existem, para não ficar "01, 03".
   const secoes = [
     d.resumo ? "perfil" : null,
@@ -64,13 +78,13 @@ export default function ModeloCriativo({ d }: { d: DadosCurriculo }) {
         </header>
 
         {d.resumo && (
-          <SecaoNum n={numero("perfil")} titulo="PERFIL" destaque>
+          <SecaoNum n={numero("perfil")} titulo="PERFIL" cor={AZUL} linha={LINHA} destaque>
             <p className="text-[10.5pt] leading-relaxed whitespace-pre-line">{d.resumo}</p>
           </SecaoNum>
         )}
 
         {d.experiencias.length > 0 && (
-          <SecaoNum n={numero("experiencia")} titulo="EXPERIÊNCIA">
+          <SecaoNum n={numero("experiencia")} titulo="EXPERIÊNCIA" cor={AZUL} linha={LINHA}>
             <div className="space-y-[5mm]">
               {d.experiencias.map((e, i) => (
                 <div key={i} className="break-inside-avoid">
@@ -90,7 +104,7 @@ export default function ModeloCriativo({ d }: { d: DadosCurriculo }) {
         )}
 
         {d.formacao.length > 0 && (
-          <SecaoNum n={numero("formacao")} titulo="FORMAÇÃO">
+          <SecaoNum n={numero("formacao")} titulo="FORMAÇÃO" cor={AZUL} linha={LINHA}>
             <div className="space-y-[3.5mm]">
               {d.formacao.map((f, i) => (
                 <div key={i} className="break-inside-avoid">
@@ -108,7 +122,7 @@ export default function ModeloCriativo({ d }: { d: DadosCurriculo }) {
           </SecaoNum>
         )}
 
-        <SecaoNum n={numero("skills")} titulo="SKILLS & CONTATO">
+        <SecaoNum n={numero("skills")} titulo="SKILLS & CONTATO" cor={AZUL} linha={LINHA}>
           <div className="space-y-[2mm]">
             {d.especialidades.length > 0 && <Linha rotulo="Funções">{d.especialidades.join(", ")}</Linha>}
             {d.habilidades.length > 0 && <Linha rotulo="Habilidades">{d.habilidades.join(", ")}</Linha>}

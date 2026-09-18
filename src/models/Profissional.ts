@@ -60,6 +60,8 @@ export interface IProfissional extends Document {
   videoApresentacao: { url: string; publicId: string; duracao: number; enviadoEm: Date } | null;
   /** Modelo preferido do currículo para impressão (/perfil/curriculo). */
   curriculoModelo: ModeloCurriculo;
+  /** Cor de detalhe escolhida por modelo (hex), ex.: { executivo: "#8e2a3b" }. */
+  curriculoCores: Map<string, string>;
 
   // ─── Sinais usados pelo motor de match ──────────────────────────────────────
   /** GeoJSON Point [lng, lat] — permite pré-filtro por raio com índice 2dsphere. */
@@ -157,6 +159,7 @@ const ProfissionalSchema = new Schema<IProfissional>(
     completude: { type: Number, default: 0, min: 0, max: 100 },
     videoApresentacao: { type: VideoSchema, default: null },
     curriculoModelo: { type: String, enum: MODELO_VALUES, default: MODELO_PADRAO },
+    curriculoCores: { type: Map, of: String, default: {} },
 
     // ─── Sinais usados pelo motor de match ────────────────────────────────────
     // Sem defaults de propósito: um `{ type: "Point" }` sem coordinates quebra

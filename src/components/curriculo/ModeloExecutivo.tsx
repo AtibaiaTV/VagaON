@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
-import type { DadosCurriculo } from "@/lib/curriculo";
+import { COR_PADRAO, coresExecutivo, type DadosCurriculo } from "@/lib/curriculo";
 import { Descricao, FotoCV } from "./comum";
 
+/** Texto da coluna principal: fixo, independente da cor de detalhe. */
 const ESCURO = "#2c3e50";
-const DESTAQUE = "#1abc9c";
 const CINZA = "#7f8c8d";
 
-function SecaoLateral({ titulo, children }: { titulo: string; children: ReactNode }) {
+function SecaoLateral({ titulo, destaque, children }: { titulo: string; destaque: string; children: ReactNode }) {
   return (
     <section className="mt-[9mm] break-inside-avoid">
       <p className="text-[11pt] font-bold text-white tracking-wide">{titulo}</p>
-      <div className="h-[2px] mt-[1.5mm] mb-[3mm]" style={{ backgroundColor: DESTAQUE }} />
+      <div className="h-[2px] mt-[1.5mm] mb-[3mm]" style={{ backgroundColor: destaque }} />
       <div className="text-[9.5pt] leading-relaxed space-y-[1.5mm]" style={{ color: "#bdc3c7" }}>
         {children}
       </div>
@@ -31,18 +31,20 @@ function SecaoPrincipal({ titulo, children }: { titulo: string; children: ReactN
 }
 
 /** Modelo 1 — Moderno Executivo: duas colunas, lateral escura, foto redonda. */
-export default function ModeloExecutivo({ d }: { d: DadosCurriculo }) {
+export default function ModeloExecutivo({ d, cor = COR_PADRAO.executivo }: { d: DadosCurriculo; cor?: string }) {
+  const { destaque: DESTAQUE, lateral, fotoFundo } = coresExecutivo(cor);
+
   return (
     <article className="cv-pagina grid grid-cols-[68mm_1fr]" style={{ color: ESCURO }}>
       {/* Em impressão, mantém a lateral escura em todas as páginas. */}
-      <div className="cv-fundo-fixo" style={{ backgroundColor: ESCURO, width: "68mm" }} />
+      <div className="cv-fundo-fixo" style={{ backgroundColor: lateral, width: "68mm" }} />
 
-      <aside className="px-[8mm] pt-[14mm] pb-[12mm] text-white" style={{ backgroundColor: ESCURO }}>
+      <aside className="px-[8mm] pt-[14mm] pb-[12mm] text-white" style={{ backgroundColor: lateral }}>
         <div className="flex justify-center">
-          <FotoCV src={d.foto} iniciais={d.iniciais} forma="redonda" tamanho="34mm" fundo="#34495e" cor="#fff" borda="3px solid #fff" />
+          <FotoCV src={d.foto} iniciais={d.iniciais} forma="redonda" tamanho="34mm" fundo={fotoFundo} cor="#fff" borda="3px solid #fff" />
         </div>
 
-        <SecaoLateral titulo="CONTATO">
+        <SecaoLateral titulo="CONTATO" destaque={DESTAQUE}>
           {d.telefone && <p>{d.telefone}</p>}
           {d.email && <p className="break-all">{d.email}</p>}
           {d.local && <p>{d.local}</p>}
@@ -50,7 +52,7 @@ export default function ModeloExecutivo({ d }: { d: DadosCurriculo }) {
         </SecaoLateral>
 
         {d.habilidades.length > 0 && (
-          <SecaoLateral titulo="COMPETÊNCIAS">
+          <SecaoLateral titulo="COMPETÊNCIAS" destaque={DESTAQUE}>
             {d.habilidades.map((h) => (
               <p key={h}>• {h}</p>
             ))}
@@ -58,7 +60,7 @@ export default function ModeloExecutivo({ d }: { d: DadosCurriculo }) {
         )}
 
         {d.idiomas.length > 0 && (
-          <SecaoLateral titulo="IDIOMAS">
+          <SecaoLateral titulo="IDIOMAS" destaque={DESTAQUE}>
             {d.idiomas.map((i) => (
               <p key={i}>• {i}</p>
             ))}
@@ -66,7 +68,7 @@ export default function ModeloExecutivo({ d }: { d: DadosCurriculo }) {
         )}
 
         {d.disponibilidade && (
-          <SecaoLateral titulo="DISPONIBILIDADE">
+          <SecaoLateral titulo="DISPONIBILIDADE" destaque={DESTAQUE}>
             <p>{d.disponibilidade}</p>
           </SecaoLateral>
         )}
