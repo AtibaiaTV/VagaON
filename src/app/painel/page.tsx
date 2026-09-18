@@ -4,7 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { User as UserIcon, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star, KeyRound } from "lucide-react";
+import { User as UserIcon, Briefcase, ClipboardList, Building2, Plus, Users, ShieldCheck, LayoutDashboard, Flame, MessageCircle, Star, KeyRound, MapPin } from "lucide-react";
 import User from "@/models/User";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -77,6 +77,11 @@ export default async function PainelPage() {
   const metricas = await montarMetricas(role, session.user.id).catch(() => null);
   // Conta criada pelo SSO da RedeSA nasce sem senha: lembra de definir uma.
   const semSenha = await User.exists({ _id: session.user.id, password: null }).catch(() => null);
+  // Cidade é o filtro principal das empresas; perfil sem ela quase não aparece.
+  const semCidade =
+    role === "profissional"
+      ? await Profissional.exists({ userId: session.user.id, $or: [{ cidade: "" }, { cidade: null }] }).catch(() => null)
+      : null;
 
   const titleMap: Record<string, string> = {
     profissional: "Painel do Profissional",
@@ -133,6 +138,18 @@ export default async function PainelPage() {
               uma senha para entrar direto no VagaON em qualquer aparelho.{" "}
               <Link href="/perfil/editar#senha" className="font-semibold text-primary underline underline-offset-2">
                 Definir senha
+              </Link>
+            </p>
+          </div>
+        )}
+        {semCidade && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+            <MapPin className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-900">
+              <span className="font-semibold">Seu perfil está sem cidade.</span> É por cidade que as empresas
+              procuram; sem ela, você quase não aparece.{" "}
+              <Link href="/perfil/editar#cidade" className="font-semibold underline underline-offset-2">
+                Informar cidade
               </Link>
             </p>
           </div>

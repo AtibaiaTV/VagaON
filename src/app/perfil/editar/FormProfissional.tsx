@@ -76,6 +76,10 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
     cidade: (dados?.cidade as string) ?? "",
     estado: (dados?.estado as string) ?? "",
     cep: (dados?.cep as string) ?? "",
+    logradouro: (dados?.logradouro as string) ?? "",
+    numero: (dados?.numero as string) ?? "",
+    complemento: (dados?.complemento as string) ?? "",
+    bairro: (dados?.bairro as string) ?? "",
     dispostoViajar: (dados?.dispostoViajar as boolean) ?? false,
     resumoProfissional: (dados?.resumoProfissional as string) ?? "",
     linkedinUrl: (dados?.linkedinUrl as string) ?? "",
@@ -200,8 +204,35 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
     );
   }
 
+  const [buscandoCep, setBuscandoCep] = useState(false);
+
+  /** ViaCEP: com 8 dígitos, preenche rua, bairro, cidade e UF (número e complemento ficam). */
+  async function buscarCep(valor: string) {
+    const digitos = valor.replace(/\D/g, "");
+    if (digitos.length !== 8) return;
+    setBuscandoCep(true);
+    const r = await fetch(`https://viacep.com.br/ws/${digitos}/json/`)
+      .then((res) => res.json())
+      .catch(() => null);
+    setBuscandoCep(false);
+    if (!r || r.erro) return;
+    setPessoal((p) => ({
+      ...p,
+      cep: `${digitos.slice(0, 5)}-${digitos.slice(5)}`,
+      logradouro: r.logradouro || p.logradouro,
+      bairro: r.bairro || p.bairro,
+      cidade: r.localidade || p.cidade,
+      estado: r.uf || p.estado,
+    }));
+  }
+
   async function handleSalvar() {
     setErro("");
+    if (!pessoal.cidade.trim() || !pessoal.estado) {
+      setErro("Informe cidade e estado: é por eles que as empresas encontram você.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     setSalvando(true);
 
     const payload = {
@@ -459,6 +490,64 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                   placeholder="(11) 99999-9999"
                 />
               </div>
+              {/* Endereço: CEP preenche rua, bairro, cidade e UF. Cidade e UF são o que a empresa filtra. */}
+              <div className="grid grid-cols-[1fr_auto] gap-4 items-end">
+                <div className="space-y-1">
+                  <Label htmlFor="cep">CEP</Label>
+                  <Input
+                    id="cep"
+                    inputMode="numeric"
+                    value={pessoal.cep}
+                    onChange={(e) => setPessoal((p) => ({ ...p, cep: e.target.value }))}
+                    onBlur={(e) => buscarCep(e.target.value)}
+                    placeholder="00000-000"
+                    maxLength={9}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground pb-2.5">
+                  {buscandoCep ? "Buscando…" : "Preenche o endereço"}
+                </p>
+              </div>
+              <div className="grid grid-cols-[1fr_7rem] gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="logradouro">Rua / Avenida</Label>
+                  <Input
+                    id="logradouro"
+                    value={pessoal.logradouro}
+                    onChange={(e) => setPessoal((p) => ({ ...p, logradouro: e.target.value }))}
+                    placeholder="Rua das Flores"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="numero">Número</Label>
+                  <Input
+                    id="numero"
+                    value={pessoal.numero}
+                    onChange={(e) => setPessoal((p) => ({ ...p, numero: e.target.value }))}
+                    placeholder="123"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="complemento">Complemento</Label>
+                  <Input
+                    id="complemento"
+                    value={pessoal.complemento}
+                    onChange={(e) => setPessoal((p) => ({ ...p, complemento: e.target.value }))}
+                    placeholder="Apto, bloco, fundos…"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bairro">Bairro</Label>
+                  <Input
+                    id="bairro"
+                    value={pessoal.bairro}
+                    onChange={(e) => setPessoal((p) => ({ ...p, bairro: e.target.value }))}
+                    placeholder="Centro"
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="cidade">Cidade *</Label>
@@ -467,10 +556,11 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                     value={pessoal.cidade}
                     onChange={(e) => setPessoal((p) => ({ ...p, cidade: e.target.value }))}
                     placeholder="São Paulo"
+                    required
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label>Estado</Label>
+                  <Label>Estado *</Label>
                   <Select
                     value={pessoal.estado}
                     onValueChange={(v) => setPessoal((p) => ({ ...p, estado: v ?? "" }))}
@@ -484,6 +574,9 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                   </Select>
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                As empresas veem só bairro, cidade e UF. O endereço completo fica no seu cadastro.
+              </p>
               <div className="space-y-1">
                 <Label htmlFor="resumoProfissional">Resumo profissional</Label>
                 <Textarea

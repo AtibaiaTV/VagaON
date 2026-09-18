@@ -61,7 +61,7 @@ export default async function ProfissionaisPage() {
   // Só quem está visível para empresas (perfil pausado/inativo fica fora).
   // Admin vê todos, com o pausado marcado.
   const raw = await Profissional.find(ehAdmin ? {} : { "match.ativo": { $ne: false } })
-    .select("-cpf -experiencias -habilidades -dataNascimento -cep")
+    .select("-cpf -experiencias -habilidades -dataNascimento -cep -logradouro -numero -complemento")
     .sort({ completude: -1, createdAt: -1 })
     .limit(48)
     .lean();
@@ -129,12 +129,17 @@ export default async function ProfissionaisPage() {
                             </span>
                           )}
                         </p>
-                        {(prof.cidade || prof.estado) && (
+                        {(prof.cidade || prof.estado) ? (
                           <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <MapPin className="h-3 w-3 shrink-0" />
                             {[prof.cidade, prof.estado].filter(Boolean).join(", ")}
                           </p>
-                        )}
+                        ) : ehAdmin ? (
+                          <p className="text-xs text-amber-700 flex items-center gap-1 mt-0.5">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            sem cidade
+                          </p>
+                        ) : null}
                       </div>
                     </div>
 

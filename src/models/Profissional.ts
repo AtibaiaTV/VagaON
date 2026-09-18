@@ -41,6 +41,11 @@ export interface IProfissional extends Document {
   cidade: string;
   estado: string;
   cep: string;
+  /** Endereço residencial. Empresa vê só o bairro; endereço completo é para o admin. */
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
   dispostoViajar: boolean;
   especialidades: string[];
   resumoProfissional: string;
@@ -156,6 +161,10 @@ const ProfissionalSchema = new Schema<IProfissional>(
     cidade: { type: String, default: "" },
     estado: { type: String, default: "" },
     cep: { type: String, default: "" },
+    logradouro: { type: String, default: "" },
+    numero: { type: String, default: "" },
+    complemento: { type: String, default: "" },
+    bairro: { type: String, default: "" },
     dispostoViajar: { type: Boolean, default: false },
     especialidades: [{ type: String }],
     resumoProfissional: { type: String, default: "" },
