@@ -11,6 +11,7 @@ import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor } from "./erros";
+import { expiracaoInicial } from "./vagas";
 
 /**
  * Entrada rápida pelo QR Code ou link: uma tela, quatro ou cinco campos,
@@ -180,6 +181,11 @@ export async function criarEmpresaRapida(e: EntradaEmpresaRapida) {
     status: "ativa",
     aprovadaPorAdmin: true,
     ...dadosVaga,
+    // Mesma validade das vagas criadas pelo formulário (60 dias ou data de término).
+    expiresAt: expiracaoInicial({
+      tipo: String(dadosVaga.tipo ?? e.vaga.tipo),
+      periodo: (dadosVaga.periodo as { dataFim?: string | null } | undefined) ?? null,
+    }),
   });
 
   return { userId: String(user._id), empresaId: String(empresa._id), vagaId: String(vaga._id), montadaPorIA };
