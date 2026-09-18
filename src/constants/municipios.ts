@@ -10,6 +10,8 @@
  * do IBGE (malha municipal) mantendo o mesmo formato "UF:cidade-normalizada".
  */
 
+import { MUNICIPIOS_IBGE } from "./municipios-ibge";
+
 export interface Coordenadas {
   lat: number;
   lng: number;
@@ -46,8 +48,12 @@ export const CENTROIDES_UF: Record<string, Coordenadas> = {
   TO: { lat: -10.2, lng: -48.3 },
 };
 
-/** Chave: "UF:cidade" com a cidade já normalizada (minúscula, sem acento). */
-export const MUNICIPIOS: Record<string, Coordenadas> = {
+/**
+ * Tabela curada (capitais + ~150 cidades do setor), conferida à mão. Tem
+ * prioridade sobre a tabela completa do IBGE em MUNICIPIOS, abaixo.
+ * Chave: "UF:cidade" com a cidade já normalizada (minúscula, sem acento).
+ */
+export const MUNICIPIOS_CURADOS: Record<string, Coordenadas> = {
   // ─── Capitais ──────────────────────────────────────────────────────────────
   "AC:rio branco": { lat: -9.97, lng: -67.81 },
   "AL:maceio": { lat: -9.67, lng: -35.73 },
@@ -471,6 +477,13 @@ export const MUNICIPIOS: Record<string, Coordenadas> = {
   "ES:domingos martins": { lat: -20.36, lng: -40.66 },
   "ES:linhares": { lat: -19.39, lng: -40.07 },
 };
+
+/**
+ * Todos os 5.570 municípios (IBGE, gerado por src/scripts/gerar-municipios.mjs)
+ * com a tabela curada por cima. Cidade fora daqui é erro de digitação ou
+ * distrito — o motor então usa "mesma UF" e não pontua distância.
+ */
+export const MUNICIPIOS: Record<string, Coordenadas> = { ...MUNICIPIOS_IBGE, ...MUNICIPIOS_CURADOS };
 
 /** Minúsculas, sem acento, sem hífen e sem espaços duplicados. */
 export function normalizarCidade(cidade: string): string {
