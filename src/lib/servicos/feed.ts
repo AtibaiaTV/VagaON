@@ -84,10 +84,20 @@ export async function feedParaProfissional(
   const coords = paraCoords(p.localizacao) ?? geocodificarCidade(p.cidade, p.estado);
   const condicoes: Record<string, unknown>[] = [];
 
-  if (coords) {
+  // Cidades de interesse entram como centros extras do raio.
+  const centrosInteresse = (p.cidadesInteresse ?? [])
+    .map((c) => paraCoords(c.localizacao) ?? geocodificarCidade(c.cidade, c.estado))
+    .filter((c): c is { lat: number; lng: number } => c !== null);
+
+  if (coords || centrosInteresse.length) {
     const km = raioEfetivoKm(p.raioKm, p.dispostoViajar) * MARGEM_RAIO;
     condicoes.push({
-      $or: [{ remoto: true }, dentroDoRaio(coords, km), { ...SEM_GEO, estado: p.estado }],
+      $or: [
+        { remoto: true },
+        ...(coords ? [dentroDoRaio(coords, km)] : []),
+        ...centrosInteresse.map((c) => dentroDoRaio(c, km)),
+        { ...SEM_GEO, estado: p.estado },
+      ],
     });
   } else if (p.estado) {
     condicoes.push({ $or: [{ remoto: true }, { estado: p.estado }] });
@@ -157,6 +167,12 @@ export async function feedParaEmpresa(
       condicoes.push({
         $or: [
           dentroDoRaio(coords, RAIO_BUSCA_EMPRESA_KM),
+          // Quem declarou interesse numa cidade perto da vaga entra mesmo morando longe.
+          {
+            "cidadesInteresse.localizacao": {
+              $geoWithin: { $centerSphere: [[coords.lng, coords.lat], RAIO_BUSCA_EMPRESA_KM / RAIO_TERRA_KM] },
+            },
+          },
           { dispostoViajar: true },
           { ...SEM_GEO, estado: vaga.estado },
         ],

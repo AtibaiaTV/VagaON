@@ -7,6 +7,7 @@ import User from "@/models/User";
 import { notifyRedesaTalento } from "@/lib/redesa-webhook";
 import { calcularCompletude } from "@/lib/completude";
 import { PASTA_VIDEOS } from "@/constants/upload";
+import { geocodificarCidade, normalizarCidade } from "@/constants/municipios";
 
 /**
  * Só aceita vídeo que veio do nosso Cloudinary, na pasta de vídeos — o
@@ -89,6 +90,28 @@ export async function PUT(
         atualizacao[campo] = body[campo];
       }
     }
+    // Cidades de interesse: só as que a tabela de municípios reconhece, no
+    // máximo 5, sem repetir e sem a própria cidade. Coordenadas gravadas aqui
+    // (o hook de geo do modelo só cuida da cidade principal).
+    if (body.cidadesInteresse !== undefined) {
+      const lista = Array.isArray(body.cidadesInteresse) ? body.cidadesInteresse : [];
+      const vistas = new Set<string>();
+      const saida: { cidade: string; estado: string; localizacao: { type: "Point"; coordinates: [number, number] } }[] = [];
+      const propria = `${String(atualizacao.estado ?? profissional.estado ?? "").toUpperCase()}:${normalizarCidade(String(atualizacao.cidade ?? profissional.cidade ?? ""))}`;
+      for (const item of lista) {
+        if (saida.length >= 5 || !item || typeof item !== "object") break;
+        const cidade = String((item as Record<string, unknown>).cidade ?? "").trim().slice(0, 80);
+        const estado = String((item as Record<string, unknown>).estado ?? "").trim().toUpperCase().slice(0, 2);
+        const chave = `${estado}:${normalizarCidade(cidade)}`;
+        if (!cidade || !estado || vistas.has(chave) || chave === propria) continue;
+        const coords = geocodificarCidade(cidade, estado);
+        if (!coords) continue;
+        vistas.add(chave);
+        saida.push({ cidade, estado, localizacao: { type: "Point", coordinates: [coords.lng, coords.lat] } });
+      }
+      atualizacao.cidadesInteresse = saida;
+    }
+
     // Liga/desliga a presença no deck das empresas sem expor o resto de `match`.
     if (typeof body.matchAtivo === "boolean") {
       atualizacao["match.ativo"] = body.matchAtivo;

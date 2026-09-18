@@ -47,6 +47,29 @@ export function notaDistancia(distancia: number, raioEfetivo: number): number {
   return Math.max(0, 1 - alem * alem);
 }
 
+export interface PontoDoProfissional {
+  coords: { lat: number; lng: number };
+  /** null = a cidade onde mora; senão, o nome da cidade de interesse. */
+  cidadeInteresse: string | null;
+}
+
+/**
+ * Menor distância entre um alvo e qualquer ponto do profissional: a cidade
+ * onde mora ou uma das cidades em que ele aceita trabalhar. Devolve também
+ * qual ponto venceu, para a explicação ("a 12 km de Campos do Jordão").
+ */
+export function menorDistancia(
+  pontos: PontoDoProfissional[],
+  alvo: { lat: number; lng: number }
+): { km: number; ponto: PontoDoProfissional } | null {
+  let melhor: { km: number; ponto: PontoDoProfissional } | null = null;
+  for (const ponto of pontos) {
+    const km = distanciaKm(ponto.coords, alvo);
+    if (!melhor || km < melhor.km) melhor = { km, ponto };
+  }
+  return melhor;
+}
+
 /** Converte GeoJSON [lng, lat] do Mongo para o formato usado no motor. */
 export function paraCoords(
   localizacao: { coordinates?: number[] | null } | null | undefined

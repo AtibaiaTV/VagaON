@@ -1,5 +1,5 @@
 import { paraSalarioMensal } from "@/constants/match";
-import { distanciaKm, notaDistancia, raioEfetivoKm } from "./geo";
+import { menorDistancia, notaDistancia, raioEfetivoKm, type PontoDoProfissional } from "./geo";
 import { CONFIANCA, MULTIPLICADOR, PESOS, TETO_ESPECIALIDADE, fatorAmplitude } from "./pesos";
 import {
   coberturaHabilidades,
@@ -72,6 +72,14 @@ function avaliarEspecialidade(p: ProfissionalMatch, v: VagaMatch): ResultadoDime
   return dim("especialidade", nota, m.nota >= 0.45 ? explicarAderencia(m) : null, alerta);
 }
 
+/** Cidade onde mora + cidades de interesse, só as que têm coordenadas. */
+function pontosDe(p: ProfissionalMatch): PontoDoProfissional[] {
+  const pontos: PontoDoProfissional[] = [];
+  if (p.coords) pontos.push({ coords: p.coords, cidadeInteresse: null });
+  for (const c of p.cidadesInteresse ?? []) pontos.push({ coords: c.coords, cidadeInteresse: c.cidade });
+  return pontos;
+}
+
 function avaliarLocalizacao(
   p: ProfissionalMatch,
   v: VagaMatch
@@ -89,7 +97,8 @@ function avaliarLocalizacao(
     };
   }
 
-  if (!p.coords || !v.coords) {
+  const pontos = pontosDe(p);
+  if (!pontos.length || !v.coords) {
     // Sem coordenadas, o melhor que dá para afirmar é "mesmo estado".
     if (p.estado && v.estado) {
       const mesmo = p.estado.toUpperCase() === v.estado.toUpperCase();
@@ -106,12 +115,18 @@ function avaliarLocalizacao(
     return { dimensao: dim("localizacao", null), distancia: null };
   }
 
-  const d = distanciaKm(p.coords, v.coords);
+  // Menor distância entre a vaga e qualquer cidade do profissional (a de casa
+  // ou uma de interesse): quem quer mudar para a cidade da vaga não é penalizado.
+  const melhor = menorDistancia(pontos, v.coords)!;
+  const d = melhor.km;
   const raio = raioEfetivoKm(p.raioKm, p.dispostoViajar);
   const nota = notaDistancia(d, raio);
+  const deInteresse = melhor.ponto.cidadeInteresse;
 
   let explicacao: string | null = null;
-  if (d <= 5) explicacao = "Na sua região";
+  if (deInteresse) {
+    explicacao = d <= 5 ? `Em ${deInteresse}, cidade de interesse` : `A ${d} km de ${deInteresse}, cidade de interesse`;
+  } else if (d <= 5) explicacao = "Na sua região";
   else if (nota >= 0.55) explicacao = `A ${d} km de distância`;
 
   const alerta =
@@ -257,10 +272,10 @@ function eliminar(p: ProfissionalMatch, v: VagaMatch): string | null {
   // Sem especialidade não há o que comparar — e é o que o /descobrir também exige.
   if (!p.especialidades?.length) return "Perfil sem especialidade definida";
 
-  if (!v.remoto && p.coords && v.coords) {
-    const d = distanciaKm(p.coords, v.coords);
+  if (!v.remoto && v.coords) {
+    const melhor = menorDistancia(pontosDe(p), v.coords);
     const limite = raioEfetivoKm(p.raioKm, p.dispostoViajar) * 1.5;
-    if (d > limite) return `Distância de ${d} km excede o limite de deslocamento`;
+    if (melhor && melhor.km > limite) return `Distância de ${melhor.km} km excede o limite de deslocamento`;
   }
 
   if (p.especialidades?.length) {

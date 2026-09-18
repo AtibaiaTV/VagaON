@@ -38,6 +38,9 @@ export function paraProfissionalMatch(entrada: unknown): ProfissionalMatch {
     cidade: doc.cidade ?? "",
     estado: doc.estado ?? "",
     coords: coordsDe(doc),
+    cidadesInteresse: (Array.isArray(doc.cidadesInteresse) ? (doc.cidadesInteresse as Doc[]) : [])
+      .map((c) => ({ cidade: String(c.cidade ?? ""), estado: String(c.estado ?? ""), coords: coordsDe(c) }))
+      .filter((c): c is { cidade: string; estado: string; coords: { lat: number; lng: number } } => c.coords !== null),
     raioKm: doc.raioKm ?? RAIO_PADRAO_KM,
     dispostoViajar: Boolean(doc.dispostoViajar),
     disponibilidade: {

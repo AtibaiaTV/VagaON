@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/db";
 import { MENSAGENS_LIMITE } from "@/lib/planos";
 import { acessoDaEmpresa } from "@/lib/servicos/planos";
-import { distanciaKm, paraCoords } from "@/lib/match/geo";
+import { menorDistancia, paraCoords, type PontoDoProfissional } from "@/lib/match/geo";
 import { geocodificarCidade } from "@/constants/municipios";
 import Empresa from "@/models/Empresa";
 import Profissional from "@/models/Profissional";
@@ -31,6 +31,7 @@ interface IProfissionalLean {
   disponibilidade: { tipo: string[]; imediata: boolean };
   match?: { ativo?: boolean; ultimaAtividade?: string | null };
   localizacao?: { coordinates?: number[] } | null;
+  cidadesInteresse?: { cidade: string; estado: string; localizacao?: { coordinates?: number[] } | null }[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -115,19 +116,28 @@ export default async function ProfissionaisPage({ searchParams }: { searchParams
   if (raioValido && referencia) {
     // Raio substitui o filtro exato de cidade: "até 25 km de Atibaia" inclui as vizinhas.
     delete filtro.cidade;
-    filtro.localizacao = { $geoWithin: { $centerSphere: [[referencia.lng, referencia.lat], raioValido / RAIO_TERRA_KM] } };
+    // Casa OU qualquer cidade de interesse dentro do raio.
+    const dentro = { $geoWithin: { $centerSphere: [[referencia.lng, referencia.lat], raioValido / RAIO_TERRA_KM] } };
+    filtro.$or = [{ localizacao: dentro }, { "cidadesInteresse.localizacao": dentro }];
   }
 
   const raw = await Profissional.find(filtro)
-    .select("nomeCompleto fotoPerfil especialidades cidade estado resumoProfissional disponibilidade match.ativo match.ultimaAtividade localizacao completude createdAt updatedAt")
+    .select("nomeCompleto fotoPerfil especialidades cidade estado resumoProfissional disponibilidade match.ativo match.ultimaAtividade localizacao cidadesInteresse completude createdAt updatedAt")
     .sort({ completude: -1, createdAt: -1 })
     .limit(LIMITE * 2)
     .lean();
 
   const profissionais = (JSON.parse(JSON.stringify(raw)) as IProfissionalLean[]).map((p) => {
-    const coords = paraCoords(p.localizacao) ?? geocodificarCidade(p.cidade, p.estado);
-    const distancia = referencia && coords ? distanciaKm(referencia, coords) : null;
-    return { ...p, distancia };
+    // Menor distância entre a referência e a casa ou qualquer cidade de interesse.
+    const pontos: PontoDoProfissional[] = [];
+    const casa = paraCoords(p.localizacao) ?? geocodificarCidade(p.cidade, p.estado);
+    if (casa) pontos.push({ coords: casa, cidadeInteresse: null });
+    for (const c of p.cidadesInteresse ?? []) {
+      const cc = paraCoords(c.localizacao) ?? geocodificarCidade(c.cidade, c.estado);
+      if (cc) pontos.push({ coords: cc, cidadeInteresse: c.cidade });
+    }
+    const melhor = referencia ? menorDistancia(pontos, referencia) : null;
+    return { ...p, distancia: melhor?.km ?? null, viaInteresse: melhor?.ponto.cidadeInteresse ?? null };
   });
 
   // ── Ordenação ───────────────────────────────────────────────────────────
@@ -238,6 +248,7 @@ export default async function ProfissionaisPage({ searchParams }: { searchParams
                             <p className="text-xs font-medium text-primary flex items-center gap-1 mt-0.5" title={`Distância até ${referenciaLabel}`}>
                               <Navigation className="h-3 w-3 shrink-0" />
                               {prof.distancia === 0 ? "na mesma cidade" : `a ${prof.distancia} km`}
+                              {prof.viaInteresse && <span className="font-normal text-muted-foreground"> · quer trabalhar em {prof.viaInteresse}</span>}
                             </p>
                           )}
                         </div>

@@ -79,6 +79,8 @@ export interface IProfissional extends Document {
   localizacao: { type: "Point"; coordinates: [number, number] } | null;
   /** Distância máxima que aceita percorrer até o trabalho, em km. */
   raioKm: number;
+  /** Outras cidades em que aceita trabalhar (mudança ou temporada). O motor usa a menor distância entre a vaga e qualquer cidade do profissional. */
+  cidadesInteresse: { cidade: string; estado: string; localizacao: { type: "Point"; coordinates: [number, number] } | null }[];
   pretensaoSalarial: {
     min: number | null;
     periodo: "hora" | "dia" | "mes";
@@ -202,6 +204,22 @@ const ProfissionalSchema = new Schema<IProfissional>(
       coordinates: { type: [Number], default: undefined }, // [lng, lat]
     },
     raioKm: { type: Number, default: RAIO_PADRAO_KM, min: 1, max: 500 },
+    cidadesInteresse: {
+      type: [
+        new Schema(
+          {
+            cidade: { type: String, required: true },
+            estado: { type: String, required: true },
+            localizacao: {
+              type: { type: String, enum: ["Point"] },
+              coordinates: { type: [Number] },
+            },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
     pretensaoSalarial: {
       min: { type: Number, default: null },
       periodo: { type: String, enum: ["hora", "dia", "mes"], default: "mes" },
@@ -233,6 +251,7 @@ ProfissionalSchema.index({ estado: 1, especialidades: 1 });
 ProfissionalSchema.index({ "disponibilidade.tipo": 1 });
 // Pré-filtro geográfico do feed.
 ProfissionalSchema.index({ localizacao: "2dsphere" });
+ProfissionalSchema.index({ "cidadesInteresse.localizacao": "2dsphere" });
 // Deck da empresa: candidatos ativos de uma especialidade.
 ProfissionalSchema.index({ "match.ativo": 1, especialidades: 1 });
 // Página pública do currículo (/cv/[token]).

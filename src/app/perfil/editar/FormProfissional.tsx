@@ -147,6 +147,33 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
 
   // Preferências que alimentam o motor de match (Descobrir).
   const pretensaoDados = dados?.pretensaoSalarial as Record<string, unknown> | undefined;
+  const [cidadesInteresse, setCidadesInteresse] = useState<{ cidade: string; estado: string }[]>(
+    ((dados?.cidadesInteresse as { cidade: string; estado: string }[] | undefined) ?? []).map((c) => ({ cidade: c.cidade, estado: c.estado }))
+  );
+  const [novaCidade, setNovaCidade] = useState({ cidade: "", estado: "" });
+  const [erroCidade, setErroCidade] = useState("");
+  const [validandoCidade, setValidandoCidade] = useState(false);
+
+  /** Confere na tabela de municípios (no servidor) antes de aceitar. */
+  async function adicionarCidadeInteresse() {
+    const cidade = novaCidade.cidade.trim();
+    const estado = novaCidade.estado;
+    setErroCidade("");
+    if (!cidade || !estado) { setErroCidade("Informe cidade e UF."); return; }
+    if (cidadesInteresse.length >= 5) { setErroCidade("Até 5 cidades."); return; }
+    if (cidadesInteresse.some((c) => c.estado === estado && c.cidade.toLowerCase() === cidade.toLowerCase())) { setErroCidade("Essa cidade já está na lista."); return; }
+    setValidandoCidade(true);
+    const r = await fetch(`/api/geo/cidade?cidade=${encodeURIComponent(cidade)}&uf=${estado}`).catch(() => null);
+    setValidandoCidade(false);
+    if (!r?.ok) {
+      const dados = await r?.json().catch(() => null);
+      setErroCidade(dados?.error ?? "Não encontrei essa cidade.");
+      return;
+    }
+    setCidadesInteresse((l) => [...l, { cidade, estado }]);
+    setNovaCidade({ cidade: "", estado: "" });
+  }
+
   const [preferencias, setPreferencias] = useState({
     raioKm: (dados?.raioKm as number) ?? RAIO_PADRAO_KM,
     pretensaoMin: pretensaoDados?.min ? String(pretensaoDados.min) : "",
@@ -255,6 +282,7 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
         dataDisponivel: disponibilidade.imediata ? null : disponibilidade.dataDisponivel,
       },
       raioKm: preferencias.raioKm,
+      cidadesInteresse,
       pretensaoSalarial: {
         min: preferencias.pretensaoMin ? parseFloat(preferencias.pretensaoMin) : null,
         periodo: preferencias.pretensaoPeriodo,
@@ -977,6 +1005,54 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                   <p className="text-xs text-muted-foreground">
                     {pessoal.dispostoViajar ? "Como você aceita viajar, consideramos até 3× esse raio." : "Marque \"disposto a viajar\" na primeira etapa para ampliar."}
                   </p>
+                </div>
+
+                {/* Cidades de interesse: centros extras para o raio e para a distância no match. */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="cidadeInteresse">Outras cidades em que aceita trabalhar</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Mudança ou temporada: uma vaga perto de qualquer uma delas conta como perto de você. Até 5.
+                  </p>
+                  {cidadesInteresse.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {cidadesInteresse.map((c) => (
+                        <span key={`${c.estado}:${c.cidade}`} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium">
+                          {c.cidade}/{c.estado}
+                          <button
+                            type="button"
+                            onClick={() => setCidadesInteresse((l) => l.filter((x) => x !== c))}
+                            aria-label={`Remover ${c.cidade}`}
+                            className="hover:text-destructive"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {cidadesInteresse.length < 5 && (
+                    <div className="grid grid-cols-[1fr_5.5rem_auto] gap-2">
+                      <Input
+                        id="cidadeInteresse"
+                        value={novaCidade.cidade}
+                        onChange={(e) => setNovaCidade((n) => ({ ...n, cidade: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); adicionarCidadeInteresse(); } }}
+                        placeholder="Campos do Jordão"
+                      />
+                      <Select value={novaCidade.estado} onValueChange={(v) => setNovaCidade((n) => ({ ...n, estado: v ?? "" }))}>
+                        <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                        <SelectContent>
+                          {ESTADOS.map((e) => (
+                            <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button type="button" variant="outline" onClick={adicionarCidadeInteresse} disabled={validandoCidade}>
+                        {validandoCidade ? "…" : "Adicionar"}
+                      </Button>
+                    </div>
+                  )}
+                  {erroCidade && <p className="text-xs text-destructive">{erroCidade}</p>}
                 </div>
 
                 <div className="space-y-1.5">
