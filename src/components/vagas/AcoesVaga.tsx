@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CalendarClock, CheckCircle2, Loader2, Pause, Play, RefreshCw, Users, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  COR_STATUS_VAGA,
   LABEL_ACAO_VAGA,
   LABEL_STATUS_VAGA,
   acoesDisponiveis,
@@ -12,16 +13,6 @@ import {
   type AcaoVaga,
   type StatusVaga,
 } from "@/lib/vagas-estado";
-
-export const COR_STATUS_VAGA: Record<StatusVaga, string> = {
-  ativa: "bg-green-100 text-green-700",
-  pausada: "bg-amber-100 text-amber-700",
-  preenchida: "bg-emerald-100 text-emerald-800",
-  encerrada: "bg-gray-100 text-gray-600",
-  expirada: "bg-gray-100 text-gray-600",
-  rascunho: "bg-blue-100 text-blue-600",
-  rejeitada: "bg-red-100 text-red-700",
-};
 
 const ICONE: Record<AcaoVaga, typeof Pause> = {
   pausar: Pause,

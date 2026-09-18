@@ -16,7 +16,8 @@ import { ESPECIALIDADES } from "@/constants/especialidades";
 import { MapPin, Users, Navigation } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import FiltrosProfissionais, { RAIOS_KM } from "@/components/profissionais/FiltrosProfissionais";
+import FiltrosProfissionais from "@/components/profissionais/FiltrosProfissionais";
+import { RAIOS_KM } from "@/constants/profissionais-filtros";
 
 const RAIO_TERRA_KM = 6371;
 const LIMITE = 60;

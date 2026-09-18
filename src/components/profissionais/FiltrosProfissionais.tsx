@@ -4,30 +4,19 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X, SlidersHorizontal } from "lucide-react";
 import FilterChip from "@/components/shared/FilterChip";
+import AutocompleteCidade from "@/components/shared/AutocompleteCidade";
 import { ESTADOS } from "@/constants/estados";
 import { CATEGORIAS } from "@/constants/especialidades";
+import { ORDENS, RAIOS_KM, TIPOS_CONTRATO } from "@/constants/profissionais-filtros";
 
 /**
  * Filtros do banco de profissionais. Tudo vive na URL (?tipo=&cat=&uf=…):
  * a página é um Server Component que lê os searchParams e consulta o banco,
  * então o link fica compartilhável e o "voltar" do navegador funciona.
+ *
+ * As listas de opções ficam em src/constants/profissionais-filtros.ts — nunca
+ * exportar valores daqui para a página, que é Server Component.
  */
-
-export const TIPOS_CONTRATO = [
-  { value: "clt", label: "CLT" },
-  { value: "temporario", label: "Temporário" },
-  { value: "sazonal", label: "Sazonal" },
-];
-
-export const RAIOS_KM = [10, 25, 50, 100, 200];
-
-export const ORDENS = [
-  { value: "relevancia", label: "Perfil mais completo" },
-  { value: "distancia", label: "Mais perto" },
-  { value: "recentes", label: "Cadastro mais recente" },
-  { value: "atualizados", label: "Atualizado há menos tempo" },
-  { value: "ativos", label: "Ativo há menos tempo" },
-];
 
 interface Props {
   /** Há ponto de referência (cidade da empresa ou cidade filtrada) para raio e distância. */
@@ -96,6 +85,7 @@ export default function FiltrosProfissionais({ temReferencia, referenciaLabel }:
 
       {/* Regime */}
       <div className="flex flex-wrap gap-2">
+        <FilterChip label="Todos" active={!tipo} onClick={() => definir({ tipo: "" })} />
         {TIPOS_CONTRATO.map((t) => (
           <FilterChip key={t.value} label={t.label} active={tipo === t.value} onClick={() => definir({ tipo: tipo === t.value ? "" : t.value })} />
         ))}
@@ -128,32 +118,15 @@ export default function FiltrosProfissionais({ temReferencia, referenciaLabel }:
           ))}
         </select>
 
-        {/* Cidade */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            definir({ cidade: cidadeInput.trim() });
-          }}
-          className="relative"
-        >
-          <input
-            value={cidadeInput}
-            onChange={(e) => setCidadeInput(e.target.value)}
-            placeholder="Cidade"
-            className="w-full h-10 rounded-lg border px-3 pr-8 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
-            aria-label="Cidade"
-          />
-          {cidadeInput && (
-            <button
-              type="button"
-              onClick={() => { setCidadeInput(""); definir({ cidade: "" }); }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Limpar cidade"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </form>
+        {/* Cidade — sugere só cidades onde há profissionais; escolher uma preenche a UF */}
+        <AutocompleteCidade
+          value={cidadeInput}
+          onChange={setCidadeInput}
+          contexto="profissionais"
+          uf={uf || undefined}
+          onSelect={(c) => definir({ cidade: c.cidade, ...(c.uf ? { uf: c.uf } : {}) })}
+          onClear={() => definir({ cidade: "" })}
+        />
 
         {/* Raio */}
         <select
@@ -162,9 +135,9 @@ export default function FiltrosProfissionais({ temReferencia, referenciaLabel }:
           disabled={!temReferencia}
           className="h-10 rounded-lg border px-3 text-sm bg-white disabled:opacity-50"
           aria-label="Distância máxima"
-          title={temReferencia ? `Distância a partir de ${referenciaLabel}` : "Informe a cidade da sua empresa no perfil, ou filtre por cidade, para usar o raio"}
+          title={temReferencia ? `Distância a partir de ${referenciaLabel}` : "Informe uma cidade ao lado (ou a cidade da sua empresa no perfil) para usar o raio"}
         >
-          <option value="">Qualquer distância</option>
+          <option value="">{temReferencia ? "Qualquer distância" : "Raio: informe uma cidade"}</option>
           {RAIOS_KM.map((k) => (
             <option key={k} value={String(k)}>até {k} km{referenciaLabel ? ` de ${referenciaLabel}` : ""}</option>
           ))}
