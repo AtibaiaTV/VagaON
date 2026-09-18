@@ -19,6 +19,7 @@ export interface CidadeComVagas {
 }
 
 const TTL_MS = 10 * 60_000;
+const ESPECIALIDADES_VALIDAS = new Set(ESPECIALIDADES.map((e) => e.value));
 let cache: { em: number; lista: CidadeComVagas[] } | null = null;
 
 export function slugCidade(cidade: string, uf: string): string {
@@ -57,8 +58,10 @@ export async function cidadesComVagas(): Promise<CidadeComVagas[]> {
       porCidade.set(slug, c);
     }
     c.total += l.n;
+    // Só funções da tabela viram página: vagas importadas trazem texto livre
+    // ("Hotelaria / Governança") que não dá URL nem tem página para resolver.
     const esp = String(l._id.especialidade ?? "");
-    if (esp) {
+    if (esp && ESPECIALIDADES_VALIDAS.has(esp)) {
       const f = c.funcoes.find((x) => x.especialidade === esp);
       if (f) f.total += l.n;
       else c.funcoes.push({ especialidade: esp, slug: slugFuncao(esp), label: labelEspecialidade(esp), total: l.n });
