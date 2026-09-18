@@ -129,15 +129,15 @@ export default async function ProfissionaisPage() {
                             </span>
                           )}
                         </p>
-                        {(prof.cidade || prof.estado) ? (
+                        {!prof.cidade && ehAdmin ? (
+                          <p className="text-xs text-amber-700 flex items-center gap-1 mt-0.5">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            {prof.estado ? `${prof.estado} · sem cidade` : "sem cidade"}
+                          </p>
+                        ) : (prof.cidade || prof.estado) ? (
                           <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <MapPin className="h-3 w-3 shrink-0" />
                             {[prof.cidade, prof.estado].filter(Boolean).join(", ")}
-                          </p>
-                        ) : ehAdmin ? (
-                          <p className="text-xs text-amber-700 flex items-center gap-1 mt-0.5">
-                            <MapPin className="h-3 w-3 shrink-0" />
-                            sem cidade
                           </p>
                         ) : null}
                       </div>

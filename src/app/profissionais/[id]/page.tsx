@@ -157,17 +157,18 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
               </div>
 
               <div className="flex flex-wrap gap-4 mt-3 text-sm text-white/70">
-                {(prof.bairro || prof.cidade || prof.estado) ? (
+                {/* Sem cidade a pessoa quase não aparece nos filtros: para o admin isso é o que importa ver. */}
+                {!prof.cidade && ehAdmin ? (
+                  <span className="flex items-center gap-1 text-amber-200">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {prof.estado ? `${prof.estado} · sem cidade no cadastro` : "Sem cidade no cadastro"}
+                  </span>
+                ) : (prof.bairro || prof.cidade || prof.estado) ? (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
                     {[prof.bairro, [prof.cidade, prof.estado].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}
                   </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-amber-200">
-                    <MapPin className="h-3.5 w-3.5" />
-                    Sem cidade no cadastro
-                  </span>
-                )}
+                ) : null}
                 {prof.telefone && (
                   <span className="flex items-center gap-1">
                     <Phone className="h-3.5 w-3.5" />
