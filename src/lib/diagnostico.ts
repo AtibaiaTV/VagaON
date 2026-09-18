@@ -217,10 +217,11 @@ export const VARIAVEIS: VariavelAmbiente[] = [
   {
     nome: "CROSS_PLATFORM_SECRET",
     grupo: "Integração RedeSA",
-    severidade: "opcional",
-    descricao: "Assina os tokens de entrada vindos da RedeSA e o webhook de talentos.",
-    semEla: "A integração com a RedeSA fica desligada; o VagaON sozinho não é afetado.",
-    comoObter: "O mesmo segredo combinado com a RedeSA.",
+    severidade: "importante",
+    descricao: "Assina o SSO do backoffice da RedeSA, a API de vagas e o webhook de talentos.",
+    semEla:
+      "O botão \"Gerenciar vagas\" no backoffice da RedeSA não entra no VagaON, e a RedeSA não consegue publicar vagas aqui. Ver docs/INTEGRACAO-REDESA.md.",
+    comoObter: "O mesmo segredo combinado com a RedeSA, nos dois lados.",
     ler: () => process.env.CROSS_PLATFORM_SECRET,
   },
   {
