@@ -71,6 +71,8 @@ do site funciona sem nenhuma delas. Ver [NOTIFICACOES.md](NOTIFICACOES.md).
 | `WHATSAPP_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID` | Nenhum WhatsApp sai |
 | `WHATSAPP_TEMPLATE` | Usa `vagaon_aviso` |
 | `WHATSAPP_API_VERSION` | Usa `v21.0` |
+| `WHATSAPP_VERIFY_TOKEN` | A Meta não consegue registrar o webhook (`/api/webhooks/whatsapp`) |
+| `WHATSAPP_APP_SECRET` | O webhook responde 503: sem status de entrega e sem PARAR/VOLTAR por WhatsApp |
 
 Par VAPID: `npx web-push generate-vapid-keys`.
 
