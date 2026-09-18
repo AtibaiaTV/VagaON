@@ -76,6 +76,11 @@ interface Props {
   autoImprimir?: boolean;
   /** Mostra o link para editar os dados. */
   linkEditar?: boolean;
+  /**
+   * Currículo de outra pessoa (empresa ou admin olhando um candidato): título
+   * em terceira pessoa e sem WhatsApp/link público, que são do próprio dono.
+   */
+  terceiro?: boolean;
 }
 
 function urlPublica(token: string) {
@@ -95,6 +100,7 @@ export default function CurriculoImpressao({
   salvarPreferencia = false,
   autoImprimir = false,
   linkEditar = true,
+  terceiro = false,
 }: Props) {
   const [modelo, setModelo] = useState<ModeloCurriculo>(modeloInicial);
   const [cores, setCores] = useState<CoresCurriculo>(coresIniciais ?? {});
@@ -242,10 +248,12 @@ export default function CurriculoImpressao({
     <div className="space-y-4">
       <div className="nao-imprimir space-y-3">
         <div>
-          <h1 className="text-xl font-bold">Meu currículo</h1>
+          <h1 className="text-xl font-bold">{terceiro ? `Currículo de ${dados.nome}` : "Meu currículo"}</h1>
           <p className="text-sm text-muted-foreground">
-            Escolha o modelo e a cor; depois imprima, baixe ou envie pelo WhatsApp. Os dados vêm do seu perfil
-            {linkEditar && (
+            {terceiro
+              ? "Os dados vêm do perfil do profissional. Escolha o modelo e a cor; depois imprima ou baixe"
+              : "Escolha o modelo e a cor; depois imprima, baixe ou envie pelo WhatsApp. Os dados vêm do seu perfil"}
+            {linkEditar && !terceiro && (
               <>
                 {" "}
                 —{" "}
@@ -393,17 +401,19 @@ export default function CurriculoImpressao({
               )}
             </div>
 
-            <Button
-              type="button"
-              size="lg"
-              onClick={compartilharWhatsApp}
-              disabled={compartilhando}
-              className="gap-2 bg-[#25D366] hover:bg-[#1ebe5b] text-white"
-              title="Enviar o currículo pelo WhatsApp"
-            >
-              {compartilhando ? <Loader2 className="h-4 w-4 animate-spin" /> : <IconeWhatsApp className="h-4 w-4" />}
-              WhatsApp
-            </Button>
+            {!terceiro && (
+              <Button
+                type="button"
+                size="lg"
+                onClick={compartilharWhatsApp}
+                disabled={compartilhando}
+                className="gap-2 bg-[#25D366] hover:bg-[#1ebe5b] text-white"
+                title="Enviar o currículo pelo WhatsApp"
+              >
+                {compartilhando ? <Loader2 className="h-4 w-4 animate-spin" /> : <IconeWhatsApp className="h-4 w-4" />}
+                WhatsApp
+              </Button>
+            )}
           </div>
 
           {erro && <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">{erro}</p>}
@@ -442,9 +452,9 @@ export default function CurriculoImpressao({
 
           <p className="text-[11px] text-muted-foreground">
             Imprimir abre a janela do navegador (lá também dá para “Salvar como PDF”). Baixar gera o arquivo direto: PDF e
-            imagens são cópias fiéis da página; o Word é um documento editável com as mesmas cores. WhatsApp envia o PDF
-            pelo celular ou, no computador, o link público do currículo. Se as cores não aparecerem na impressão, ative
-            “Gráficos de fundo”.
+            imagens são cópias fiéis da página; o Word é um documento editável com as mesmas cores.
+            {!terceiro && " WhatsApp envia o PDF pelo celular ou, no computador, o link público do currículo."}
+            {" "}Se as cores não aparecerem na impressão, ative “Gráficos de fundo”.
           </p>
         </div>
       </div>

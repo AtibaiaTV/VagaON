@@ -169,6 +169,12 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                       {vagaObj.periodo.dataFim && ` até ${new Date(vagaObj.periodo.dataFim).toLocaleDateString("pt-BR")}`}
                     </span>
                   )}
+                  {vagaObj.createdAt && (
+                    <span className="flex items-center gap-1.5 text-white/60" title="Data em que a vaga foi cadastrada">
+                      <Clock className="h-4 w-4" />
+                      Publicada em {new Date(vagaObj.createdAt).toLocaleDateString("pt-BR")}
+                    </span>
+                  )}
                 </div>
               </div>
 

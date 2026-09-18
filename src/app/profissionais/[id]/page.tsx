@@ -2,19 +2,17 @@ import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { connectDB } from "@/lib/db";
 import { MENSAGENS_LIMITE } from "@/lib/planos";
-import { acessoDaEmpresa } from "@/lib/servicos/planos";
-import Candidatura from "@/models/Candidatura";
-import Empresa from "@/models/Empresa";
-import Match from "@/models/Match";
+import { acessoAoProfissional } from "@/lib/servicos/acesso-profissional";
 import Profissional from "@/models/Profissional";
 import Paywall from "@/components/planos/Paywall";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap } from "lucide-react";
+import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import ReputacaoBadge from "@/components/avaliacoes/ReputacaoBadge";
+import FotoAmpliavel from "@/components/perfil/FotoAmpliavel";
 import { resumoReputacaoPublico } from "@/lib/reputacao";
 
 interface IExperiencia {
@@ -48,6 +46,7 @@ interface IProfissionalLean {
   habilidades: string[];
   reputacao?: unknown;
   videoApresentacao?: { url: string; duracao: number } | null;
+  createdAt?: string;
 }
 
 const TIPOS_LABEL: Record<string, string> = {
@@ -62,20 +61,12 @@ function formatMes(iso: string | null | undefined): string {
 
 export default async function PerfilProfissionalPage({ params }: { params: { id: string } }) {
   const session = await auth();
-  if (!session || (session.user.role !== "empresa" && session.user.role !== "admin")) redirect("/painel");
-  const ehAdmin = session.user.role === "admin";
-
   await connectDB();
 
-  // Sem o Pro, a empresa só abre perfis de quem já se relacionou com ela
-  // (candidatura ou match): o candidato que veio até ela nunca fica escondido.
-  // Admin não tem empresa, logo não passa pelo paywall.
-  const empresa = ehAdmin ? null : await Empresa.findOne({ userId: session.user.id }).select("_id assinatura").lean();
-  if (empresa && !acessoDaEmpresa(empresa).limites.bancoCurriculos) {
-    const relacionado =
-      (await Candidatura.exists({ empresaId: empresa._id, profissionalId: params.id })) ||
-      (await Match.exists({ empresaId: empresa._id, profissionalId: params.id }));
-    if (!relacionado) {
+  // Regras em src/lib/servicos/acesso-profissional.ts (as mesmas do currículo do candidato).
+  const acesso = await acessoAoProfissional(session, params.id);
+  if (!acesso.ok) {
+    if (acesso.motivo === "paywall") {
       return (
         <div className="min-h-screen bg-[#f4f7f5]">
           <Navbar />
@@ -85,7 +76,9 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
         </div>
       );
     }
+    redirect("/painel");
   }
+  const ehAdmin = acesso.ehAdmin;
 
   // Empresa recebe só o bairro do endereço; admin recebe o endereço completo.
   const rawProf = await Profissional.findById(params.id)
@@ -96,7 +89,6 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
 
   const prof = JSON.parse(JSON.stringify(rawProf)) as IProfissionalLean;
 
-  const inicial = prof.nomeCompleto.charAt(0).toUpperCase();
   const disponTipos = prof.disponibilidade?.tipo ?? [];
 
   return (
@@ -125,18 +117,8 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
           </div>
 
           <div className="flex items-start gap-5">
-            {/* Avatar */}
-            {prof.fotoPerfil ? (
-              <img
-                src={prof.fotoPerfil}
-                alt={prof.nomeCompleto}
-                className="w-20 h-20 rounded-full object-cover shrink-0 border-2 border-white/20"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center shrink-0 border-2 border-white/20">
-                <span className="text-3xl font-bold text-white">{inicial}</span>
-              </div>
-            )}
+            {/* Avatar: maior, e abre em tamanho grande ao clicar */}
+            <FotoAmpliavel src={prof.fotoPerfil} nome={prof.nomeCompleto} className="w-28 h-28 sm:w-36 sm:h-36" classeInicial="text-5xl" />
 
             {/* Info */}
             <div className="flex-1 min-w-0">
@@ -181,6 +163,22 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                     Disposto(a) a viajar
                   </span>
                 )}
+                {prof.createdAt && (
+                  <span className="flex items-center gap-1 text-white/60" title="Data do cadastro no VagaON">
+                    <Clock className="h-3.5 w-3.5" />
+                    Cadastro em {new Date(prof.createdAt).toLocaleDateString("pt-BR")}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <Link
+                  href={`/profissionais/${prof._id}/curriculo`}
+                  className="inline-flex items-center gap-2 rounded-lg bg-white/15 hover:bg-white/25 border border-white/25 px-3 py-1.5 text-sm font-medium text-white transition-colors"
+                >
+                  <FileText className="h-4 w-4" />
+                  Ver como currículo
+                </Link>
               </div>
             </div>
           </div>

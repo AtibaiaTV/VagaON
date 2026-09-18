@@ -127,6 +127,11 @@ export default async function VagasPage() {
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {vaga.cidade}, {vaga.estado}
+                          {vaga.createdAt && (
+                            <span className="text-muted-foreground/70" title="Data em que a vaga foi cadastrada">
+                              · {new Date(vaga.createdAt).toLocaleDateString("pt-BR")}
+                            </span>
+                          )}
                         </span>
                         <span>{formatarSalario(vaga.salario)}</span>
                       </div>
