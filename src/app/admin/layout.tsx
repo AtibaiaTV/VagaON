@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
-import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload, Trash2, QrCode, ChefHat } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload, Trash2, QrCode, ChefHat, Stethoscope } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/qr", label: "QR Codes e links", icon: QrCode },
   { href: "/admin/importar", label: "Importar CSV", icon: Upload },
   { href: "/admin/excluir-vagas", label: "Excluir Vagas", icon: Trash2 },
+  { href: "/admin/diagnostico", label: "Diagnóstico", icon: Stethoscope },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

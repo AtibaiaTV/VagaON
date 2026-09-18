@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import EspecialidadesMultiSelect from "@/components/shared/EspecialidadesMultiSelect";
 import BrandBand from "@/components/shared/BrandBand";
+import DefinirSenha from "@/components/perfil/DefinirSenha";
 import ImportarCurriculo from "@/components/ia/ImportarCurriculo";
 import VideoApresentacao, { type VideoPerfil } from "@/components/perfil/VideoApresentacao";
 import { ESTADOS } from "@/constants/estados";
@@ -34,6 +35,8 @@ interface Props {
   iaDisponivel?: boolean;
   /** Veio do cadastro rápido (QR/link): conta recém-criada, perfil ainda vazio. */
   boasVindas?: boolean;
+  /** false para conta que nasceu sem senha (hoje só o SSO da RedeSA faz isso). */
+  temSenha?: boolean;
 }
 
 const ETAPAS = ["Dados pessoais", "Especialidades", "Experiências", "Disponibilidade"];
@@ -53,7 +56,7 @@ interface Importacao {
   };
 }
 
-export default function FormProfissional({ profileId, dados, iaDisponivel = false, boasVindas = false }: Props) {
+export default function FormProfissional({ profileId, dados, iaDisponivel = false, boasVindas = false, temSenha = true }: Props) {
   const router = useRouter();
   const [etapa, setEtapa] = useState(0);
   const [salvando, setSalvando] = useState(false);
@@ -1018,6 +1021,12 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
             </Button>
           )}
         </div>
+
+        {!boasVindas && (
+          <div className="mt-8">
+            <DefinirSenha temSenha={temSenha} />
+          </div>
+        )}
       </main>
     </div>
   );

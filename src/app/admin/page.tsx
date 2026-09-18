@@ -7,6 +7,7 @@ import Candidatura from "@/models/Candidatura";
 import Link from "next/link";
 import { Users, Building2, ChefHat, Briefcase, ClipboardList, TrendingUp, FlaskConical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AvisoConfiguracao from "@/components/admin/AvisoConfiguracao";
 
 interface StatCardProps {
   titulo: string;
@@ -67,6 +68,8 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="p-8">
+      <AvisoConfiguracao />
+
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
