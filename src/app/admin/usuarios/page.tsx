@@ -54,11 +54,30 @@ export default function AdminUsuariosPage() {
   const [erroEdicao, setErroEdicao] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
 
+  // Erro da API aparece na tela: "Nenhum usuário" quando a API falhou é mentira e esconde o problema.
+  const [erroCarga, setErroCarga] = useState<string | null>(null);
+
   useEffect(() => {
-    fetch("/api/admin/usuarios")
-      .then((r) => r.json())
-      .then((data) => { setUsuarios(Array.isArray(data) ? data : []); setCarregando(false); })
-      .catch(() => setCarregando(false));
+    (async () => {
+      try {
+        const r = await fetch("/api/admin/usuarios", { cache: "no-store" });
+        const texto = await r.text();
+        let data: unknown = null;
+        try { data = JSON.parse(texto); } catch { /* resposta não é JSON */ }
+        if (!r.ok) {
+          const msg = (data as { error?: string } | null)?.error ?? texto.slice(0, 200);
+          setErroCarga(`A API respondeu ${r.status}${msg ? `: ${msg}` : ""}`);
+        } else if (!Array.isArray(data)) {
+          setErroCarga(`A API respondeu algo inesperado: ${texto.slice(0, 200)}`);
+        } else {
+          setUsuarios(data as Usuario[]);
+        }
+      } catch (e) {
+        setErroCarga(`Falha de rede ao chamar a API: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        setCarregando(false);
+      }
+    })();
   }, []);
 
   function abrirEdicao(u: Usuario) {
@@ -135,6 +154,15 @@ export default function AdminUsuariosPage() {
         <CardContent>
           {carregando ? (
             <p className="text-sm text-muted-foreground text-center py-8">Carregando...</p>
+          ) : erroCarga ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              <p className="font-semibold">Não foi possível carregar os usuários.</p>
+              <p className="mt-1 font-mono text-xs break-all">{erroCarga}</p>
+              <p className="mt-2 text-xs text-red-800/80">
+                Se for 401, a sessão de admin não chegou à API — saia e entre de novo. Se for 500, a mensagem acima
+                diz o que quebrou no servidor.
+              </p>
+            </div>
           ) : filtrados.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">Nenhum usuário encontrado.</p>
           ) : (
