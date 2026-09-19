@@ -128,7 +128,7 @@ export const VARIAVEIS: VariavelAmbiente[] = [
     severidade: "importante",
     descricao: "Autoriza os dois crons da Vercel: lembrete de entrevista e manutenção diária.",
     semEla:
-      "Os crons respondem 401 e nada roda: vaga vencida não expira, perfil inativo não some, convite de avaliação não sai.",
+      "Os crons respondem 401 e nada roda: perfil inativo não some, convite de avaliação não sai, match parado e resumo semanal não avisam.",
     comoObter: "openssl rand -hex 32 — o mesmo valor na Vercel, que o envia como Bearer.",
     ler: () => process.env.CRON_SECRET,
   },

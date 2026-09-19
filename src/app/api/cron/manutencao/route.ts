@@ -10,7 +10,7 @@ export const maxDuration = 60;
 /**
  * Cron diário único (o plano Hobby da Vercel permite dois crons; o outro é
  * o lembrete de entrevista). Roda em sequência, cada passo isolado:
- * avaliações (convites + publicação), validade das vagas, inatividade,
+ * avaliações (convites + publicação), limpeza de validade herdada, inatividade,
  * match parado (48 h sem mensagem) e resumo semanal (segunda-feira).
  */
 export async function GET(req: NextRequest) {

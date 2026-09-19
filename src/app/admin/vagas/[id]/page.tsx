@@ -144,7 +144,7 @@ export default async function AdminVagaPage({ params }: { params: { id: string }
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 text-sm">
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Criada</p><p className="font-semibold">{dataHora(vaga.createdAt)}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Última alteração</p><p className="font-semibold">{dataHora(vaga.updatedAt)}</p></CardContent></Card>
-        <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Válida até</p><p className="font-semibold">{data(vaga.expiresAt)}</p></CardContent></Card>
+        <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Encerrada em</p><p className="font-semibold">{data(vaga.encerradaEm)}</p></CardContent></Card>
         <Card className={interessados.length ? "border-primary/40" : ""}><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Interessados</p><p className="font-semibold text-primary">{interessados.length}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Candidaturas · matches</p><p className="font-semibold">{candidaturas} · {matches}</p></CardContent></Card>
       </div>
@@ -174,7 +174,7 @@ export default async function AdminVagaPage({ params }: { params: { id: string }
             <Linha rotulo="Status">{LABEL_STATUS_VAGA[status] ?? status}{vaga.motivoRejeicao ? ` · ${vaga.motivoRejeicao}` : ""}</Linha>
             <Linha rotulo="Aprovada pelo admin">{vaga.aprovadaPorAdmin ? "sim" : "não"}</Linha>
             <Linha rotulo="No Descobrir">{vaga.match?.ativo === false ? "não" : "sim"}</Linha>
-            <Linha rotulo="Validade">{data(vaga.expiresAt)}{vaga.expiraAvisoEm ? ` · aviso enviado em ${data(vaga.expiraAvisoEm)}` : ""}</Linha>
+            <Linha rotulo="Prazo">sem prazo — fica no ar até a empresa pausar, encerrar ou excluir{vaga.expiresAt ? ` (validade antiga ${data(vaga.expiresAt)}, ignorada)` : ""}</Linha>
             <Linha rotulo="Encerrada em">{data(vaga.encerradaEm)}</Linha>
             <Linha rotulo="Posições">{vaga.preenchidas ?? 0} preenchida(s) de {vaga.posicoes ?? 1}</Linha>
             <Linha rotulo="Alerta de vaga nova">{vaga.alertaVagaNovaEm ? `enviado em ${dataHora(vaga.alertaVagaNovaEm)}` : "não enviado"}</Linha>
