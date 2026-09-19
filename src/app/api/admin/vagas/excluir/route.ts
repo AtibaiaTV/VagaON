@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
 import mongoose from "mongoose";
+import { registrarHistoricoVaga } from "@/lib/servicos/historico-vaga";
 
 // POST /api/admin/vagas/excluir
 // body: { ids?: string[], filtros?: { empresa?, titulo?, dataInicio?, dataFim?, status?, tipo? } }
@@ -66,6 +67,12 @@ export async function POST(req: Request) {
 
     if (idsParaExcluir.length === 0) {
       return NextResponse.json({ excluidas: 0 });
+    }
+
+    // Registra antes de apagar: o histórico fica mesmo sem a vaga.
+    const titulos = await Vaga.find({ _id: { $in: idsParaExcluir } }).select("titulo status").lean();
+    for (const v of titulos) {
+      await registrarHistoricoVaga(v._id, "excluida", { tipo: "admin", userId: session.user.id, nome: session.user.name ?? "" }, `"${v.titulo}" (${v.status}) excluída definitivamente`);
     }
 
     const result = await Vaga.deleteMany({ _id: { $in: idsParaExcluir } });

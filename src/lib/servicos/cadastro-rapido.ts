@@ -13,6 +13,7 @@ import Vaga from "@/models/Vaga";
 import { ErroAtor } from "./erros";
 import { expiracaoInicial } from "./vagas";
 import { alertarSemFalhar } from "./alerta-vaga";
+import { registrarHistoricoVaga } from "./historico-vaga";
 import { enviarCodigoVerificacao } from "./whatsapp-verificacao";
 
 /**
@@ -200,6 +201,7 @@ export async function criarEmpresaRapida(e: EntradaEmpresaRapida) {
     }),
   });
 
+  await registrarHistoricoVaga(vaga._id, "criada", { tipo: "empresa", userId: user._id, nome: e.nome }, `entrada rápida${montadaPorIA ? " (estruturada por IA)" : ""}`);
   await confirmarWhatsAppNoCadastro(user._id, "empresa");
   await alertarSemFalhar(vaga._id, "entrada-rapida");
 

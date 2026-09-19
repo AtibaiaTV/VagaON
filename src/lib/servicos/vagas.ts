@@ -20,6 +20,7 @@ import {
 import Candidatura from "@/models/Candidatura";
 import Vaga, { type IVaga } from "@/models/Vaga";
 import { ErroAtor } from "./erros";
+import { registrarHistoricoVaga, SISTEMA, type Autor } from "./historico-vaga";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Doc = Record<string, any>;
@@ -50,7 +51,7 @@ function resumo(v: IVaga): ResumoVaga {
  * Empresa muda o estado da própria vaga. Transições em vagas-estado.ts.
  * Fechar (preenchida/encerrada) avisa quem ainda estava no funil.
  */
-export async function alterarStatusVaga(empresa: Doc, vagaId: string, acao: AcaoVaga): Promise<ResumoVaga> {
+export async function alterarStatusVaga(empresa: Doc, vagaId: string, acao: AcaoVaga, por?: Autor): Promise<ResumoVaga> {
   await connectDB();
   if (!isValidObjectId(vagaId)) throw new ErroAtor(400, "Vaga inválida.");
 
@@ -74,6 +75,12 @@ export async function alterarStatusVaga(empresa: Doc, vagaId: string, acao: Acao
     vaga.encerradaEm = agora;
   }
   await vaga.save();
+  await registrarHistoricoVaga(
+    vaga._id,
+    "status",
+    por ?? { tipo: "empresa", nome: empresa.nomeFantasia ?? "" },
+    `${anterior} → ${novo} (${acao})${novo === "ativa" && vaga.expiresAt ? ` · válida até ${vaga.expiresAt.toLocaleDateString("pt-BR")}` : ""}`
+  );
 
   if ((novo === "preenchida" || novo === "encerrada") && anterior !== novo) {
     await avisarCandidatosFechamento(vaga, novo, empresa.nomeFantasia ?? "A empresa");
@@ -133,7 +140,9 @@ export async function manutencaoVagas(agora: Date = new Date()): Promise<Resulta
   // 1. Vagas ativas sem validade (anteriores a esta regra).
   const semValidade = await Vaga.find({ status: "ativa", expiresAt: null }).select("tipo periodo createdAt").lean();
   for (const v of semValidade) {
-    await Vaga.updateOne({ _id: v._id }, { $set: { expiresAt: expiracaoLegado(v, agora) } });
+    const ate = expiracaoLegado(v, agora);
+    await Vaga.updateOne({ _id: v._id }, { $set: { expiresAt: ate } });
+    await registrarHistoricoVaga(v._id, "validade", SISTEMA, `validade atribuída até ${ate.toLocaleDateString("pt-BR")}`);
     r.validadeAtribuida++;
   }
 
@@ -141,6 +150,7 @@ export async function manutencaoVagas(agora: Date = new Date()): Promise<Resulta
   const vencidas = await Vaga.find({ status: "ativa", expiresAt: { $lte: agora } }).select("titulo empresaId").lean();
   for (const v of vencidas) {
     await Vaga.updateOne({ _id: v._id }, { $set: { status: "expirada", encerradaEm: agora } });
+    await registrarHistoricoVaga(v._id, "expirada", SISTEMA, "ativa → expirada (validade vencida)");
     await notificar({ tipo: "empresa", perfilId: v.empresaId }, msgVagaExpirada({ vagaTitulo: v.titulo, vagaId: String(v._id) }));
     r.expiradas++;
   }
@@ -154,6 +164,7 @@ export async function manutencaoVagas(agora: Date = new Date()): Promise<Resulta
     const dias = Math.max(1, diasAte(v.expiresAt, agora) ?? 1);
     await notificar({ tipo: "empresa", perfilId: v.empresaId }, msgVagaExpirando({ vagaTitulo: v.titulo, vagaId: String(v._id), dias }));
     await Vaga.updateOne({ _id: v._id }, { $set: { expiraAvisoEm: agora } });
+    await registrarHistoricoVaga(v._id, "aviso", SISTEMA, `empresa avisada: expira em ${dias} dia(s)`);
     r.avisadas++;
   }
 

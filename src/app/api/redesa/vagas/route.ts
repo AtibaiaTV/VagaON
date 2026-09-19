@@ -7,6 +7,7 @@ import { ErroAtor } from "@/lib/servicos/erros";
 import { garantirContaRedesa } from "@/lib/servicos/sso-redesa";
 import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
 import { inferirEspecialidade } from "@/lib/especialidade-inferida";
+import { REDESA, registrarHistoricoVaga } from "@/lib/servicos/historico-vaga";
 
 // GET /api/redesa/vagas — lista vagas do estabelecimento Redesa
 export async function GET(req: NextRequest) {
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
       aprovadaPorAdmin: true,
     });
 
+    await registrarHistoricoVaga(vaga._id, "criada", REDESA, "publicada pela RedeSA");
     await alertarSemFalhar(vaga._id, "redesa");
 
     return NextResponse.json(vaga, { status: 201 });

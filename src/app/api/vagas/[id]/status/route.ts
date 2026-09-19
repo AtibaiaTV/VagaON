@@ -10,11 +10,12 @@ export const dynamic = "force-dynamic";
 // PATCH /api/vagas/[id]/status { acao: pausar | reativar | preencher | encerrar | renovar }
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const empresa = exigirEmpresa(await resolverAtor());
+    const ator = await resolverAtor();
+    const empresa = exigirEmpresa(ator);
     const body = await req.json().catch(() => ({}));
     const acao = body?.acao;
     if (typeof acao !== "string" || !(acao in TRANSICOES_VAGA)) throw new ErroAtor(400, "Ação inválida.");
-    const vaga = await alterarStatusVaga(empresa, params.id, acao as AcaoVaga);
+    const vaga = await alterarStatusVaga(empresa, params.id, acao as AcaoVaga, { tipo: "empresa", userId: ator.userId });
     return NextResponse.json(vaga);
   } catch (err) {
     return responderErro(err);

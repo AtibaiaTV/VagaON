@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,13 @@ interface Vaga {
   aprovadaPorAdmin: boolean;
   totalCandidaturas: number;
   createdAt: string;
+  updatedAt?: string;
+}
+
+/** "18/09 20:46" no horário de Brasília. */
+function dataHora(iso: string | undefined): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
 }
 
 const TIPO_LABEL: Record<string, string> = {
@@ -115,6 +123,8 @@ export default function AdminVagasPage() {
                     <th className="text-left py-3 pr-4">Tipo</th>
                     <th className="text-left py-3 pr-4">Local</th>
                     <th className="text-left py-3 pr-4">Status</th>
+                    <th className="text-left py-3 pr-4">Criada</th>
+                    <th className="text-left py-3 pr-4">Alterada</th>
                     <th className="text-left py-3 pr-4">Cand.</th>
                     <th className="text-right py-3">Ações</th>
                   </tr>
@@ -128,7 +138,9 @@ export default function AdminVagasPage() {
                             <Briefcase className="h-3.5 w-3.5 text-green-600" />
                           </div>
                           <div>
-                            <p className="font-medium leading-tight">{v.titulo}</p>
+                            <Link href={`/admin/vagas/${v._id}`} className="font-medium leading-tight hover:text-primary hover:underline" title="Ficha completa e histórico">
+                              {v.titulo}
+                            </Link>
                             <p className="text-xs text-muted-foreground">{v.especialidade}</p>
                           </div>
                         </div>
@@ -149,6 +161,8 @@ export default function AdminVagasPage() {
                           {v.status}
                         </span>
                       </td>
+                      <td className="py-3 pr-4 text-xs text-muted-foreground whitespace-nowrap">{dataHora(v.createdAt)}</td>
+                      <td className="py-3 pr-4 text-xs text-muted-foreground whitespace-nowrap">{dataHora(v.updatedAt)}</td>
                       <td className="py-3 pr-4 text-center text-muted-foreground">
                         {v.totalCandidaturas}
                       </td>
