@@ -19,6 +19,8 @@ interface Vaga {
   status: string;
   aprovadaPorAdmin: boolean;
   totalCandidaturas: number;
+  /** Profissionais distintos que curtiram ou se candidataram. */
+  interessados?: number;
   createdAt: string;
   updatedAt?: string;
 }
@@ -125,6 +127,7 @@ export default function AdminVagasPage() {
                     <th className="text-left py-3 pr-4">Status</th>
                     <th className="text-left py-3 pr-4">Criada</th>
                     <th className="text-left py-3 pr-4">Alterada</th>
+                    <th className="text-left py-3 pr-4" title="Profissionais que curtiram no Descobrir ou se candidataram">Interesse</th>
                     <th className="text-left py-3 pr-4">Cand.</th>
                     <th className="text-right py-3">Ações</th>
                   </tr>
@@ -163,6 +166,9 @@ export default function AdminVagasPage() {
                       </td>
                       <td className="py-3 pr-4 text-xs text-muted-foreground whitespace-nowrap">{dataHora(v.createdAt)}</td>
                       <td className="py-3 pr-4 text-xs text-muted-foreground whitespace-nowrap">{dataHora(v.updatedAt)}</td>
+                      <td className={`py-3 pr-4 text-center ${(v.interessados ?? 0) > 0 ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+                        {v.interessados ?? 0}
+                      </td>
                       <td className="py-3 pr-4 text-center text-muted-foreground">
                         {v.totalCandidaturas}
                       </td>

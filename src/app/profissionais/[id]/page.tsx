@@ -9,7 +9,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText, Cake, RefreshCw, Activity, Navigation } from "lucide-react";
+import { MapPin, Phone, ArrowLeft, Briefcase, CheckCircle, Clock, Plane, Star, Video, GraduationCap, FileText, Cake, RefreshCw, Activity, Navigation, Heart } from "lucide-react";
+import { empresasInteressadas } from "@/lib/servicos/interesse";
 import Empresa from "@/models/Empresa";
 import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
 import { menorDistancia, paraCoords, type PontoDoProfissional } from "@/lib/match/geo";
@@ -124,6 +125,10 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
       nomeEmpresa = minha?.nomeFantasia ?? null;
     }
   }
+  // Empresas que curtiram o perfil no Descobrir. A empresa que está olhando vê
+  // só o número; o admin vê quais empresas e em que vagas.
+  const interesse = await empresasInteressadas(prof._id).catch(() => []);
+
   const atualizadoEm = prof.updatedAt ? new Date(prof.updatedAt).toLocaleDateString("pt-BR") : null;
   const ativoEm = prof.match?.ultimaAtividade ?? prof.updatedAt;
   const ativoEmTexto = ativoEm ? new Date(ativoEm).toLocaleDateString("pt-BR") : null;
@@ -237,6 +242,15 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                     {idade} anos
                   </span>
                 )}
+                <span
+                  className={`flex items-center gap-1 ${interesse.length ? "text-white font-medium" : "text-white/60"}`}
+                  title="Empresas que curtiram este perfil no Descobrir (cada empresa conta uma vez)"
+                >
+                  <Heart className="h-3.5 w-3.5" />
+                  {interesse.length === 0
+                    ? "Nenhuma empresa se interessou ainda"
+                    : `${interesse.length} empresa${interesse.length > 1 ? "s" : ""} se interessou${interesse.length > 1 ? "ram" : ""} pelo perfil`}
+                </span>
               </div>
 
               <div className="mt-4">
@@ -287,6 +301,36 @@ export default async function PerfilProfissionalPage({ params }: { params: { id:
                   não informado. O cadastro só passou a pedir endereço e nascimento agora; a pessoa preenche em Perfil → Editar.
                 </p>
               )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quais empresas: só o admin, para não expor uma empresa à concorrente. */}
+        {ehAdmin && interesse.length > 0 && (
+          <Card className="border-dashed">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="h-4 w-4 text-primary" />
+                Empresas interessadas <span className="text-xs font-normal text-muted-foreground">(visível só para o admin)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="divide-y">
+                {interesse.map((e) => (
+                  <li key={e.empresaId} className="py-2 text-sm flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span className="text-xs text-muted-foreground w-20 shrink-0">{new Date(e.em).toLocaleDateString("pt-BR")}</span>
+                    <span className="font-medium">{e.nome || "(empresa sem nome)"}</span>
+                    <span className="text-xs text-muted-foreground">
+                      em {e.vagas.map((v, i) => (
+                        <span key={v.vagaId}>
+                          {i > 0 && ", "}
+                          <Link href={`/admin/vagas/${v.vagaId}`} className="underline underline-offset-2 hover:text-primary">{v.titulo}</Link>
+                        </span>
+                      ))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
         )}

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isValidObjectId } from "mongoose";
-import { ArrowLeft, Briefcase, Building2, Clock, ExternalLink, History, MapPin, Users } from "lucide-react";
+import { ArrowLeft, Briefcase, Building2, Clock, ExternalLink, Heart, History, MapPin, Users } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { labelEspecialidade } from "@/constants/especialidades";
 import { AFIRMATIVAS, ESCALAS, TURNOS } from "@/constants/match";
 import { LABEL_STATUS_VAGA, type StatusVaga } from "@/lib/vagas-estado";
 import { COR_STATUS_VAGA } from "@/lib/vagas-estado";
 import { historicoDaVaga } from "@/lib/servicos/historico-vaga";
+import { interessadosNaVaga } from "@/lib/servicos/interesse";
 import Candidatura from "@/models/Candidatura";
 import Empresa from "@/models/Empresa";
 import Match from "@/models/Match";
@@ -26,6 +27,11 @@ const AUTOR_LABEL: Record<string, string> = {
   sistema: "Sistema",
   redesa: "RedeSA",
   profissional: "Profissional",
+};
+const VIA_LABEL: Record<string, string> = {
+  descobrir: "curtiu no Descobrir",
+  candidatura: "candidatou-se",
+  ambos: "curtiu e candidatou-se",
 };
 const ACAO_COR: Record<string, string> = {
   criada: "bg-green-100 text-green-700",
@@ -100,11 +106,12 @@ export default async function AdminVagaPage({ params }: { params: { id: string }
   const vaga: any = await Vaga.findById(params.id).lean();
   if (!vaga) notFound();
 
-  const [empresa, candidaturas, matches, historico] = await Promise.all([
+  const [empresa, candidaturas, matches, historico, interessados] = await Promise.all([
     Empresa.findById(vaga.empresaId).select("nomeFantasia slug cidade estado email telefone").lean(),
     Candidatura.countDocuments({ vagaId: vaga._id }),
     Match.countDocuments({ vagaId: vaga._id }),
     historicoDaVaga(vaga._id),
+    interessadosNaVaga(vaga._id),
   ]);
 
   const status = vaga.status as StatusVaga;
@@ -134,10 +141,11 @@ export default async function AdminVagaPage({ params }: { params: { id: string }
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 text-sm">
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Criada</p><p className="font-semibold">{dataHora(vaga.createdAt)}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Última alteração</p><p className="font-semibold">{dataHora(vaga.updatedAt)}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Válida até</p><p className="font-semibold">{data(vaga.expiresAt)}</p></CardContent></Card>
+        <Card className={interessados.length ? "border-primary/40" : ""}><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Interessados</p><p className="font-semibold text-primary">{interessados.length}</p></CardContent></Card>
         <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Candidaturas · matches</p><p className="font-semibold">{candidaturas} · {matches}</p></CardContent></Card>
       </div>
 
@@ -210,9 +218,33 @@ export default async function AdminVagaPage({ params }: { params: { id: string }
         <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-primary" />Métricas</CardTitle></CardHeader>
         <CardContent>
           <Linha rotulo="Visualizações">{vaga.visualizacoes ?? 0}{vaga.ultimaVisualizacaoEm ? ` · última em ${dataHora(vaga.ultimaVisualizacaoEm)}` : ""}</Linha>
+          <Linha rotulo="Interessados">{interessados.length} <span className="text-xs text-muted-foreground">(curtiram ou se candidataram; cada pessoa conta uma vez)</span></Linha>
           <Linha rotulo="Candidaturas">{candidaturas}</Linha>
           <Linha rotulo="Curtidas recebidas">{vaga.match?.totalLikesRecebidos ?? 0}</Linha>
           <Linha rotulo="Matches">{matches}</Linha>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2"><Heart className="h-4 w-4 text-primary" />Quem se interessou</CardTitle>
+          <p className="text-xs text-muted-foreground">Profissionais que curtiram a vaga no Descobrir ou se candidataram pelo site.</p>
+        </CardHeader>
+        <CardContent>
+          {interessados.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Ninguém ainda.</p>
+          ) : (
+            <ul className="divide-y">
+              {interessados.map((i) => (
+                <li key={i.profissionalId} className="py-2 text-sm flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0">{dataHora(i.em)}</span>
+                  <Link href={`/profissionais/${i.profissionalId}`} className="font-medium text-primary hover:underline">{i.nome || "(sem nome)"}</Link>
+                  {(i.cidade || i.estado) && <span className="text-xs text-muted-foreground">{[i.cidade, i.estado].filter(Boolean).join("/")}</span>}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{VIA_LABEL[i.via]}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
 

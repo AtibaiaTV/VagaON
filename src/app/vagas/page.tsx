@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ESPECIALIDADES } from "@/constants/especialidades";
-import { MapPin, Clock, Plus, Briefcase } from "lucide-react";
+import { MapPin, Clock, Plus, Briefcase, Heart } from "lucide-react";
+import { contarInteressadosPorVaga } from "@/lib/servicos/interesse";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import VagasListaPublica from "@/components/vagas/VagasListaPublica";
@@ -57,6 +58,7 @@ export default async function VagasPage() {
 
   let vagas: VagaPopulada[] = [];
   let isEmpresa = false;
+  let interessados = new Map<string, number>();
 
   if (session?.user.role === "empresa") {
     isEmpresa = true;
@@ -67,6 +69,7 @@ export default async function VagasPage() {
         .populate("empresaId", "nomeFantasia cidade estado")
         .lean();
       vagas = JSON.parse(JSON.stringify(raw));
+      interessados = await contarInteressadosPorVaga(raw.map((v) => v._id)).catch(() => new Map());
     }
   }
 
@@ -152,6 +155,11 @@ export default async function VagasPage() {
                           )}
                         </span>
                         <span className="flex items-center gap-1 shrink-0">
+                          <span className={`flex items-center gap-1 ${(interessados.get(vaga._id) ?? 0) > 0 ? "text-primary font-semibold" : ""}`} title="Profissionais que curtiram no Descobrir ou se candidataram">
+                            <Heart className="h-3 w-3" />
+                            {interessados.get(vaga._id) ?? 0} interessado(s)
+                          </span>
+                          {" · "}
                           <Clock className="h-3 w-3" />
                           {vaga.totalCandidaturas} candidatura(s)
                           {(vaga.preenchidas ?? 0) > 0 && ` · ${vaga.preenchidas}/${vaga.posicoes ?? 1} contratada(s)`}
