@@ -21,6 +21,18 @@ interface StatCardProps {
   cor: string;
 }
 
+/** "18/09 20:46" no horário de Brasília — o servidor da Vercel roda em UTC. */
+function formatarDataHora(d: Date | string | null | undefined): string {
+  if (!d) return "";
+  return new Date(d).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
 function StatCard({ titulo, valor, icone: Icone, descricao, cor }: StatCardProps) {
   return (
     <Card>
@@ -152,6 +164,9 @@ export default async function AdminDashboardPage() {
                   <p className="text-xs text-muted-foreground">{u.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground" title="Data e hora do cadastro (horário de Brasília)">
+                    {formatarDataHora(u.createdAt as Date)}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {ROLE_LABEL[u.role as string]}
                   </span>
