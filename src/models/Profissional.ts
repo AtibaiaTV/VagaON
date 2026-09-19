@@ -102,6 +102,8 @@ export interface IProfissional extends Document {
     avisoInatividadeEm: Date | null;
     /** Último resumo semanal de vagas enviado (cron). */
     resumoSemanalEm: Date | null;
+    /** Campanha "perfil sem cidade" (admin): quando este perfil foi avisado. Uma vez só. */
+    avisoSemCidadeEm: Date | null;
   };
   /** Agregado das avaliações publicadas recebidas de empresas. Recalculado a cada publicação. */
   reputacao: {
@@ -237,6 +239,7 @@ const ProfissionalSchema = new Schema<IProfissional>(
       ultimaAtividade: { type: Date, default: null },
       avisoInatividadeEm: { type: Date, default: null },
       resumoSemanalEm: { type: Date, default: null },
+      avisoSemCidadeEm: { type: Date, default: null },
     },
     reputacao: {
       media: { type: Number, default: null },

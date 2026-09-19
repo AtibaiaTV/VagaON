@@ -6,6 +6,7 @@ import { ArrowDownLeft, ArrowUpRight, KeyRound, Loader2, RefreshCw, Send, Webhoo
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import CampanhaSemCidade from "./CampanhaSemCidade";
 
 interface Mensagem {
   id: string;
@@ -265,6 +266,8 @@ export default function AdminWhatsAppPage() {
           </CardContent>
         </Card>
       </div>
+
+      <CampanhaSemCidade configurado={Boolean(dados?.configurado)} />
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
