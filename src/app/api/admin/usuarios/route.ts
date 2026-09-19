@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import { contarEmpresasPorProfissional } from "@/lib/servicos/interesse";
 
 export async function GET() {
   try {
@@ -21,7 +22,15 @@ export async function GET() {
       .allowDiskUse(true)
       .lean();
 
-    return NextResponse.json(usuarios);
+    // Quantas empresas curtiram cada profissional (profileId = Profissional._id).
+    const interesse = await contarEmpresasPorProfissional().catch(() => new Map<string, number>());
+    const resultado = usuarios.map((u) => ({
+      ...u,
+      empresasInteressadas:
+        u.role === "profissional" && u.profileId ? (interesse.get(String(u.profileId)) ?? 0) : null,
+    }));
+
+    return NextResponse.json(resultado);
   } catch (err) {
     // Rota só de admin: a mensagem real ajuda a diagnosticar e não vaza para usuário comum.
     console.error("[admin/usuarios]", err);

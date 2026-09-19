@@ -5,6 +5,7 @@ import Match from "@/models/Match";
 import Swipe from "@/models/Swipe";
 import Vaga from "@/models/Vaga";
 import { LIMITE_LIKES_DIA } from "@/constants/match";
+import { contarInteressadosPorVaga } from "./interesse";
 
 /**
  * Números do painel. Tudo vem do que já é gravado (Swipe, Match, Candidatura,
@@ -20,6 +21,8 @@ export interface LinhaVaga {
   status: string;
   visualizacoes: number;
   likes: number;
+  /** Profissionais distintos que curtiram ou se candidataram. */
+  interessados: number;
   matches: number;
   candidaturas: number;
 }
@@ -29,6 +32,8 @@ export interface MetricasEmpresa {
   visualizacoes: number;
   candidaturas: number;
   likesRecebidos: number;
+  /** Soma de interessados por vaga (quem se interessou por duas vagas conta duas vezes). */
+  interessados: number;
   matches: number;
   contratacoes: number;
   /** Do match ao "contratado", em dias. null sem contratações. */
@@ -50,6 +55,7 @@ export async function metricasEmpresa(empresaId: Types.ObjectId | string): Promi
     Match.countDocuments({ empresaId }),
     Candidatura.countDocuments({ empresaId }),
   ]);
+  const interessadosPorVaga = await contarInteressadosPorVaga(vagas.map((v) => v._id));
 
   const porVaga: LinhaVaga[] = vagas
     .map((v) => ({
@@ -59,11 +65,12 @@ export async function metricasEmpresa(empresaId: Types.ObjectId | string): Promi
       status: v.status,
       visualizacoes: v.visualizacoes ?? 0,
       likes: v.match?.totalLikesRecebidos ?? 0,
+      interessados: interessadosPorVaga.get(String(v._id)) ?? 0,
       matches: matchesPorVaga.get(String(v._id)) ?? 0,
       candidaturas: v.totalCandidaturas ?? 0,
     }))
     // Ativas primeiro; dentro, por interesse recebido.
-    .sort((a, b) => Number(b.status === "ativa") - Number(a.status === "ativa") || b.likes - a.likes || b.visualizacoes - a.visualizacoes);
+    .sort((a, b) => Number(b.status === "ativa") - Number(a.status === "ativa") || b.interessados - a.interessados || b.visualizacoes - a.visualizacoes);
 
   const tempoMedio = contratados.length
     ? Math.round(
@@ -78,6 +85,7 @@ export async function metricasEmpresa(empresaId: Types.ObjectId | string): Promi
     visualizacoes: porVaga.reduce((a, v) => a + v.visualizacoes, 0),
     candidaturas,
     likesRecebidos: porVaga.reduce((a, v) => a + v.likes, 0),
+    interessados: porVaga.reduce((a, v) => a + v.interessados, 0),
     matches: totalMatches,
     contratacoes: contratados.length,
     tempoMedioContratacaoDias: tempoMedio,
@@ -107,7 +115,8 @@ export async function metricasProfissional(
 
   const [avaliado, curtido, matchesAtivos, candidaturas, likesHoje] = await Promise.all([
     Swipe.countDocuments({ profissionalId, autorTipo: "empresa" }),
-    Swipe.countDocuments({ profissionalId, autorTipo: "empresa", direcao: { $in: ["like", "super"] } }),
+    // Empresas distintas: uma empresa que curtiu em três vagas conta uma vez.
+    Swipe.distinct("empresaId", { profissionalId, autorTipo: "empresa", direcao: { $in: ["like", "super"] } }).then((r) => r.length),
     Match.countDocuments({ profissionalId, status: { $ne: "encerrado" } }),
     Candidatura.countDocuments({ profissionalId }),
     Swipe.countDocuments({

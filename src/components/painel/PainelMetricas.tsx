@@ -52,7 +52,7 @@ export default function PainelMetricas({ tiles, porVaga }: { tiles: Tile[]; porV
                 <tr>
                   <th className="text-left px-4 py-2 font-semibold">Vaga</th>
                   <th className="text-right px-3 py-2 font-semibold">Views</th>
-                  <th className="text-right px-3 py-2 font-semibold">Curtidas</th>
+                  <th className="text-right px-3 py-2 font-semibold" title="Profissionais que curtiram no Descobrir ou se candidataram">Interessados</th>
                   <th className="text-right px-3 py-2 font-semibold">Matches</th>
                   <th className="text-right px-4 py-2 font-semibold">Candid.</th>
                 </tr>
@@ -69,7 +69,7 @@ export default function PainelMetricas({ tiles, porVaga }: { tiles: Tile[]; porV
                       </span>
                     </td>
                     <td className="text-right px-3 py-2.5 tabular-nums">{v.visualizacoes}</td>
-                    <td className="text-right px-3 py-2.5 tabular-nums font-semibold text-primary">{v.likes}</td>
+                    <td className="text-right px-3 py-2.5 tabular-nums font-semibold text-primary">{v.interessados}</td>
                     <td className="text-right px-3 py-2.5 tabular-nums">{v.matches}</td>
                     <td className="text-right px-4 py-2.5 tabular-nums">{v.candidaturas}</td>
                   </tr>

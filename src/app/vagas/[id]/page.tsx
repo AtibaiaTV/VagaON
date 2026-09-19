@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ESPECIALIDADES } from "@/constants/especialidades";
 import { labelAfirmativa } from "@/constants/match";
-import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink, HeartHandshake, RefreshCw, Eye, Navigation } from "lucide-react";
+import { MapPin, Building2, ArrowLeft, Calendar, Users, Briefcase, Clock, CheckCircle, BadgeCheck, ExternalLink, Heart, HeartHandshake, RefreshCw, Eye, Navigation } from "lucide-react";
 import { distanciaKm, paraCoords } from "@/lib/match/geo";
 import { geocodificarCidade } from "@/constants/municipios";
 import BotaoCandidatar from "./BotaoCandidatar";
@@ -22,6 +22,7 @@ import { AVISO_STATUS_VAGA, type StatusVaga } from "@/lib/vagas-estado";
 import AcoesVaga from "@/components/vagas/AcoesVaga";
 import Empresa from "@/models/Empresa";
 import { papelNaEmpresa } from "@/lib/servicos/equipe";
+import { contarInteressadosPorVaga } from "@/lib/servicos/interesse";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -105,6 +106,12 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
   if (!isDonoEmpresa && session?.user.role !== "admin") {
     await Vaga.updateOne({ _id: vaga._id }, { $inc: { visualizacoes: 1 }, $set: { ultimaVisualizacaoEm: new Date() } });
   }
+
+  // Quem pode ver o interesse na vaga: a empresa dona (e gerentes) e o admin.
+  const veInteresse = isDonoEmpresa || session?.user.role === "admin";
+  const interessados = veInteresse
+    ? ((await contarInteressadosPorVaga([vaga._id]).catch(() => new Map())).get(String(vaga._id)) ?? 0)
+    : null;
 
   const empresa = vaga.empresaId as EmpresaPopulada;
   const vagaObj = JSON.parse(JSON.stringify(vaga));
@@ -211,6 +218,11 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
                 <p className="text-white/60 text-xs mt-1 flex items-center gap-1 sm:justify-end">
                   <Users className="h-3 w-3" />{vagaObj.totalCandidaturas} candidatura(s)
                 </p>
+                {interessados !== null && (
+                  <p className="text-white text-xs mt-1 flex items-center gap-1 sm:justify-end font-medium" title="Profissionais que curtiram no Descobrir ou se candidataram (cada pessoa conta uma vez)">
+                    <Heart className="h-3 w-3" />{interessados} profissional(is) interessado(s)
+                  </p>
+                )}
               </div>
             </div>
 

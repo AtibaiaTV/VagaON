@@ -19,6 +19,8 @@ interface Usuario {
   createdAt: string;
   /** Profissional ou Empresa ligado à conta; null se ainda não completou o perfil. */
   profileId: string | null;
+  /** Empresas distintas que curtiram o perfil; null para quem não é profissional. */
+  empresasInteressadas?: number | null;
 }
 
 interface FormEdicao {
@@ -175,6 +177,7 @@ export default function AdminUsuariosPage() {
                     <th className="text-left py-3 pr-4">Perfil</th>
                     <th className="text-left py-3 pr-4">Status</th>
                     <th className="text-left py-3 pr-4">Cadastro</th>
+                    <th className="text-left py-3 pr-4" title="Empresas que curtiram o perfil no Descobrir">Interesse</th>
                     <th className="text-right py-3">Ações</th>
                   </tr>
                 </thead>
@@ -196,6 +199,18 @@ export default function AdminUsuariosPage() {
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
                         {new Date(u.createdAt).toLocaleDateString("pt-BR")}
+                      </td>
+                      <td className="py-3 pr-4 text-center">
+                        {u.empresasInteressadas === null || u.empresasInteressadas === undefined ? (
+                          <span className="text-muted-foreground/50">—</span>
+                        ) : (
+                          <span
+                            className={u.empresasInteressadas > 0 ? "font-semibold text-primary" : "text-muted-foreground"}
+                            title={`${u.empresasInteressadas} empresa(s) curtiram este perfil`}
+                          >
+                            {u.empresasInteressadas}
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-2">

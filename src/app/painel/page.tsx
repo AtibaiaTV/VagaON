@@ -38,7 +38,7 @@ async function montarMetricas(
       tiles: [
         { rotulo: "Vagas ativas", valor: m.vagasAtivas },
         { rotulo: "Visualizações", valor: m.visualizacoes, dica: "nas suas vagas" },
-        { rotulo: "Curtidas", valor: m.likesRecebidos, dica: "profissionais interessados" },
+        { rotulo: "Interessados", valor: m.interessados, dica: "curtiram ou se candidataram às suas vagas" },
         { rotulo: "Matches", valor: m.matches, destaque: true },
         { rotulo: "Candidaturas", valor: m.candidaturas },
         {
@@ -59,7 +59,7 @@ async function montarMetricas(
     return {
       tiles: [
         { rotulo: "Empresas que viram você", valor: m.avaliadoPorEmpresas, dica: "no Descobrir" },
-        { rotulo: "Curtiram seu perfil", valor: m.curtidoPorEmpresas },
+        { rotulo: "Empresas interessadas", valor: m.curtidoPorEmpresas, dica: "curtiram seu perfil" },
         { rotulo: "Matches ativos", valor: m.matchesAtivos, destaque: true },
         { rotulo: "Candidaturas", valor: m.candidaturas },
         { rotulo: "Likes hoje", valor: `${m.likesUsadosHoje}/${m.limiteLikesDia}` },
