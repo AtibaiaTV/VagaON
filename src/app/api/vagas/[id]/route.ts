@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import Vaga from "@/models/Vaga";
 import Empresa from "@/models/Empresa";
 import { filtroEmpresaDoUsuario } from "@/lib/servicos/equipe";
+import { diffVaga, registrarHistoricoVaga } from "@/lib/servicos/historico-vaga";
 import { sanitizarPerguntas } from "@/lib/triagem";
 
 export async function GET(
@@ -63,6 +64,14 @@ export async function PUT(
     if (body.perguntasTriagem !== undefined) atualizacao.perguntasTriagem = sanitizarPerguntas(body.perguntasTriagem);
 
     const atualizada = await Vaga.findByIdAndUpdate(params.id, { $set: atualizacao }, { new: true });
+    const mudancas = diffVaga(vaga.toObject(), atualizacao);
+    await registrarHistoricoVaga(
+      params.id,
+      "editada",
+      { tipo: "empresa", userId: session.user.id, nome: session.user.name ?? "" },
+      mudancas.length ? `${mudancas.length} campo(s) alterado(s)` : "salva sem mudanças",
+      mudancas
+    );
     return NextResponse.json(atualizada);
   } catch {
     return NextResponse.json({ error: "Erro interno." }, { status: 500 });
@@ -89,6 +98,12 @@ export async function DELETE(
     }
 
     await Vaga.findByIdAndUpdate(params.id, { status: "encerrada" });
+    await registrarHistoricoVaga(
+      params.id,
+      "status",
+      { tipo: "empresa", userId: session.user.id, nome: session.user.name ?? "" },
+      `${vaga.status} → encerrada`
+    );
     return NextResponse.json({ message: "Vaga encerrada." });
   } catch {
     return NextResponse.json({ error: "Erro interno." }, { status: 500 });

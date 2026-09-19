@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import Empresa from "@/models/Empresa";
 import Vaga, { IVaga } from "@/models/Vaga";
 import { inferirEspecialidade } from "@/lib/especialidade-inferida";
+import { diffVaga, REDESA, registrarHistoricoVaga } from "@/lib/servicos/historico-vaga";
 
 // Apenas os campos de negócio que a Redesa conhece — sem metadados do Mongoose
 function toRedesaShape(vaga: IVaga) {
@@ -68,12 +69,15 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       update.especialidade = inferirEspecialidade(String(body?.titulo ?? ""), update.especialidade, update.especialidade);
     }
 
+    const antes = await Vaga.findOne({ _id: params.id, empresaId: empresa._id }).lean();
     const vaga = await Vaga.findOneAndUpdate(
       { _id: params.id, empresaId: empresa._id },
       { $set: update },
       { new: true }
     );
     if (!vaga) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
+    const mudancas = antes ? diffVaga(antes, update) : [];
+    await registrarHistoricoVaga(vaga._id, "editada", REDESA, mudancas.length ? `${mudancas.length} campo(s) alterado(s) pela RedeSA` : "sincronizada pela RedeSA", mudancas);
 
     return NextResponse.json(toRedesaShape(vaga));
   } catch (err) {
@@ -91,10 +95,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const empresa = await Empresa.findOne({ redesaId: payload.establishmentId });
     if (!empresa) return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
 
-    await Vaga.findOneAndUpdate(
+    const antes = await Vaga.findOneAndUpdate(
       { _id: params.id, empresaId: empresa._id },
       { status: "encerrada" }
     );
+    if (antes) await registrarHistoricoVaga(antes._id, "status", REDESA, `${antes.status} → encerrada (pela RedeSA)`);
 
     return new NextResponse(null, { status: 204 });
   } catch (err) {

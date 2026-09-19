@@ -11,6 +11,7 @@ import { verificarLimiteVagas } from "@/lib/servicos/planos";
 import { expiracaoInicial } from "@/lib/servicos/vagas";
 import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
 import { especialidadeValida } from "@/lib/especialidade-inferida";
+import { registrarHistoricoVaga } from "@/lib/servicos/historico-vaga";
 
 const SUPER_CATEGORIAS_MAP: Record<string, string[]> = {
   gastronomia: ["cozinha", "bar", "salao"],
@@ -141,6 +142,7 @@ export async function POST(req: NextRequest) {
       perguntasTriagem: sanitizarPerguntas(perguntasTriagem),
     });
 
+    await registrarHistoricoVaga(vaga._id, "criada", { tipo: "empresa", userId: session.user.id, nome: session.user.name ?? "" }, "publicada pelo formulário");
     // Aguardado: a função da Vercel encerra ao responder. Nunca lança.
     await alertarSemFalhar(vaga._id, "publicacao");
 
