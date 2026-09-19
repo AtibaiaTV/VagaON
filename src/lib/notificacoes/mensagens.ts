@@ -208,6 +208,20 @@ export function msgVagaNovaCombina(p: {
   };
 }
 
+// ─── Campanha: perfil sem cidade (admin) ────────────────────────────────────
+
+export function msgPerfilSemCidade(): MensagemNotificacao {
+  return {
+    categoria: "sistema",
+    titulo: "Seu perfil está sem cidade",
+    corpo:
+      "As empresas procuram candidatos por cidade e distância, e o seu perfil no VagaON está sem cidade — por isso ele quase não aparece. " +
+      "Informe sua cidade e aproveite para completar o resto: funções, experiências, disponibilidade e foto. " +
+      "Quanto mais completo o perfil, mais alto você aparece para as empresas e mais chance de dar match.",
+    url: "/perfil/editar#cidade",
+  };
+}
+
 // ─── Engajamento (cron) ─────────────────────────────────────────────────────
 
 export function msgMatchParado(p: {
