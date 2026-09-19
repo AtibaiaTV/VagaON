@@ -267,7 +267,7 @@ export default function AdminWhatsAppPage() {
         </Card>
       </div>
 
-      <CampanhaSemCidade configurado={Boolean(dados?.configurado)} />
+      <CampanhaSemCidade configurado={Boolean(dados?.configurado)} onEnviado={() => void carregar()} />
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
