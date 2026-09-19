@@ -188,9 +188,13 @@ export default function AdminWhatsAppPage() {
               <p className={`mt-2 text-sm ${resultadoTeste.ok ? "text-emerald-700" : "text-red-700"}`}>{resultadoTeste.texto}</p>
             )}
 
-            {/* Registro do número na Cloud API: passo único, exigido depois de
-                adicionar o número na conta. Sem ele: "(#133010) Account not registered". */}
-            <div className="mt-4 pt-4 border-t">
+            {/* Ferramentas de ativação (registro do número e assinatura na WABA):
+                usadas uma vez; ficam recolhidas para não poluir o dia a dia. */}
+            <details className="mt-4 pt-3 border-t">
+              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                Configuração do número (só na ativação ou se o envio falhar)
+              </summary>
+            <div className="mt-3">
               <p className="text-sm font-semibold">Registrar número na API</p>
               <p className="text-xs text-muted-foreground mt-0.5 mb-2">
                 Só na primeira vez, ou se o envio responder <code>#133010 Account not registered</code>. O PIN de 6
@@ -241,6 +245,7 @@ export default function AdminWhatsAppPage() {
                 <pre className={`mt-2 text-xs whitespace-pre-wrap break-all rounded-lg p-2 ${resultadoWaba.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>{resultadoWaba.texto}</pre>
               )}
             </div>
+            </details>
           </CardContent>
         </Card>
 
