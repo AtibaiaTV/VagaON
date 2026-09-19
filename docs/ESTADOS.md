@@ -9,24 +9,26 @@ a pessoa decidir.
 
 | Estado | Aparece no Descobrir, site e Google | Funil, chats e candidaturas | Quem leva até aqui |
 |---|---|---|---|
-| `ativa` | sim | sim | publicação, Reativar, Renovar |
+| `ativa` | sim | sim | publicação, Reativar |
 | `pausada` | não | sim | empresa (Pausar) |
 | `preenchida` | não | sim | empresa (Marcar como preenchida) |
 | `encerrada` | não | sim | empresa (Encerrar) |
-| `expirada` | não | sim | cron, por prazo |
+| `expirada` | não | sim | legado (o cron expirava por prazo até 18/09/2026); reativável |
 | `rascunho` / `rejeitada` | não | — | já existiam (admin) |
 
 Transições e rótulos em `src/lib/vagas-estado.ts` (puro). Botões na página da
 vaga, para a empresa dona (`AcoesVaga`): Pausar, Reativar, Marcar como
-preenchida, Encerrar, Renovar por 30 dias. API: `PATCH /api/vagas/[id]/status
+preenchida, Encerrar. API: `PATCH /api/vagas/[id]/status
 { acao }`. Fechar (preenchida/encerrada) avisa quem ainda estava no funil
 (candidaturas enviada/visualizada/em análise/entrevista, até 200).
 
-**Validade.** Vaga CLT vale 60 dias; temporária ou sazonal vale até a data de
-término (`expiresAt`, definido na criação). O cron avisa 3 dias antes
-("Renovar por 30 dias" em um clique) e expira o que venceu, avisando a
-empresa. Reativar dá validade nova. Vagas antigas sem validade recebem a
-natural, com carência mínima de 7 dias, na primeira rodada do cron.
+**Sem prazo.** A vaga não expira sozinha: fica no ar até a empresa pausar,
+encerrar, marcar como preenchida ou excluir (decisão de 18/09/2026). Não há
+mais aviso de "expira em 3 dias" nem "Renovar". `expiresAt` e
+`expiraAvisoEm` ficam no modelo só por legado; o passo `vagas` do cron zera o
+que ainda tiver valor, e nada lê esses campos para tirar a vaga do ar. Para o
+Google for Jobs, `validThrough` é a data de término (temporária/sazonal) ou
+uma janela móvel de 60 dias a partir da renderização.
 
 **Contratação.** Cada "contratado" no chat ou "aprovada" no funil soma em
 `preenchidas`. Ao chegar em `posicoes`, a empresa recebe "Marcar a vaga como
@@ -57,7 +59,7 @@ antigo sem nenhuma atividade usa a data da última edição.
 
 O plano Hobby da Vercel permite dois crons. `vercel.json` aponta para
 `/api/cron/manutencao` (12:30 UTC), que roda em sequência: convites e
-publicação de avaliações, validade das vagas, inatividade. Cada passo é
+publicação de avaliações, limpeza de validade herdada, inatividade. Cada passo é
 isolado e idempotente; a resposta traz as contagens. A rota antiga
 `/api/cron/avaliacoes` continua existindo para chamadas manuais.
 
@@ -65,5 +67,5 @@ isolado e idempotente; a resposta traz as contagens. A rota antiga
 
 `/dev/estados` (fora de produção): a barra de ações em cada estado da vaga e
 o card de visibilidade nas quatro situações. Os cliques chamam a API real e
-falham sem sessão — é só visual. As transições e a validade têm testes puros
-no script de fumaça.
+falham sem sessão — é só visual. As transições têm testes puros no script de
+fumaça.

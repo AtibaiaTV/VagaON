@@ -14,7 +14,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import VagasListaPublica from "@/components/vagas/VagasListaPublica";
 import BrandBand from "@/components/shared/BrandBand";
-import { COR_STATUS_VAGA, LABEL_STATUS_VAGA, diasAte, type StatusVaga } from "@/lib/vagas-estado";
+import { COR_STATUS_VAGA, LABEL_STATUS_VAGA, type StatusVaga } from "@/lib/vagas-estado";
 import { cidadesComVagas } from "@/lib/servicos/paginas-vagas";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -35,7 +35,6 @@ interface VagaPopulada {
   estado: string;
   status: StatusVaga;
   totalCandidaturas: number;
-  expiresAt?: string | null;
   preenchidas?: number;
   posicoes?: number;
   createdAt: string;
@@ -148,11 +147,6 @@ export default async function VagasPage() {
                           <span className={`font-semibold px-2 py-0.5 rounded-full ${COR_STATUS_VAGA[vaga.status] ?? "bg-muted"}`}>
                             {LABEL_STATUS_VAGA[vaga.status] ?? vaga.status}
                           </span>
-                          {vaga.status === "ativa" && diasAte(vaga.expiresAt) !== null && (
-                            <span className={`truncate ${(diasAte(vaga.expiresAt) ?? 99) <= 3 ? "text-amber-700 font-medium" : ""}`}>
-                              expira em {Math.max(0, diasAte(vaga.expiresAt) ?? 0)} dia(s)
-                            </span>
-                          )}
                         </span>
                         <span className="flex items-center gap-1 shrink-0">
                           <span className={`flex items-center gap-1 ${(interessados.get(vaga._id) ?? 0) > 0 ? "text-primary font-semibold" : ""}`} title="Profissionais que curtiram no Descobrir ou se candidataram">

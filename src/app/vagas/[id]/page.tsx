@@ -256,7 +256,6 @@ export default async function DetalheVagaPage({ params }: { params: { id: string
               <AcoesVaga
                 vagaId={params.id}
                 status={vagaObj.status as StatusVaga}
-                expiresAt={vagaObj.expiresAt ?? null}
                 preenchidas={vagaObj.preenchidas ?? 0}
                 posicoes={vagaObj.posicoes ?? 1}
               />

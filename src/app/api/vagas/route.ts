@@ -8,7 +8,6 @@ import { ESPECIALIDADES } from "@/constants/especialidades";
 import { sanitizarPerguntas } from "@/lib/triagem";
 import { ErroAtor } from "@/lib/servicos/erros";
 import { verificarLimiteVagas } from "@/lib/servicos/planos";
-import { expiracaoInicial } from "@/lib/servicos/vagas";
 import { alertarSemFalhar } from "@/lib/servicos/alerta-vaga";
 import { especialidadeValida } from "@/lib/especialidade-inferida";
 import { registrarHistoricoVaga } from "@/lib/servicos/historico-vaga";
@@ -129,8 +128,8 @@ export async function POST(req: NextRequest) {
       raioKm: Number.isFinite(Number(raioKm)) && Number(raioKm) > 0 ? Math.min(1000, Math.round(Number(raioKm))) : null,
       status: "ativa",
       aprovadaPorAdmin: true,
-      // 60 dias (CLT) ou a data de término; o cron avisa e expira.
-      expiresAt: expiracaoInicial({ tipo, periodo: periodo ?? null }),
+      // Sem prazo: a vaga fica no ar até a empresa pausar, encerrar ou excluir.
+      expiresAt: null,
       especialidadesAceitas: Array.isArray(especialidadesAceitas) ? especialidadesAceitas : [],
       anosExperienciaMin: Number(anosExperienciaMin) || 0,
       habilidadesDesejadas: Array.isArray(habilidadesDesejadas) ? habilidadesDesejadas : [],

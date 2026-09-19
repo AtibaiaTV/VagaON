@@ -72,10 +72,10 @@ export function montarOrganization(empresa: Doc) {
 
 export function montarJobPosting(vaga: Doc, empresa: Doc) {
   const criada = iso(vaga.createdAt) ?? new Date().toISOString();
-  const validade =
-    iso(vaga.expiresAt) ??
-    iso(vaga.periodo?.dataFim) ??
-    new Date(new Date(criada).getTime() + 60 * DIA_MS).toISOString();
+  // A vaga não expira por prazo; o Google exige validThrough, então informa a
+  // data de término (temporária/sazonal) ou uma janela móvel de 60 dias a
+  // partir de agora — a página é dinâmica, o valor anda junto com o tempo.
+  const validade = iso(vaga.periodo?.dataFim) ?? new Date(Date.now() + 60 * DIA_MS).toISOString();
 
   const descricao = [vaga.descricao, vaga.requisitos ? `Requisitos:\n${vaga.requisitos}` : ""]
     .filter(Boolean)

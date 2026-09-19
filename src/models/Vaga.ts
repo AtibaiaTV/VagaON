@@ -33,9 +33,9 @@ export interface IVaga extends Document {
   totalCandidaturas: number;
   visualizacoes: number;
   ultimaVisualizacaoEm: Date | null;
-  /** Validade: 60 dias (CLT) ou a data de término (temporária/sazonal). O cron expira. */
+  /** Legado: a vaga não expira mais por prazo (18/09/2026). O cron zera o que sobrou. */
   expiresAt: Date | null;
-  /** Quando o aviso "expira em 3 dias" foi enviado (uma vez por validade). */
+  /** Legado, junto com `expiresAt`. */
   expiraAvisoEm: Date | null;
   /** Alerta "vaga nova que combina com você" já disparado para os profissionais aderentes (uma vez por vaga). */
   alertaVagaNovaEm: Date | null;
@@ -156,7 +156,7 @@ VagaSchema.index({ createdAt: -1 });
 VagaSchema.index({ localizacao: "2dsphere" });
 // Deck do profissional: vagas ativas e abertas ao match.
 VagaSchema.index({ status: 1, "match.ativo": 1, especialidade: 1 });
-// Cron de expiração.
+// Legado da expiração por prazo (o cron ainda consulta para zerar).
 VagaSchema.index({ status: 1, expiresAt: 1 });
 
 // Mantém as coordenadas sincronizadas com cidade/estado.

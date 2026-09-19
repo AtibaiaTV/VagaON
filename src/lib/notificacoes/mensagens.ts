@@ -260,14 +260,12 @@ export function msgResumoSemanalEmpresa(p: {
   candidaturas: number;
   matchesNovos: number;
   matchesParados: number;
-  vagasExpirando: { titulo: string; dias: number }[];
   vagasAtivas: number;
 }): MensagemNotificacao {
   const linhas: string[] = [];
   if (p.candidaturas) linhas.push(`${p.candidaturas} candidatura${p.candidaturas === 1 ? "" : "s"} nova${p.candidaturas === 1 ? "" : "s"} nas suas vagas`);
   if (p.matchesNovos) linhas.push(`${p.matchesNovos} match${p.matchesNovos === 1 ? "" : "es"} novo${p.matchesNovos === 1 ? "" : "s"}`);
   if (p.matchesParados) linhas.push(`${p.matchesParados} match${p.matchesParados === 1 ? "" : "es"} sem nenhuma mensagem — responda antes que o candidato feche com outro`);
-  for (const v of p.vagasExpirando) linhas.push(`"${v.titulo}" expira em ${v.dias} dia${v.dias === 1 ? "" : "s"}`);
   return {
     categoria: "sistema",
     titulo: "Resumo da semana das suas vagas",
@@ -284,24 +282,6 @@ export function msgPosicoesPreenchidas(p: { vagaTitulo: string; vagaId: string; 
     categoria: "sistema",
     titulo: p.posicoes === 1 ? "Vaga preenchida?" : `As ${p.posicoes} posições foram preenchidas?`,
     corpo: `Você registrou ${p.posicoes === 1 ? "a contratação" : `${p.posicoes} contratações`} em "${p.vagaTitulo}". Marque a vaga como preenchida para parar de receber candidatos, ou deixe ativa para continuar.`,
-    url: `/vagas/${p.vagaId}`,
-  };
-}
-
-export function msgVagaExpirando(p: { vagaTitulo: string; vagaId: string; dias: number }): MensagemNotificacao {
-  return {
-    categoria: "sistema",
-    titulo: `Sua vaga expira em ${p.dias} dia${p.dias === 1 ? "" : "s"}`,
-    corpo: `"${p.vagaTitulo}" sai do ar em ${p.dias} dia${p.dias === 1 ? "" : "s"}. Se ainda está contratando, renove por mais 30 dias com um clique.`,
-    url: `/vagas/${p.vagaId}`,
-  };
-}
-
-export function msgVagaExpirada(p: { vagaTitulo: string; vagaId: string }): MensagemNotificacao {
-  return {
-    categoria: "sistema",
-    titulo: "Vaga expirada",
-    corpo: `"${p.vagaTitulo}" saiu do ar por prazo. Os candidatos e conversas continuam no funil; reative se ainda estiver contratando.`,
     url: `/vagas/${p.vagaId}`,
   };
 }

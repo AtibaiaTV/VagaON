@@ -1,26 +1,11 @@
 import { isValidObjectId } from "mongoose";
 import { connectDB } from "@/lib/db";
-import {
-  msgPosicoesPreenchidas,
-  msgVagaExpirada,
-  msgVagaExpirando,
-  msgVagaFechadaParaCandidato,
-  notificar,
-} from "@/lib/notificacoes";
-import {
-  DIAS_AVISO_EXPIRACAO,
-  calcularExpiracao,
-  diasAte,
-  expiracaoLegado,
-  proximoStatus,
-  renovarExpiracao,
-  type AcaoVaga,
-  type StatusVaga,
-} from "@/lib/vagas-estado";
+import { msgPosicoesPreenchidas, msgVagaFechadaParaCandidato, notificar } from "@/lib/notificacoes";
+import { proximoStatus, type AcaoVaga, type StatusVaga } from "@/lib/vagas-estado";
 import Candidatura from "@/models/Candidatura";
 import Vaga, { type IVaga } from "@/models/Vaga";
 import { ErroAtor } from "./erros";
-import { registrarHistoricoVaga, SISTEMA, type Autor } from "./historico-vaga";
+import { registrarHistoricoVaga, type Autor } from "./historico-vaga";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Doc = Record<string, any>;
@@ -67,8 +52,8 @@ export async function alterarStatusVaga(empresa: Doc, vagaId: string, acao: Acao
   vaga.status = novo;
 
   if (novo === "ativa") {
-    // Reabrir ou renovar: validade nova, aviso zerado.
-    vaga.expiresAt = acao === "renovar" ? renovarExpiracao(vaga.expiresAt, agora) : calcularExpiracao({ ...vaga.toObject(), createdAt: agora }, agora);
+    // Reabrir: volta ao ar sem prazo — a vaga só sai quando a empresa decidir.
+    vaga.expiresAt = null;
     vaga.expiraAvisoEm = null;
     vaga.encerradaEm = null;
   } else if (novo === "preenchida" || novo === "encerrada") {
@@ -79,7 +64,7 @@ export async function alterarStatusVaga(empresa: Doc, vagaId: string, acao: Acao
     vaga._id,
     "status",
     por ?? { tipo: "empresa", nome: empresa.nomeFantasia ?? "" },
-    `${anterior} → ${novo} (${acao})${novo === "ativa" && vaga.expiresAt ? ` · válida até ${vaga.expiresAt.toLocaleDateString("pt-BR")}` : ""}`
+    `${anterior} → ${novo} (${acao})`
   );
 
   if ((novo === "preenchida" || novo === "encerrada") && anterior !== novo) {
@@ -118,55 +103,21 @@ export async function registrarContratacao(vagaId: unknown): Promise<void> {
   }
 }
 
-/** Validade inicial de uma vaga recém-criada. */
-export function expiracaoInicial(vaga: { tipo: string; periodo?: { dataFim?: Date | string | null } | null }): Date {
-  return calcularExpiracao({ ...vaga, createdAt: new Date() });
-}
-
 export interface ResultadoManutencaoVagas {
-  validadeAtribuida: number;
-  avisadas: number;
-  expiradas: number;
+  validadeRemovida: number;
 }
 
 /**
- * Cron diário: dá validade a vagas antigas (com carência), avisa 3 dias
- * antes e expira o que venceu. Cada passo é idempotente.
+ * Cron diário. A vaga não expira mais por prazo (decisão de 18/09/2026: fica
+ * no ar até a empresa pausar, encerrar ou excluir). Este passo só garante que
+ * nenhuma vaga carregue validade herdada da regra antiga — idempotente, e
+ * zero na maioria dos dias.
  */
-export async function manutencaoVagas(agora: Date = new Date()): Promise<ResultadoManutencaoVagas> {
+export async function manutencaoVagas(): Promise<ResultadoManutencaoVagas> {
   await connectDB();
-  const r: ResultadoManutencaoVagas = { validadeAtribuida: 0, avisadas: 0, expiradas: 0 };
-
-  // 1. Vagas ativas sem validade (anteriores a esta regra).
-  const semValidade = await Vaga.find({ status: "ativa", expiresAt: null }).select("tipo periodo createdAt").lean();
-  for (const v of semValidade) {
-    const ate = expiracaoLegado(v, agora);
-    await Vaga.updateOne({ _id: v._id }, { $set: { expiresAt: ate } });
-    await registrarHistoricoVaga(v._id, "validade", SISTEMA, `validade atribuída até ${ate.toLocaleDateString("pt-BR")}`);
-    r.validadeAtribuida++;
-  }
-
-  // 2. Expira o que venceu.
-  const vencidas = await Vaga.find({ status: "ativa", expiresAt: { $lte: agora } }).select("titulo empresaId").lean();
-  for (const v of vencidas) {
-    await Vaga.updateOne({ _id: v._id }, { $set: { status: "expirada", encerradaEm: agora } });
-    await registrarHistoricoVaga(v._id, "expirada", SISTEMA, "ativa → expirada (validade vencida)");
-    await notificar({ tipo: "empresa", perfilId: v.empresaId }, msgVagaExpirada({ vagaTitulo: v.titulo, vagaId: String(v._id) }));
-    r.expiradas++;
-  }
-
-  // 3. Avisa quem expira em breve (uma vez por validade).
-  const limite = new Date(agora.getTime() + DIAS_AVISO_EXPIRACAO * 86_400_000);
-  const proximas = await Vaga.find({ status: "ativa", expiresAt: { $gt: agora, $lte: limite }, expiraAvisoEm: null })
-    .select("titulo empresaId expiresAt")
-    .lean();
-  for (const v of proximas) {
-    const dias = Math.max(1, diasAte(v.expiresAt, agora) ?? 1);
-    await notificar({ tipo: "empresa", perfilId: v.empresaId }, msgVagaExpirando({ vagaTitulo: v.titulo, vagaId: String(v._id), dias }));
-    await Vaga.updateOne({ _id: v._id }, { $set: { expiraAvisoEm: agora } });
-    await registrarHistoricoVaga(v._id, "aviso", SISTEMA, `empresa avisada: expira em ${dias} dia(s)`);
-    r.avisadas++;
-  }
-
-  return r;
+  const r = await Vaga.updateMany(
+    { $or: [{ expiresAt: { $ne: null } }, { expiraAvisoEm: { $ne: null } }] },
+    { $set: { expiresAt: null, expiraAvisoEm: null } }
+  );
+  return { validadeRemovida: r.modifiedCount };
 }

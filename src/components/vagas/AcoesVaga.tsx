@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarClock, CheckCircle2, Loader2, Pause, Play, RefreshCw, Users, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Pause, Play, Users, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   COR_STATUS_VAGA,
   LABEL_ACAO_VAGA,
   LABEL_STATUS_VAGA,
   acoesDisponiveis,
-  diasAte,
   type AcaoVaga,
   type StatusVaga,
 } from "@/lib/vagas-estado";
@@ -19,7 +18,6 @@ const ICONE: Record<AcaoVaga, typeof Pause> = {
   reativar: Play,
   preencher: CheckCircle2,
   encerrar: XCircle,
-  renovar: RefreshCw,
 };
 
 const ESTILO: Record<AcaoVaga, string> = {
@@ -27,7 +25,6 @@ const ESTILO: Record<AcaoVaga, string> = {
   reativar: "",
   preencher: "border-emerald-300 text-emerald-800 hover:bg-emerald-50",
   encerrar: "border-red-200 text-red-700 hover:bg-red-50",
-  renovar: "",
 };
 
 const CONFIRMACAO: Partial<Record<AcaoVaga, string>> = {
@@ -37,15 +34,15 @@ const CONFIRMACAO: Partial<Record<AcaoVaga, string>> = {
 
 interface Estado {
   status: StatusVaga;
-  expiresAt: string | null;
   preenchidas: number;
   posicoes: number;
 }
 
 /**
  * Estado da vaga e ações da empresa dona (pausar, reativar, marcar como
- * preenchida, encerrar, renovar). Cada clique chama a API e recarrega a
- * página, para o funil e os badges refletirem.
+ * preenchida, encerrar). Cada clique chama a API e recarrega a página, para
+ * o funil e os badges refletirem. A vaga não tem prazo: fica ativa até a
+ * empresa decidir.
  */
 export default function AcoesVaga({ vagaId, ...inicial }: { vagaId: string } & Estado) {
   const router = useRouter();
@@ -69,11 +66,10 @@ export default function AcoesVaga({ vagaId, ...inicial }: { vagaId: string } & E
       setErro(d?.error ?? "Não foi possível alterar a vaga.");
       return;
     }
-    setV({ status: d.status, expiresAt: d.expiresAt, preenchidas: d.preenchidas, posicoes: d.posicoes });
+    setV({ status: d.status, preenchidas: d.preenchidas, posicoes: d.posicoes });
     router.refresh();
   }
 
-  const dias = v.status === "ativa" ? diasAte(v.expiresAt) : null;
   const completa = v.preenchidas >= v.posicoes;
 
   return (
@@ -84,12 +80,8 @@ export default function AcoesVaga({ vagaId, ...inicial }: { vagaId: string } & E
           <Users className="h-3.5 w-3.5" />
           {v.preenchidas}/{v.posicoes} {v.posicoes === 1 ? "posição preenchida" : "posições preenchidas"}
         </span>
-        {dias !== null && (
-          <span className={`inline-flex items-center gap-1 ${dias <= 3 ? "text-amber-700 font-medium" : "text-muted-foreground"}`}>
-            <CalendarClock className="h-3.5 w-3.5" />
-            {dias <= 0 ? "expira hoje" : `expira em ${dias} dia${dias === 1 ? "" : "s"}`}
-            {v.expiresAt && ` (${new Date(v.expiresAt).toLocaleDateString("pt-BR")})`}
-          </span>
+        {v.status === "ativa" && (
+          <span className="text-xs text-muted-foreground" title="A vaga não expira sozinha">sem prazo · fica no ar até você pausar ou encerrar</span>
         )}
       </div>
 

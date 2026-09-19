@@ -5,7 +5,6 @@ import {
   msgResumoSemanalProfissional,
   notificar,
 } from "@/lib/notificacoes";
-import { diasAte } from "@/lib/vagas-estado";
 import Candidatura from "@/models/Candidatura";
 import Empresa from "@/models/Empresa";
 import Match from "@/models/Match";
@@ -83,7 +82,7 @@ export interface ResultadoResumoSemanal {
 
 /**
  * Segunda-feira (BRT): profissional recebe as vagas novas que combinam com
- * ele; empresa recebe candidaturas, matches e vagas expirando. Quem não tem
+ * ele; empresa recebe candidaturas, matches e matches parados. Quem não tem
  * nada de novo não recebe nada. Reexecutar no mesmo dia não duplica.
  */
 export async function enviarResumoSemanal(agora: Date = new Date()): Promise<ResultadoResumoSemanal> {
@@ -137,7 +136,7 @@ export async function enviarResumoSemanal(agora: Date = new Date()): Promise<Res
   for (const e of empresas) {
     try {
       const [vagasAtivas, candidaturas, matchesNovos, matchesParados] = await Promise.all([
-        Vaga.find({ empresaId: e._id, status: "ativa" }).select("titulo expiresAt").lean(),
+        Vaga.countDocuments({ empresaId: e._id, status: "ativa" }),
         Candidatura.countDocuments({ empresaId: e._id, createdAt: { $gte: semanaAtras } }),
         Match.countDocuments({ empresaId: e._id, createdAt: { $gte: semanaAtras } }),
         Match.countDocuments({
@@ -146,19 +145,14 @@ export async function enviarResumoSemanal(agora: Date = new Date()): Promise<Res
           $or: [{ ultimaMensagem: null }, { "ultimaMensagem.autorTipo": { $in: ["sistema", "profissional"] } }],
         }),
       ]);
-      const vagasExpirando = vagasAtivas
-        .map((v) => ({ titulo: v.titulo, dias: diasAte(v.expiresAt, agora) }))
-        .filter((v): v is { titulo: string; dias: number } => v.dias !== null && v.dias >= 0 && v.dias <= 7);
-
-      if (candidaturas || matchesNovos || matchesParados || vagasExpirando.length) {
+      if (candidaturas || matchesNovos || matchesParados) {
         await notificar(
           { tipo: "empresa", perfilId: e._id },
           msgResumoSemanalEmpresa({
             candidaturas,
             matchesNovos,
             matchesParados,
-            vagasExpirando,
-            vagasAtivas: vagasAtivas.length,
+            vagasAtivas,
           })
         );
         r.empresas++;

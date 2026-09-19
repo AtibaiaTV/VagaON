@@ -7,7 +7,7 @@ import { TRANSICOES_VAGA, type AcaoVaga } from "@/lib/vagas-estado";
 
 export const dynamic = "force-dynamic";
 
-// PATCH /api/vagas/[id]/status { acao: pausar | reativar | preencher | encerrar | renovar }
+// PATCH /api/vagas/[id]/status { acao: pausar | reativar | preencher | encerrar }
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const ator = await resolverAtor();

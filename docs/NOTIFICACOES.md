@@ -25,7 +25,7 @@ operação que a disparou. Tudo é aguardado (Vercel encerra a função ao respo
 | Nova candidatura pelo board | empresa | `api/vagas/[id]/candidaturas` POST |
 | Vaga nova que combina (na publicação) | até 10 profissionais com ≥ 55% de aderência | `servicos/alerta-vaga.ts`, chamado por `POST /api/vagas`, entrada rápida e `POST /api/redesa/vagas`; uma vez por vaga (`Vaga.alertaVagaNovaEm`) |
 | Match parado (48 h sem mensagem humana) | os dois lados, uma vez | cron `manutencao` → `servicos/engajamento.ts` |
-| Resumo semanal (segunda, BRT) | profissional: vagas novas que combinam; empresa: candidaturas, matches, matches parados, vagas expirando | cron `manutencao` → `servicos/engajamento.ts` |
+| Resumo semanal (segunda, BRT) | profissional: vagas novas que combinam; empresa: candidaturas, matches, matches parados | cron `manutencao` → `servicos/engajamento.ts` |
 
 Os dois de engajamento só saem quando há o que dizer (profissional sem vaga
 nova ou empresa sem movimento não recebem nada). `Match.alertaParadoEm`,

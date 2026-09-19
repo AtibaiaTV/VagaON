@@ -6,15 +6,13 @@ import { LABEL_STATUS_VAGA, acoesDisponiveis, type StatusVaga } from "@/lib/vaga
 /** Playground dos estados de vaga e da visibilidade do perfil — sem banco (os cliques dão erro de API). Só fora de produção. */
 export default function EstadosDevPage() {
   if (process.env.NODE_ENV === "production") notFound();
-  const em2dias = new Date(Date.now() + 2 * 86_400_000).toISOString();
-  const em40dias = new Date(Date.now() + 40 * 86_400_000).toISOString();
-  const estados: { status: StatusVaga; expiresAt: string | null; preenchidas: number; posicoes: number }[] = [
-    { status: "ativa", expiresAt: em40dias, preenchidas: 0, posicoes: 2 },
-    { status: "ativa", expiresAt: em2dias, preenchidas: 2, posicoes: 2 },
-    { status: "pausada", expiresAt: em40dias, preenchidas: 1, posicoes: 2 },
-    { status: "preenchida", expiresAt: null, preenchidas: 2, posicoes: 2 },
-    { status: "encerrada", expiresAt: null, preenchidas: 0, posicoes: 1 },
-    { status: "expirada", expiresAt: null, preenchidas: 0, posicoes: 1 },
+  const estados: { status: StatusVaga; preenchidas: number; posicoes: number }[] = [
+    { status: "ativa", preenchidas: 0, posicoes: 2 },
+    { status: "ativa", preenchidas: 2, posicoes: 2 },
+    { status: "pausada", preenchidas: 1, posicoes: 2 },
+    { status: "preenchida", preenchidas: 2, posicoes: 2 },
+    { status: "encerrada", preenchidas: 0, posicoes: 1 },
+    { status: "expirada", preenchidas: 0, posicoes: 1 },
   ];
 
   return (

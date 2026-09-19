@@ -11,7 +11,6 @@ import Profissional from "@/models/Profissional";
 import User from "@/models/User";
 import Vaga from "@/models/Vaga";
 import { ErroAtor } from "./erros";
-import { expiracaoInicial } from "./vagas";
 import { alertarSemFalhar } from "./alerta-vaga";
 import { registrarHistoricoVaga } from "./historico-vaga";
 import { enviarCodigoVerificacao } from "./whatsapp-verificacao";
@@ -194,11 +193,8 @@ export async function criarEmpresaRapida(e: EntradaEmpresaRapida) {
     status: "ativa",
     aprovadaPorAdmin: true,
     ...dadosVaga,
-    // Mesma validade das vagas criadas pelo formulário (60 dias ou data de término).
-    expiresAt: expiracaoInicial({
-      tipo: String(dadosVaga.tipo ?? e.vaga.tipo),
-      periodo: (dadosVaga.periodo as { dataFim?: string | null } | undefined) ?? null,
-    }),
+    // Sem prazo, como no formulário: fica no ar até a empresa decidir.
+    expiresAt: null,
   });
 
   await registrarHistoricoVaga(vaga._id, "criada", { tipo: "empresa", userId: user._id, nome: e.nome }, `entrada rápida${montadaPorIA ? " (estruturada por IA)" : ""}`);
