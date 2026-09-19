@@ -17,7 +17,7 @@ const BLOQUEIO_LABEL: Record<string, string> = {
  * Campanha única "perfil sem cidade": simulação sempre visível, disparo só
  * pelo botão, em lotes pequenos (número novo, qualidade em observação).
  */
-export default function CampanhaSemCidade({ configurado }: { configurado: boolean }) {
+export default function CampanhaSemCidade({ configurado, onEnviado }: { configurado: boolean; onEnviado?: () => void }) {
   const [sim, setSim] = useState<SimulacaoCampanha | null>(null);
   const [lote, setLote] = useState(10);
   const [enviando, setEnviando] = useState(false);
@@ -53,6 +53,7 @@ export default function CampanhaSemCidade({ configurado }: { configurado: boolea
     }
     setResultado(d);
     void carregar();
+    onEnviado?.();
   }
 
   const elegiveis = sim?.alvos.filter((a) => a.bloqueio === null) ?? [];
