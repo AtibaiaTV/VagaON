@@ -4,13 +4,16 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/layout/Logo";
-import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload, Trash2, QrCode, ChefHat, Stethoscope, MessageCircle } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Briefcase, LogOut, Upload, Trash2, QrCode, ChefHat, Stethoscope, MessageCircle, HeartHandshake, ClipboardList, BellRing } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/empresas", label: "Empresas", icon: Building2 },
   { href: "/admin/vagas", label: "Vagas", icon: Briefcase },
+  { href: "/admin/matches", label: "Matches", icon: HeartHandshake },
+  { href: "/admin/candidaturas", label: "Candidaturas", icon: ClipboardList },
+  { href: "/admin/alertas", label: "Alertas enviados", icon: BellRing },
   { href: "/profissionais", label: "Banco de profissionais", icon: ChefHat },
   { href: "/admin/qr", label: "QR Codes e links", icon: QrCode },
   { href: "/admin/importar", label: "Importar CSV", icon: Upload },

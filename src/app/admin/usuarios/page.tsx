@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,35 @@ interface Usuario {
   profileId: string | null;
   /** Empresas distintas que curtiram o perfil; null para quem não é profissional. */
   empresasInteressadas?: number | null;
+  /** Última vez que o profissional usou o VagaON (painel, Descobrir, swipe); null para os demais. */
+  ultimaAtividade?: string | null;
+}
+
+const DIA_MS = 86_400_000;
+
+/** Filtros que vivem na URL, para o dashboard poder linkar já filtrado. */
+const PERFIS: { value: string; label: string }[] = [
+  { value: "", label: "Todos" },
+  { value: "profissional", label: "Profissionais" },
+  { value: "empresa", label: "Empresas" },
+  { value: "admin", label: "Admins" },
+];
+const STATUS_OPCOES: { value: string; label: string }[] = [
+  { value: "", label: "Qualquer status" },
+  { value: "ativo", label: "Ativos" },
+  { value: "pendente", label: "Pendentes" },
+  { value: "suspenso", label: "Suspensos" },
+];
+const ATIVIDADE: { value: string; label: string }[] = [
+  { value: "", label: "Qualquer atividade" },
+  { value: "7", label: "Usaram nos últimos 7 dias" },
+  { value: "30", label: "Usaram nos últimos 30 dias" },
+  { value: "parados", label: "Sem usar há mais de 30 dias" },
+];
+
+function dataCurta(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 interface FormEdicao {
@@ -43,9 +73,30 @@ const STATUS_BADGE: Record<string, string> = {
   pendente: "bg-yellow-100 text-yellow-700",
 };
 
+/** useSearchParams exige Suspense por cima (regra do Next para páginas que leem a URL). */
 export default function AdminUsuariosPage() {
+  return (
+    <Suspense fallback={<p className="p-8 text-sm text-muted-foreground">Carregando...</p>}>
+      <AdminUsuariosPageConteudo />
+    </Suspense>
+  );
+}
+
+function AdminUsuariosPageConteudo() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const perfil = params.get("perfil") ?? "";
+  const statusFiltro = params.get("status") ?? "";
+  const atividade = params.get("ativos") ?? "";
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState(params.get("busca") ?? "");
+
+  function setParam(chave: string, valor: string) {
+    const q = new URLSearchParams(params.toString());
+    if (valor) q.set(chave, valor);
+    else q.delete(chave);
+    router.replace(`/admin/usuarios${q.toString() ? `?${q}` : ""}`);
+  }
   const [carregando, setCarregando] = useState(true);
   const [atualizando, setAtualizando] = useState<string | null>(null);
   const [curriculumAberto, setCurriculumAberto] = useState<{ id: string; nome: string } | null>(null);
@@ -124,11 +175,38 @@ export default function AdminUsuariosPage() {
     setAtualizando(null);
   }
 
-  const filtrados = usuarios.filter(
-    (u) =>
-      u.name.toLowerCase().includes(busca.toLowerCase()) ||
-      u.email.toLowerCase().includes(busca.toLowerCase())
-  );
+  const agora = Date.now();
+  const filtrados = usuarios.filter((u) => {
+    if (!(u.name.toLowerCase().includes(busca.toLowerCase()) || u.email.toLowerCase().includes(busca.toLowerCase()))) return false;
+    if (perfil && u.role !== perfil) return false;
+    if (statusFiltro && u.status !== statusFiltro) return false;
+    if (atividade) {
+      // Só profissionais têm "última atividade"; para os outros usamos o cadastro.
+      const ref = u.ultimaAtividade ?? u.createdAt;
+      const dias = (agora - new Date(ref).getTime()) / DIA_MS;
+      if (atividade === "parados" ? dias <= 30 : dias > Number(atividade)) return false;
+    }
+    return true;
+  });
+
+  function Chips({ opcoes, atual, chave }: { opcoes: { value: string; label: string }[]; atual: string; chave: string }) {
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {opcoes.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => setParam(chave, o.value)}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              o.value === atual ? "bg-primary text-white border-primary" : "bg-white hover:border-primary/50 hover:text-primary"
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -141,7 +219,7 @@ export default function AdminUsuariosPage() {
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <CardTitle className="text-base">Todos os usuários</CardTitle>
-            <Badge variant="secondary">{usuarios.length}</Badge>
+            <Badge variant="secondary">{filtrados.length === usuarios.length ? usuarios.length : `${filtrados.length} de ${usuarios.length}`}</Badge>
           </div>
           <div className="relative mt-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -151,6 +229,11 @@ export default function AdminUsuariosPage() {
               onChange={(e) => setBusca(e.target.value)}
               className="pl-9"
             />
+          </div>
+          <div className="mt-3 space-y-1.5">
+            <Chips opcoes={PERFIS} atual={perfil} chave="perfil" />
+            <Chips opcoes={STATUS_OPCOES} atual={statusFiltro} chave="status" />
+            <Chips opcoes={ATIVIDADE} atual={atividade} chave="ativos" />
           </div>
         </CardHeader>
         <CardContent>
@@ -177,6 +260,7 @@ export default function AdminUsuariosPage() {
                     <th className="text-left py-3 pr-4">Perfil</th>
                     <th className="text-left py-3 pr-4">Status</th>
                     <th className="text-left py-3 pr-4">Cadastro</th>
+                    <th className="text-left py-3 pr-4" title="Última vez que o profissional abriu o painel, o Descobrir ou deu swipe">Último uso</th>
                     <th className="text-left py-3 pr-4" title="Empresas que curtiram o perfil no Descobrir">Interesse</th>
                     <th className="text-right py-3">Ações</th>
                   </tr>
@@ -199,6 +283,15 @@ export default function AdminUsuariosPage() {
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
                         {new Date(u.createdAt).toLocaleDateString("pt-BR")}
+                      </td>
+                      <td className="py-3 pr-4 text-muted-foreground text-xs whitespace-nowrap">
+                        {u.role === "profissional" ? (
+                          <span className={u.ultimaAtividade && Date.now() - new Date(u.ultimaAtividade).getTime() <= 30 * DIA_MS ? "text-green-700 font-medium" : ""}>
+                            {dataCurta(u.ultimaAtividade)}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
+                        )}
                       </td>
                       <td className="py-3 pr-4 text-center">
                         {u.empresasInteressadas === null || u.empresasInteressadas === undefined ? (

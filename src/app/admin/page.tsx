@@ -19,6 +19,10 @@ interface StatCardProps {
   icone: React.ElementType;
   descricao: string;
   cor: string;
+  /** Para onde o clique leva: a lista nominal por trás do número. */
+  href: string;
+  /** Segundo link, opcional, no texto de apoio (ex.: "58 ativas"). */
+  hrefDescricao?: string;
 }
 
 /** "18/09 20:46" no horário de Brasília — o servidor da Vercel roda em UTC. */
@@ -33,18 +37,26 @@ function formatarDataHora(d: Date | string | null | undefined): string {
   });
 }
 
-function StatCard({ titulo, valor, icone: Icone, descricao, cor }: StatCardProps) {
+function StatCard({ titulo, valor, icone: Icone, descricao, cor, href, hrefDescricao }: StatCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{titulo}</CardTitle>
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${cor}`}>
-          <Icone className="h-4 w-4" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-3xl font-bold">{valor.toLocaleString("pt-BR")}</p>
-        <p className="text-xs text-muted-foreground mt-1">{descricao}</p>
+    <Card className="hover:border-primary/50 hover:shadow-md transition-all">
+      <Link href={href} className="block" title="Ver a lista">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">{titulo}</CardTitle>
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${cor}`}>
+            <Icone className="h-4 w-4" />
+          </div>
+        </CardHeader>
+        <CardContent className="pb-2">
+          <p className="text-3xl font-bold">{valor.toLocaleString("pt-BR")}</p>
+        </CardContent>
+      </Link>
+      <CardContent className="pt-0">
+        {hrefDescricao ? (
+          <Link href={hrefDescricao} className="text-xs text-primary hover:underline">{descricao} →</Link>
+        ) : (
+          <p className="text-xs text-muted-foreground">{descricao}</p>
+        )}
       </CardContent>
     </Card>
   );
@@ -110,6 +122,7 @@ export default async function AdminDashboardPage() {
           icone={Users}
           descricao="Contas cadastradas na plataforma"
           cor="bg-blue-100 text-blue-600"
+          href="/admin/usuarios"
         />
         <StatCard
           titulo="Profissionais"
@@ -117,6 +130,7 @@ export default async function AdminDashboardPage() {
           icone={ChefHat}
           descricao="Perfis de profissionais criados"
           cor="bg-orange-100 text-orange-600"
+          href="/admin/usuarios?perfil=profissional"
         />
         <StatCard
           titulo="Empresas"
@@ -124,6 +138,7 @@ export default async function AdminDashboardPage() {
           icone={Building2}
           descricao="Empresas cadastradas"
           cor="bg-purple-100 text-purple-600"
+          href="/admin/empresas"
         />
         <StatCard
           titulo="Vagas publicadas"
@@ -131,6 +146,8 @@ export default async function AdminDashboardPage() {
           icone={Briefcase}
           descricao={`${totalVagasAtivas} ativas no momento`}
           cor="bg-green-100 text-green-600"
+          href="/admin/vagas"
+          hrefDescricao="/admin/vagas?status=ativa"
         />
         <StatCard
           titulo="Candidaturas"
@@ -138,13 +155,15 @@ export default async function AdminDashboardPage() {
           icone={ClipboardList}
           descricao="Total de candidaturas enviadas"
           cor="bg-pink-100 text-pink-600"
+          href="/admin/candidaturas"
         />
         <StatCard
           titulo="Taxa de engajamento"
           valor={totalVagas > 0 ? Math.round((totalCandidaturas / totalVagas) * 10) / 10 : 0}
           icone={TrendingUp}
-          descricao="Média de candidaturas por vaga"
+          descricao="Média de candidaturas por vaga · ver vagas com interessados"
           cor="bg-indigo-100 text-indigo-600"
+          href="/admin/vagas?status=com-interesse"
         />
       </div>
 
@@ -152,17 +171,18 @@ export default async function AdminDashboardPage() {
 
       {/* Usuários recentes */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Cadastros recentes</CardTitle>
+          <Link href="/admin/usuarios" className="text-xs text-primary hover:underline">ver todos os usuários →</Link>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {usuariosRecentes.map((u) => (
               <div key={u._id.toString()} className="flex items-center justify-between py-2 border-b last:border-0">
-                <div>
-                  <p className="font-medium text-sm">{u.name}</p>
+                <Link href={`/admin/usuarios?busca=${encodeURIComponent(u.email)}`} className="group" title="Abrir nos usuários">
+                  <p className="font-medium text-sm group-hover:text-primary group-hover:underline">{u.name}</p>
                   <p className="text-xs text-muted-foreground">{u.email}</p>
-                </div>
+                </Link>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground" title="Data e hora do cadastro (horário de Brasília)">
                     {formatarDataHora(u.createdAt as Date)}

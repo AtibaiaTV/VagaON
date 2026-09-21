@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Activity, BellRing, Clock, MessageSquareText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MetricasLiquidez } from "@/lib/servicos/metricas-liquidez";
@@ -14,13 +15,17 @@ function horas(h: number | null): string {
   return `${(h / 24).toFixed(1)} dias`;
 }
 
-function Tile({ rotulo, valor, dica, destaque }: { rotulo: string; valor: string; dica?: string; destaque?: boolean }) {
+function Tile({ rotulo, valor, dica, destaque, href }: { rotulo: string; valor: string; dica?: string; destaque?: boolean; href: string }) {
   return (
-    <div className={`rounded-lg border px-3 py-2.5 ${destaque ? "border-primary/40 bg-primary/5" : "bg-white"}`}>
+    <Link
+      href={href}
+      title="Ver quem está por trás deste número"
+      className={`block rounded-lg border px-3 py-2.5 transition-all hover:border-primary hover:shadow-sm ${destaque ? "border-primary/40 bg-primary/5" : "bg-white"}`}
+    >
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{rotulo}</p>
       <p className="text-xl font-bold leading-tight mt-0.5">{valor}</p>
       {dica && <p className="text-[11px] text-muted-foreground mt-0.5">{dica}</p>}
-    </div>
+    </Link>
   );
 }
 
@@ -67,13 +72,14 @@ export default function PainelLiquidez({ m }: { m: MetricasLiquidez }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <Tile rotulo="Matches" valor={String(t.total)} dica={`${t.contratados} contratação(ões)`} />
-          <Tile rotulo="Viraram conversa" valor={pct(t.comMensagem, t.total)} dica={`${t.comMensagem} de ${t.total}`} destaque />
-          <Tile rotulo="Resposta em 48 h" valor={pct(t.respondidosEm48h, t.total)} dica={`${t.semMensagem} sem nenhuma mensagem`} destaque />
+          <Tile rotulo="Matches" valor={String(t.total)} dica={`${t.contratados} contratação(ões)`} href={`/admin/matches?dias=${m.dias}`} />
+          <Tile rotulo="Viraram conversa" valor={pct(t.comMensagem, t.total)} dica={`${t.comMensagem} de ${t.total}`} destaque href={`/admin/matches?dias=${m.dias}&f=conversa`} />
+          <Tile rotulo="Resposta em 48 h" valor={pct(t.respondidosEm48h, t.total)} dica={`${t.semMensagem} sem nenhuma mensagem`} destaque href={`/admin/matches?dias=${m.dias}&f=${t.respondidosEm48h ? "48h" : "sem-mensagem"}`} />
           <Tile
             rotulo="Tempo até a 1ª mensagem"
             valor={horas(t.horasAtePrimeiraMensagemMediana)}
             dica={`mediana · média ${horas(t.horasAtePrimeiraMensagemMedia)}`}
+            href={`/admin/matches?dias=${m.dias}&f=conversa`}
           />
         </div>
 
@@ -82,21 +88,25 @@ export default function PainelLiquidez({ m }: { m: MetricasLiquidez }) {
             rotulo="Quem fala primeiro"
             valor={t.comMensagem ? `${pct(t.primeiroFalou.empresa, t.comMensagem)} empresa` : "—"}
             dica={t.comMensagem ? `${pct(t.primeiroFalou.profissional, t.comMensagem)} profissional` : undefined}
+            href={`/admin/matches?dias=${m.dias}&f=empresa-primeiro`}
           />
           <Tile
             rotulo="Alerta de match parado"
             valor={String(m.alertaMatchParado.enviados)}
             dica={m.alertaMatchParado.enviados ? `${m.alertaMatchParado.reagiram} reagiram (${pct(m.alertaMatchParado.reagiram, m.alertaMatchParado.enviados)})` : "nenhum enviado"}
+            href={`/admin/matches?dias=${m.dias}&f=alerta-parado`}
           />
           <Tile
             rotulo="Alerta de vaga nova"
             valor={String(m.alertaVagaNova.profissionaisAvisados)}
             dica={`${m.alertaVagaNova.vagasComAlerta} vaga(s) · ${m.alertaVagaNova.converteram} converteram (${pct(m.alertaVagaNova.converteram, m.alertaVagaNova.profissionaisAvisados)})`}
+            href={`/admin/alertas?dias=${m.dias}&tipo=vaga-nova`}
           />
           <Tile
             rotulo="Match → contratação"
             valor={t.diasAteContratacaoMedia !== null ? `${t.diasAteContratacaoMedia.toFixed(0)} dias` : "—"}
             dica={`${m.resumoSemanal.enviados} resumo(s) semanal(is) enviado(s)`}
+            href={`/admin/matches?dias=${m.dias}&f=contratados`}
           />
         </div>
 
@@ -109,7 +119,8 @@ export default function PainelLiquidez({ m }: { m: MetricasLiquidez }) {
           ))}
         </ul>
         <p className="text-[11px] text-muted-foreground">
-          Conta só mensagens de pessoas (propostas de entrevista e avisos do sistema não valem como resposta). Conversão do
+          Clique em qualquer número para ver quem está por trás dele. Resumos semanais enviados:{" "}
+          <Link href={`/admin/alertas?dias=${m.dias}&tipo=resumo`} className="underline">ver lista</Link>. Conta só mensagens de pessoas (propostas de entrevista e avisos do sistema não valem como resposta). Conversão do
           alerta de vaga = like ou candidatura naquela vaga depois do aviso.
         </p>
       </CardContent>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,9 +46,35 @@ const STATUS_BADGE: Record<string, string> = {
   rascunho: "bg-blue-100 text-blue-600",
 };
 
+const STATUS_OPCOES: { value: string; label: string }[] = [
+  { value: "", label: "Todas" },
+  { value: "ativa", label: "Ativas" },
+  { value: "pausada", label: "Pausadas" },
+  { value: "preenchida", label: "Preenchidas" },
+  { value: "encerrada", label: "Encerradas" },
+  { value: "rejeitada", label: "Rejeitadas" },
+  { value: "com-interesse", label: "Com interessados" },
+];
+
+/** useSearchParams exige Suspense por cima (regra do Next para páginas que leem a URL). */
 export default function AdminVagasPage() {
+  return (
+    <Suspense fallback={<p className="p-8 text-sm text-muted-foreground">Carregando...</p>}>
+      <AdminVagasPageConteudo />
+    </Suspense>
+  );
+}
+
+function AdminVagasPageConteudo() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const statusFiltro = params.get("status") ?? "";
   const [vagas, setVagas] = useState<Vaga[]>([]);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState(params.get("busca") ?? "");
+
+  function setStatus(valor: string) {
+    router.replace(valor ? `/admin/vagas?status=${valor}` : "/admin/vagas");
+  }
   const [carregando, setCarregando] = useState(true);
   const [atualizando, setAtualizando] = useState<string | null>(null);
 
@@ -77,12 +104,12 @@ export default function AdminVagasPage() {
     setAtualizando(null);
   }
 
-  const filtradas = vagas.filter(
-    (v) =>
-      v.titulo.toLowerCase().includes(busca.toLowerCase()) ||
-      v.nomeEmpresa.toLowerCase().includes(busca.toLowerCase()) ||
-      v.especialidade.toLowerCase().includes(busca.toLowerCase())
-  );
+  const filtradas = vagas.filter((v) => {
+    const b = busca.toLowerCase();
+    if (!(v.titulo.toLowerCase().includes(b) || v.nomeEmpresa.toLowerCase().includes(b) || v.especialidade.toLowerCase().includes(b))) return false;
+    if (statusFiltro === "com-interesse") return (v.interessados ?? 0) > 0;
+    return !statusFiltro || v.status === statusFiltro;
+  });
 
   return (
     <div className="p-8">
@@ -102,6 +129,23 @@ export default function AdminVagasPage() {
           className="pl-9 max-w-sm"
         />
       </div>
+      <div className="flex flex-wrap gap-1.5 mb-6">
+        {STATUS_OPCOES.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => setStatus(o.value)}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              o.value === statusFiltro ? "bg-primary text-white border-primary" : "bg-white hover:border-primary/50 hover:text-primary"
+            }`}
+          >
+            {o.label}
+            <span className={`ml-1 tabular-nums ${o.value === statusFiltro ? "text-white/80" : "text-muted-foreground"}`}>
+              {o.value === "" ? vagas.length : o.value === "com-interesse" ? vagas.filter((v) => (v.interessados ?? 0) > 0).length : vagas.filter((v) => v.status === o.value).length}
+            </span>
+          </button>
+        ))}
+      </div>
 
       {carregando ? (
         <p className="text-sm text-muted-foreground text-center py-16">Carregando...</p>
@@ -111,8 +155,8 @@ export default function AdminVagasPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              Todas as vagas
-              <Badge variant="secondary">{vagas.length}</Badge>
+              {statusFiltro ? STATUS_OPCOES.find((o) => o.value === statusFiltro)?.label : "Todas as vagas"}
+              <Badge variant="secondary">{filtradas.length === vagas.length ? vagas.length : `${filtradas.length} de ${vagas.length}`}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
