@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import Profissional from "@/models/Profissional";
 import { contarEmpresasPorProfissional } from "@/lib/servicos/interesse";
 
 export async function GET() {
@@ -22,12 +23,18 @@ export async function GET() {
       .allowDiskUse(true)
       .lean();
 
-    // Quantas empresas curtiram cada profissional (profileId = Profissional._id).
-    const interesse = await contarEmpresasPorProfissional().catch(() => new Map<string, number>());
+    // Quantas empresas curtiram cada profissional (profileId = Profissional._id)
+    // e quando cada profissional usou o VagaON pela última vez.
+    const [interesse, profs] = await Promise.all([
+      contarEmpresasPorProfissional().catch(() => new Map<string, number>()),
+      Profissional.find().select("_id match.ultimaAtividade updatedAt").lean().catch(() => []),
+    ]);
+    const atividade = new Map(profs.map((p) => [String(p._id), p.match?.ultimaAtividade ?? p.updatedAt ?? null]));
     const resultado = usuarios.map((u) => ({
       ...u,
       empresasInteressadas:
         u.role === "profissional" && u.profileId ? (interesse.get(String(u.profileId)) ?? 0) : null,
+      ultimaAtividade: u.role === "profissional" && u.profileId ? (atividade.get(String(u.profileId)) ?? null) : null,
     }));
 
     return NextResponse.json(resultado);
