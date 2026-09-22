@@ -157,7 +157,9 @@ export default function AutocompleteCidade({
         <ul
           id={listaId}
           role="listbox"
-          className="absolute z-20 mt-1 w-full max-h-64 overflow-auto rounded-lg border bg-white shadow-lg text-sm"
+          // Mais larga que o campo quando ele é estreito (grade de cidade + UF no
+          // celular): "Campinas · SP" precisa caber; limita à largura da tela.
+          className="absolute left-0 z-20 mt-1 w-max min-w-full max-w-[calc(100vw-2rem)] max-h-64 overflow-auto rounded-lg border bg-white shadow-lg text-sm"
         >
           {sugestoes.map((s, i) => (
             <li
@@ -171,7 +173,7 @@ export default function AutocompleteCidade({
             >
               <span className="flex items-center gap-2 min-w-0">
                 <MapPin className="h-3.5 w-3.5 text-primary/60 shrink-0" />
-                <span className="truncate">
+                <span className="whitespace-nowrap">
                   {s.cidade}
                   {s.uf && <span className="text-muted-foreground"> · {s.uf}</span>}
                 </span>

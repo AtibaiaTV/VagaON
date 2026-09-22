@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import InputSenha from "@/components/shared/InputSenha";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Search, UserCheck, UserX, ShieldCheck, FileText, Pencil, X, Loader2, Eye } from "lucide-react";
@@ -413,7 +414,7 @@ function AdminUsuariosPageConteudo() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="edit-senha">Nova senha <span className="text-muted-foreground font-normal">(deixe em branco para não alterar)</span></Label>
-                <Input id="edit-senha" type="password" placeholder="Mínimo 6 caracteres"
+                <InputSenha id="edit-senha" placeholder="Mínimo 6 caracteres"
                   value={form.novaSenha}
                   onChange={(e) => setForm((f) => ({ ...f, novaSenha: e.target.value }))} />
               </div>

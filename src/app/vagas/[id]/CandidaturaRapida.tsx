@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import { CheckCircle, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import InputSenha from "@/components/shared/InputSenha";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
@@ -141,7 +142,7 @@ export default function CandidaturaRapida({ vagaId, vagaTitulo, cidade, estado, 
         </div>
         <div className="space-y-1">
           <Label htmlFor="cr-senha">Crie uma senha *</Label>
-          <Input id="cr-senha" type="password" value={form.senha} onChange={campo("senha")} required minLength={8} autoComplete="new-password" placeholder="mínimo 8 caracteres" />
+          <InputSenha id="cr-senha" value={form.senha} onChange={campo("senha")} required minLength={8} autoComplete="new-password" placeholder="mínimo 8 caracteres" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="cr-cidade">Cidade *</Label>
