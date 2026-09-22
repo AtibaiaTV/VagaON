@@ -256,12 +256,21 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
     }));
   }
 
-  async function handleSalvar() {
+  const [salvoEm, setSalvoEm] = useState<Date | null>(null);
+
+  /**
+   * Grava o perfil inteiro. Chamado ao "Salvar" e também a cada "Próximo" e
+   * ao trocar de etapa: o formulário tem 4 etapas e, antes, nada era gravado
+   * até a última — quem preenchia foto, vídeo e endereço e saía perdia tudo.
+   * Devolve true se gravou.
+   */
+  async function persistir(): Promise<boolean> {
     setErro("");
     if (!pessoal.cidade.trim() || !pessoal.estado) {
       setErro("Informe cidade e estado: é por eles que as empresas encontram você.");
+      setEtapa(0);
       window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
+      return false;
     }
     setSalvando(true);
 
@@ -296,18 +305,32 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    });
+    }).catch(() => null);
 
     setSalvando(false);
 
-    if (!res.ok) {
-      const data = await res.json();
-      setErro(data.error || "Erro ao salvar.");
-      return;
+    if (!res?.ok) {
+      const data = await res?.json().catch(() => null);
+      setErro(data?.error || `Não foi possível salvar${res ? ` (erro ${res.status})` : ": sem conexão"}. Tente de novo.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return false;
     }
+    setSalvoEm(new Date());
+    return true;
+  }
 
+  /** Botão final: grava e volta ao painel. */
+  async function handleSalvar() {
+    if (!(await persistir())) return;
     setSucesso(true);
     setTimeout(() => router.push("/painel"), 1500);
+  }
+
+  /** Troca de etapa gravando o que já está preenchido; se não der, fica onde está. */
+  async function irParaEtapa(destino: number) {
+    if (destino > etapa && !(await persistir())) return;
+    setEtapa(destino);
+    setErro("");
   }
 
   return (
@@ -340,7 +363,7 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
             {ETAPAS.map((nome, i) => (
               <button
                 key={i}
-                onClick={() => { setEtapa(i); setErro(""); }}
+                onClick={() => irParaEtapa(i)}
                 className={`flex-1 text-center text-xs font-medium pb-2 border-b-2 transition-colors ${
                   i === etapa
                     ? "border-primary text-primary"
@@ -1036,7 +1059,7 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
                     </div>
                   )}
                   {cidadesInteresse.length < 5 && (
-                    <div className="grid grid-cols-[1fr_5.5rem_auto] gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_5.5rem_auto] gap-2">
                       <AutocompleteCidade
                         id="cidadeInteresse"
                         contexto="todas"
@@ -1182,6 +1205,12 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
         )}
 
         {/* Navegação entre etapas */}
+        {salvoEm && !sucesso && (
+          <p className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
+            <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+            Salvo às {salvoEm.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} — pode sair e voltar depois.
+          </p>
+        )}
         <div className="mt-6 flex gap-3">
           {etapa > 0 && (
             <Button
@@ -1197,11 +1226,12 @@ export default function FormProfissional({ profileId, dados, iaDisponivel = fals
           {etapa < ETAPAS.length - 1 ? (
             <Button
               type="button"
-              onClick={() => { setEtapa((e) => e + 1); setErro(""); }}
+              onClick={() => irParaEtapa(etapa + 1)}
               className="flex-1"
+              disabled={salvando}
             >
-              Próximo
-              <ArrowRight className="h-4 w-4 ml-2" />
+              {salvando ? "Salvando…" : "Salvar e continuar"}
+              {!salvando && <ArrowRight className="h-4 w-4 ml-2" />}
             </Button>
           ) : (
             <Button

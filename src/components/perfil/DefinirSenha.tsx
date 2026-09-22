@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { KeyRound, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import InputSenha from "@/components/shared/InputSenha";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -76,9 +76,8 @@ export default function DefinirSenha({ temSenha: temSenhaInicial }: Props) {
           {temSenha && (
             <div className="space-y-1">
               <Label htmlFor="senhaAtual">Senha atual</Label>
-              <Input
+              <InputSenha
                 id="senhaAtual"
-                type="password"
                 value={senhaAtual}
                 onChange={(e) => setSenhaAtual(e.target.value)}
                 required
@@ -89,9 +88,8 @@ export default function DefinirSenha({ temSenha: temSenhaInicial }: Props) {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label htmlFor="novaSenha">{temSenha ? "Nova senha" : "Senha"}</Label>
-              <Input
+              <InputSenha
                 id="novaSenha"
-                type="password"
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
                 required
@@ -102,9 +100,8 @@ export default function DefinirSenha({ temSenha: temSenhaInicial }: Props) {
             </div>
             <div className="space-y-1">
               <Label htmlFor="confirmacao">Confirmar</Label>
-              <Input
+              <InputSenha
                 id="confirmacao"
-                type="password"
                 value={confirmacao}
                 onChange={(e) => setConfirmacao(e.target.value)}
                 required

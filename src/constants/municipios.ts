@@ -564,10 +564,15 @@ export function buscarMunicipios(trecho: string, uf: string | null | undefined, 
   const encontrados = listaMunicipios.filter(
     (m) => (!ufFiltro || m.uf === ufFiltro) && m.normalizado.includes(q)
   );
+  // Ordem: começa com o digitado > cidade do setor (tabela curada: capitais e
+  // polos de gastronomia/hotelaria) > nome. "Campi" traz Campinas antes de
+  // Campina da Lagoa; sem isso, a ordem alfabética enterra a cidade grande.
   encontrados.sort((a, b) => {
     const pa = Number(!a.normalizado.startsWith(q));
     const pb = Number(!b.normalizado.startsWith(q));
-    return pa - pb || a.nome.localeCompare(b.nome, "pt-BR") || a.uf.localeCompare(b.uf);
+    const ca = Number(!(a.chave in MUNICIPIOS_CURADOS));
+    const cb = Number(!(b.chave in MUNICIPIOS_CURADOS));
+    return pa - pb || ca - cb || a.nome.localeCompare(b.nome, "pt-BR") || a.uf.localeCompare(b.uf);
   });
   return encontrados.slice(0, limite).map((m) => {
     const c = MUNICIPIOS[m.chave];

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import InputSenha from "@/components/shared/InputSenha";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import Logo from "@/components/layout/Logo";
@@ -126,12 +127,12 @@ export default function CadastroEmpresaPage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="senha" className="text-sm font-medium">Senha</Label>
-                <Input id="senha" name="senha" type="password" placeholder="Mínimo 8 caracteres" value={form.senha} onChange={handleChange} required className="h-11 bg-white" />
+                <InputSenha id="senha" name="senha" placeholder="Mínimo 8 caracteres" value={form.senha} onChange={handleChange} required autoComplete="new-password" className="h-11 bg-white" />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="confirmarSenha" className="text-sm font-medium">Confirmar senha</Label>
-                <Input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="Repita a senha" value={form.confirmarSenha} onChange={handleChange} required className="h-11 bg-white" />
+                <InputSenha id="confirmarSenha" name="confirmarSenha" placeholder="Repita a senha" value={form.confirmarSenha} onChange={handleChange} required autoComplete="new-password" className="h-11 bg-white" />
               </div>
 
               <Button type="submit" className="w-full h-11 font-semibold text-base" disabled={carregando}>

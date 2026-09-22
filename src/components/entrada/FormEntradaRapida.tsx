@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import InputSenha from "@/components/shared/InputSenha";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EspecialidadeSelect from "@/components/shared/EspecialidadeSelect";
@@ -123,7 +124,7 @@ export default function FormEntradaRapida({
         </div>
         <div className="space-y-1 sm:col-span-2">
           <Label htmlFor="er-senha">Crie uma senha *</Label>
-          <Input id="er-senha" type="password" value={conta.senha} onChange={campo("senha")} required minLength={8} autoComplete="new-password" placeholder="mínimo 8 caracteres" />
+          <InputSenha id="er-senha" value={conta.senha} onChange={campo("senha")} required minLength={8} autoComplete="new-password" placeholder="mínimo 8 caracteres" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="er-cidade">Cidade *</Label>
