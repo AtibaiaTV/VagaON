@@ -23,6 +23,8 @@ import { urlAbsoluta } from "./tipos";
 
 export const PALAVRAS_PARAR = ["parar", "pare", "sair", "cancelar", "stop", "descadastrar"];
 export const PALAVRAS_VOLTAR = ["voltar", "ativar", "start", "continuar"];
+/** Tipos que a Meta entrega sem nada para responder ("unsupported" = ligação, enquete, visualização única…). */
+const TIPOS_SEM_RESPOSTA = new Set(["unsupported", "reaction", "system"]);
 
 // ─── Assinatura ────────────────────────────────────────────────────────────
 
@@ -201,6 +203,10 @@ async function processarMensagem(m: MensagemMeta, nomeContato?: string): Promise
     texto: texto || `[${m.type}]`,
     status: "recebida",
   }).catch(() => {});
+
+  // Só registra, sem responder: número de fora do Brasil (não tem conta aqui;
+  // na prática é bot ou spam) ou evento sem conteúdo (ligação, reação…).
+  if (!telefone.startsWith("55") || TIPOS_SEM_RESPOSTA.has(m.type)) return;
 
   const intencao = classificar(texto);
   const primeiroNome = (dono?.nome ?? nomeContato ?? "").split(" ")[0];
