@@ -25,6 +25,7 @@ interface Resposta {
   configurado: boolean;
   phoneNumberId: string | null;
   template: string;
+  templateInfo: { categoria: string | null; status: string | null; detalhe: string | null };
   totais: Record<string, number>;
   ultimas24h: number;
   mensagens: Mensagem[];
@@ -42,11 +43,29 @@ function quando(iso: string) {
   return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
+/** A Meta manda o número com DDI; só o que começa com 55 é brasileiro. */
 function formatarTelefone(t: string) {
   const d = t.replace(/\D/g, "");
-  const local = d.startsWith("55") ? d.slice(2) : d;
+  if (!d.startsWith("55")) return d ? `+${d} (exterior)` : t;
+  const local = d.slice(2);
   if (local.length < 10) return t;
   return `(${local.slice(0, 2)}) ${local.slice(2, -4)}-${local.slice(-4)}`;
+}
+
+/** Erros comuns da Meta, em português. A chave é o código no começo de `erro`. */
+const EXPLICACAO_ERRO: Record<string, string> = {
+  "131049":
+    "A Meta segurou esta mensagem de marketing: a pessoa já recebeu muitas mensagens de marketing de empresas ou não tem interagido com elas. Só acontece com template de categoria Marketing.",
+  "130472":
+    "Número sorteado para um experimento da Meta, que bloqueia mensagens de marketing para ele. Não adianta repetir; só template de Utilidade passa.",
+  "131026": "O número não tem WhatsApp, ou o aplicativo da pessoa está desatualizado.",
+  "131047": "Fora da janela de 24 h: texto livre só vai para quem escreveu no último dia.",
+  "133010": "Número não registrado na Cloud API. Use \"Registrar número na API\" acima.",
+};
+
+function explicarErro(erro: string): string | null {
+  const codigo = erro.match(/\d{6}/)?.[0];
+  return codigo ? EXPLICACAO_ERRO[codigo] ?? null : null;
 }
 
 /**
@@ -156,6 +175,15 @@ export default function AdminWhatsAppPage() {
         </div>
       )}
 
+      {dados?.templateInfo?.categoria && dados.templateInfo.categoria !== "UTILITY" && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+          O template <code>{dados.template}</code> está na categoria <strong>{dados.templateInfo.categoria}</strong> na Meta
+          (deveria ser UTILITY). Mensagens de marketing são bloqueadas para parte das pessoas (erros 131049 e 130472) e
+          custam mais. Crie um template novo de Utilidade no Gerenciador do WhatsApp, com texto só informativo, e troque{" "}
+          <code>WHATSAPP_TEMPLATE</code> na Vercel.
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
         <Card>
           <CardHeader className="pb-3">
@@ -183,6 +211,14 @@ export default function AdminWhatsAppPage() {
               Usa o template <code>{dados?.template ?? "vagaon_aviso"}</code>
               {dados?.phoneNumberId && <> a partir do número <code>{dados.phoneNumberId}</code></>}. Precisa do template
               aprovado na Meta.
+              {dados?.templateInfo && (
+                <>
+                  {" "}
+                  {dados.templateInfo.categoria
+                    ? <>Na Meta: <strong>{dados.templateInfo.categoria}</strong>, {dados.templateInfo.status?.toLowerCase()}.</>
+                    : dados.templateInfo.detalhe}
+                </>
+              )}
             </p>
             {resultadoTeste && (
               <p className={`mt-2 text-sm ${resultadoTeste.ok ? "text-emerald-700" : "text-red-700"}`}>{resultadoTeste.texto}</p>
@@ -326,6 +362,9 @@ export default function AdminWhatsAppPage() {
                   <td className="px-3 py-2 max-w-md">
                     <div className="line-clamp-2">{m.texto}</div>
                     {m.erro && <div className="text-xs text-red-700 mt-0.5 break-all">{m.erro}</div>}
+                    {m.erro && explicarErro(m.erro) && (
+                      <div className="text-xs text-muted-foreground mt-0.5">{explicarErro(m.erro)}</div>
+                    )}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COR[m.status] ?? "bg-gray-100"}`}>{m.status}</span>

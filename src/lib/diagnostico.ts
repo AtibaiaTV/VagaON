@@ -213,6 +213,16 @@ export const VARIAVEIS: VariavelAmbiente[] = [
     mostrarValor: true,
   },
   {
+    nome: "WHATSAPP_WABA_ID",
+    grupo: "Notificações",
+    severidade: "opcional",
+    descricao: "ID da conta do WhatsApp Business; o /admin/whatsapp consulta nela a categoria do template.",
+    semEla: "Não dá para ver se a Meta reclassificou o template como Marketing (erros 131049/130472).",
+    comoObter: "Gerenciador do WhatsApp → Configuração da API, ao lado do número.",
+    ler: () => process.env.WHATSAPP_WABA_ID,
+    mostrarValor: true,
+  },
+  {
     nome: "WHATSAPP_VERIFY_TOKEN",
     grupo: "Notificações",
     severidade: "opcional",
